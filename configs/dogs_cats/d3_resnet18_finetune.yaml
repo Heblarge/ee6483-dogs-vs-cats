@@ -1,0 +1,29 @@
+name: d3_resnet18_finetune
+seed: 0
+output_dir: runs
+data:
+  root: datasets/datasets
+  img_size: 224
+  normalize: imagenet
+  batch_size: 64
+  num_workers: 4
+  augment:
+    random_resized_crop: {scale: [0.6, 1.0]}
+    hflip: 0.5
+model:
+  name: resnet18
+  pretrained: true
+  freeze: none           # 全网络微调；只解冻后部可改为 freeze: backbone + unfreeze_prefixes: [layer4]
+loss: {name: cross_entropy, label_smoothing: 0.1}
+optim:
+  name: adamw
+  lr: 1.0e-3             # 分类头学习率
+  backbone_lr_mult: 0.1  # 骨干学习率 = 1e-4
+  weight_decay: 0.05
+scheduler: {name: cosine, warmup_epochs: 1}
+train:
+  epochs: 10
+  amp: true
+  grad_clip_norm: 1.0
+  monitor: accuracy
+  early_stop_patience: 4

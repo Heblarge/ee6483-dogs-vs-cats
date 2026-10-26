@@ -1,0 +1,26 @@
+# 扩展对照：EfficientNet-B0，参数量约 5M，适合算力有限时
+name: x_efficientnet_b0_finetune
+seed: 0
+output_dir: runs
+data:
+  root: datasets/datasets
+  img_size: 224
+  normalize: imagenet
+  batch_size: 64
+  num_workers: 4
+  augment:
+    random_resized_crop: {scale: [0.6, 1.0]}
+    hflip: 0.5
+    trivialaugment: true
+model:
+  name: efficientnet_b0
+  pretrained: true
+loss: {name: cross_entropy, label_smoothing: 0.1}
+optim: {name: adamw, lr: 1.0e-3, backbone_lr_mult: 0.1, weight_decay: 0.05}
+scheduler: {name: cosine, warmup_epochs: 1}
+train:
+  epochs: 10
+  amp: true
+  grad_clip_norm: 1.0
+  monitor: accuracy
+  early_stop_patience: 4

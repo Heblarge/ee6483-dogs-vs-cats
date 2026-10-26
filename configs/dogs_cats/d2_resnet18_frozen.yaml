@@ -1,0 +1,24 @@
+name: d2_resnet18_frozen
+seed: 0
+output_dir: runs
+data:
+  root: datasets/datasets
+  img_size: 224
+  normalize: imagenet    # 必须与 ImageNet 预训练权重一致
+  batch_size: 64
+  num_workers: 4
+  augment:
+    random_resized_crop: {scale: [0.6, 1.0]}
+    hflip: 0.5
+model:
+  name: resnet18
+  pretrained: true
+  freeze: backbone       # 只训练 fc
+loss: {name: cross_entropy}
+optim: {name: adamw, lr: 1.0e-3, weight_decay: 0.01}
+scheduler: {name: cosine, warmup_epochs: 0}
+train:
+  epochs: 5
+  amp: true
+  grad_clip_norm: null
+  monitor: accuracy

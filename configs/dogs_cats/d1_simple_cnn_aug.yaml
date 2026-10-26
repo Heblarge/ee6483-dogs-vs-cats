@@ -1,0 +1,26 @@
+name: d1_simple_cnn_aug
+seed: 0
+output_dir: runs
+data:
+  root: datasets/datasets
+  img_size: 224
+  normalize: imagenet
+  batch_size: 64
+  num_workers: 4
+  augment:               # D1：与 D0 唯一差别是训练增强
+    random_resized_crop: {scale: [0.6, 1.0]}
+    hflip: 0.5
+    color_jitter: {brightness: 0.2, contrast: 0.2, saturation: 0.2}
+model:
+  name: simple_cnn
+  channels: [32, 64, 128, 256]
+  dropout: 0.3
+loss: {name: cross_entropy}
+optim: {name: adamw, lr: 1.0e-3, weight_decay: 0.05}
+scheduler: {name: cosine, warmup_epochs: 1}
+train:
+  epochs: 20
+  amp: true
+  grad_clip_norm: 5.0
+  monitor: accuracy
+  early_stop_patience: 6

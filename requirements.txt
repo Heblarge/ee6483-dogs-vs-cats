@@ -1,0 +1,10 @@
+# 先按 https://pytorch.org/get-started/locally/ 安装与本机 CUDA 匹配的 torch / torchvision
+torch>=2.3
+torchvision>=0.18
+numpy
+pillow
+pyyaml
+tqdm
+# 可选：DeiT 等 timm 模型、Grad-CAM 可视化
+# timm
+# grad-cam

@@ -181,13 +181,16 @@ I0/I1/I2 使用相同模型、初始化种子、增强与训练预算；重采�
 | PROJECT_OVERVIEW.md | 目标、分工、里程碑及决策 | 是 |
 | requirements.txt 或 environment.yml | 固定可运行依赖；确定一种主要安装方式 | 是 |
 | configs/ | 各实验 YAML 配置 | 是 |
-| src/ | 数据、模型、训练与评价实现 | 是 |
-| scripts/ | train、evaluate、predict 等入口 | 是 |
+| src/data/ | 数据读取、预处理与增强 | 是 |
+| src/policies/ | 模型库，按模型族分子目录（cnn、resnet、efficientnet、convnext、vit） | 是 |
+| src/training/ | 训练循环、梯度裁剪、优化器、调度器、损失 | 是 |
+| src/evaluation/ | 指标、评估、测试预测与提交导出 | 是 |
+| scripts/ | train、evaluate、predict、make_split 等入口 | 是 |
 | notebooks/ | 可选的数据探索与图表分析 | 是，避免大体积输出 |
 | splits/ | 样本 ID 清单、固定划分和不平衡索引 | 是，不含图像 |
 | docs/ | 文献记录、决策记录、成员贡献表 | 是 |
 | results/ | 精简指标表、用于报告的图和样例说明 | 是，控制大小 |
-| data/ | 图像数据集 | 否 |
+| datasets/ | 图像数据集（课程数据解压于 datasets/datasets/） | 否 |
 | checkpoints/、runs/ | 模型权重、大型日志及中间输出 | 否，通过约定位置共享 |
 | report/ | 报告源文件与引用文件 | 是 |
 | submissions/ | 经检查的最终 CSV | 是 |
@@ -209,7 +212,7 @@ __pycache__/
 .env
 ```
 
-WSL 工作目录可使用 `~/projects/ee6483-dogs-vs-cats`。通过配置指定数据路径，不在代码中写死某位成员的 Windows 用户目录。当前文档只约定结构，并未创建这些模块。
+WSL 工作目录可使用 `~/projects/ee6483-dogs-vs-cats`。通过配置指定数据路径，不在代码中写死某位成员的 Windows 用户目录。代码骨架已按上表创建，结构与用法见 README.md。
 
 ## 9. 进度与阶段验收
 

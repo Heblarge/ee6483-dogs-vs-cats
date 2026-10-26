@@ -1,0 +1,28 @@
+# 扩展对照：ViT-B/16 微调。输入必须 224×224；显存不足时降低 batch_size 并加 grad_accum_steps
+name: x_vit_b16_finetune
+seed: 0
+output_dir: runs
+data:
+  root: datasets/datasets
+  img_size: 224
+  normalize: imagenet
+  batch_size: 32
+  num_workers: 4
+  augment:
+    random_resized_crop: {scale: [0.6, 1.0]}
+    hflip: 0.5
+    randaugment: {num_ops: 2, magnitude: 9}
+model:
+  name: vit_b_16
+  pretrained: true
+loss: {name: cross_entropy, label_smoothing: 0.1}
+optim: {name: adamw, lr: 3.0e-4, backbone_lr_mult: 0.1, weight_decay: 0.05}
+scheduler: {name: cosine, warmup_epochs: 1}
+train:
+  epochs: 8
+  amp: true
+  grad_accum_steps: 2
+  grad_clip_norm: 1.0
+  mix: {mixup_alpha: 0.2, cutmix_alpha: 1.0, prob: 0.5}
+  monitor: accuracy
+  early_stop_patience: 3
