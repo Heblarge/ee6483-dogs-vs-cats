@@ -1,0 +1,9 @@
+[18:09:40] exp=G1_cifar_scratch method=ce mode=g1 img=32 train=45000 val=5000
+[18:11:18]   ep   1 | loss 1.978 tracc 29.79% | val 42.86% mF1 39.93% | 98s
+[18:15:08]   ep   5 | loss 1.156 tracc 71.19% | val 75.02% mF1 74.93% | 328s
+[18:19:53]   ep  10 | loss 0.962 tracc 79.72% | val 84.22% mF1 84.19% | 613s
+[18:24:58]   ep  15 | loss 0.844 tracc 84.88% | val 87.64% mF1 87.65% | 918s
+[18:29:47]   ep  20 | loss 0.726 tracc 90.16% | val 92.66% mF1 92.64% | 1207s
+[18:34:38]   ep  25 | loss 0.668 tracc 92.80% | val 93.42% mF1 93.42% | 1498s
+[18:35:20] TEST acc 93.60% macroF1 93.60% balanced_acc 93.60%
+[18:35:20] done in 25m40s

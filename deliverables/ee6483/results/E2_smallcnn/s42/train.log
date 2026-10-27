@@ -1,0 +1,33 @@
+[16:47:26] exp=E2_smallcnn model=smallcnn seed=42 device=cuda
+[16:47:26] args={'config': None, 'data_root': 'data/cache', 'out_root': 'ee6483/results', 'exp_id': 'E2_smallcnn', 'model': 'smallcnn', 'pretrained': 1, 'epochs': 14, 'lr': 0.001, 'head_lr': 0.001, 'wd': 0.0001, 'batch': 64, 'img_size': 128, 'aug': 'full', 'ft_strategy': 'scratch', 'freeze_epochs': 2, 'label_smoothing': 0.1, 'optimizer': 'adamw', 'sched': 'cosine', 'warmup_epochs': 1.0, 'seed': 42, 'n_per_class': 0, 'workers': 4, 'grad_clip': 1.0, 'patience': 6, 'limit_batches': 0, 'amp': 1}
+[16:47:26] train imgs=20000  val imgs=5000 steps/epoch=312
+[16:47:26] params=1.17M pretrained=False strategy=scratch
+[16:48:16]   epoch   1 | train loss 0.6692 acc 61.60% | lr 1.00e-03 | 51s
+[16:48:53]           val loss 0.5924 acc 71.34% macroF1 71.33%
+[16:49:16]   epoch   2 | train loss 0.6083 acc 69.18% | lr 9.85e-04 | 23s
+[16:49:20]           val loss 0.6989 acc 65.34% macroF1 61.48%
+[16:49:43]   epoch   3 | train loss 0.5687 acc 73.81% | lr 9.43e-04 | 24s
+[16:49:47]           val loss 0.4827 acc 82.38% macroF1 82.38%
+[16:50:11]   epoch   4 | train loss 0.5301 acc 77.15% | lr 8.74e-04 | 24s
+[16:50:14]           val loss 0.4608 acc 82.90% macroF1 82.85%
+[16:50:39]   epoch   5 | train loss 0.4958 acc 79.74% | lr 7.84e-04 | 24s
+[16:50:42]           val loss 0.9684 acc 65.12% macroF1 60.61%
+[16:51:07]   epoch   6 | train loss 0.4566 acc 83.35% | lr 6.77e-04 | 25s
+[16:51:11]           val loss 0.5391 acc 80.54% macroF1 79.98%
+[16:51:36]   epoch   7 | train loss 0.4302 acc 85.22% | lr 5.60e-04 | 25s
+[16:51:39]           val loss 0.4796 acc 79.94% macroF1 79.16%
+[16:52:04]   epoch   8 | train loss 0.4078 acc 87.17% | lr 4.40e-04 | 25s
+[16:52:08]           val loss 0.4252 acc 87.52% macroF1 87.39%
+[16:52:33]   epoch   9 | train loss 0.3911 acc 88.21% | lr 3.23e-04 | 25s
+[16:52:36]           val loss 0.3340 acc 93.20% macroF1 93.20%
+[16:53:01]   epoch  10 | train loss 0.3724 acc 89.59% | lr 2.16e-04 | 25s
+[16:53:05]           val loss 0.3431 acc 93.42% macroF1 93.42%
+[16:53:30]   epoch  11 | train loss 0.3627 acc 90.43% | lr 1.26e-04 | 25s
+[16:53:34]           val loss 0.3168 acc 94.36% macroF1 94.36%
+[16:53:59]   epoch  12 | train loss 0.3578 acc 90.87% | lr 5.73e-05 | 25s
+[16:54:02]           val loss 0.3142 acc 94.96% macroF1 94.96%
+[16:54:28]   epoch  13 | train loss 0.3483 acc 91.66% | lr 1.45e-05 | 25s
+[16:54:31]           val loss 0.3128 acc 95.06% macroF1 95.06%
+[16:54:57]   epoch  14 | train loss 0.3475 acc 91.74% | lr 0.00e+00 | 25s
+[16:55:00]           val loss 0.3120 acc 94.82% macroF1 94.82%
+[16:55:00] done in 7m34s | best val acc 95.06% @ epoch 13

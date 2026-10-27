@@ -1,0 +1,8 @@
+[19:31:15] exp=H_logit_adjust method=logit_adjust mode=h img=32 train=11908 val=5000
+[19:32:17]   ep   1 | loss 1.525 tracc 44.93% | val 23.82% mF1 17.43% | 62s
+[19:34:30]   ep   5 | loss 0.925 tracc 68.26% | val 33.44% mF1 23.27% | 195s
+[19:37:21]   ep  10 | loss 0.648 tracc 77.90% | val 52.60% mF1 48.45% | 365s
+[19:40:07]   ep  15 | loss 0.466 tracc 83.81% | val 60.04% mF1 57.13% | 532s
+[19:41:48]   ep  18 | loss 0.418 tracc 85.32% | val 62.14% mF1 59.94% | 632s
+[19:42:17] TEST acc 51.56% macroF1 44.92% balanced_acc 51.56%
+[19:42:17] done in 11m01s

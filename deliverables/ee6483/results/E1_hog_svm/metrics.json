@@ -1,0 +1,38 @@
+{
+  "svm_rbf": {
+    "val_acc": 0.75,
+    "macro_f1": 0.75,
+    "confusion_matrix": [
+      [
+        750,
+        250
+      ],
+      [
+        250,
+        750
+      ]
+    ],
+    "fit_seconds": 199.41674661636353,
+    "feature_dim": 4404,
+    "n_train": 8000,
+    "n_val": 2000
+  },
+  "svm_linear": {
+    "val_acc": 0.6265,
+    "macro_f1": 0.626484218958251,
+    "confusion_matrix": [
+      [
+        620,
+        380
+      ],
+      [
+        367,
+        633
+      ]
+    ],
+    "fit_seconds": 229.1497519016266,
+    "feature_dim": 4404,
+    "n_train": 8000,
+    "n_val": 2000
+  }
+}

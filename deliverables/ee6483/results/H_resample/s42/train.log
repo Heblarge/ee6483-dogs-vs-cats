@@ -1,0 +1,9 @@
+[18:59:09] resample sampler built (class counts [4500, 2997, 1797, 1077, 646, 387, 232, 139, 83, 50])
+[18:59:09] exp=H_resample method=resample mode=h img=32 train=11908 val=5000
+[19:00:19]   ep   1 | loss 2.095 tracc 21.74% | val 30.12% mF1 26.57% | 70s
+[19:02:55]   ep   5 | loss 1.150 tracc 59.29% | val 54.20% mF1 53.39% | 226s
+[19:06:19]   ep  10 | loss 0.682 tracc 75.37% | val 68.12% mF1 67.90% | 430s
+[19:09:05]   ep  15 | loss 0.459 tracc 84.01% | val 71.16% mF1 71.24% | 597s
+[19:10:45]   ep  18 | loss 0.404 tracc 85.98% | val 71.54% mF1 71.39% | 696s
+[19:11:15] TEST acc 72.02% macroF1 72.00% balanced_acc 72.02%
+[19:11:15] done in 12m06s

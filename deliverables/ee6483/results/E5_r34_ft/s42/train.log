@@ -1,0 +1,15 @@
+[17:00:58] exp=E5_r34_ft model=resnet34 seed=42 device=cuda
+[17:00:58] args={'config': None, 'data_root': 'data/cache', 'out_root': 'ee6483/results', 'exp_id': 'E5_r34_ft', 'model': 'resnet34', 'pretrained': 1, 'epochs': 8, 'lr': 0.0003, 'head_lr': 0.001, 'wd': 0.0001, 'batch': 64, 'img_size': 224, 'aug': 'full', 'ft_strategy': 'lpft', 'freeze_epochs': 2, 'label_smoothing': 0.1, 'optimizer': 'adamw', 'sched': 'cosine', 'warmup_epochs': 1.0, 'seed': 42, 'n_per_class': 0, 'workers': 4, 'grad_clip': 1.0, 'patience': 3, 'limit_batches': 0, 'amp': 1}
+[17:00:58] train imgs=20000  val imgs=5000 steps/epoch=312
+[17:01:00] params=21.29M pretrained=True strategy=lpft
+[17:02:28]   epoch   1 | train loss 0.4288 acc 84.72% | lr 3.00e-04 | 88s
+[17:03:15]           val loss 0.2602 acc 97.54% macroF1 97.54%
+[17:04:07]   epoch   2 | train loss 0.3184 acc 93.35% | lr 2.85e-04 | 52s
+[17:04:12]           val loss 0.2621 acc 97.52% macroF1 97.52%
+[17:04:12]   >> stage 2: backbone unfrozen at epoch 3
+[17:04:55]   epoch   3 | train loss 0.3007 acc 94.39% | lr 2.89e-04 | 42s
+[17:05:00]           val loss 0.2867 acc 94.58% macroF1 94.57%
+[17:05:41]   epoch   4 | train loss 0.2742 acc 95.75% | lr 2.39e-04 | 42s
+[17:05:46]           val loss 0.2439 acc 97.48% macroF1 97.48%
+[17:05:46]   early stop at epoch 4 (best 97.54% @ 1)
+[17:05:46] done in 4m46s | best val acc 97.54% @ epoch 1

@@ -1,0 +1,6 @@
+[18:35:34] exp=G2_cifar_pretrained method=ce mode=g2 img=160 train=45000 val=5000
+[18:37:25]   ep   1 | loss 1.220 tracc 69.71% | val 91.28% mF1 91.29% | 111s
+[18:42:04]   ep   5 | loss 0.673 tracc 94.40% | val 95.36% mF1 95.35% | 389s
+[18:44:26]   ep   7 | loss 0.656 tracc 95.20% | val 95.58% mF1 95.58% | 531s
+[18:45:14] TEST acc 95.20% macroF1 95.19% balanced_acc 95.20%
+[18:45:14] done in 9m39s

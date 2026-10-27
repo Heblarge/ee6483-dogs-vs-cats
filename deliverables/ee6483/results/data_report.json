@@ -1,0 +1,113 @@
+{
+  "root": "data\\datasets",
+  "splits": {
+    "train": {
+      "cat": {
+        "count": 10000,
+        "corrupt": [],
+        "width": {
+          "min": 50,
+          "max": 1023,
+          "mean": 411.0
+        },
+        "height": {
+          "min": 32,
+          "max": 768,
+          "mean": 357.4
+        },
+        "aspect_ratio_mean": 1.188,
+        "smallest_side_min": 32
+      },
+      "dog": {
+        "count": 10000,
+        "corrupt": [],
+        "width": {
+          "min": 42,
+          "max": 1050,
+          "mean": 397.7
+        },
+        "height": {
+          "min": 33,
+          "max": 702,
+          "mean": 364.6
+        },
+        "aspect_ratio_mean": 1.125,
+        "smallest_side_min": 33
+      }
+    },
+    "val": {
+      "cat": {
+        "count": 2500,
+        "corrupt": [],
+        "width": {
+          "min": 59,
+          "max": 500,
+          "mean": 408.7
+        },
+        "height": {
+          "min": 39,
+          "max": 500,
+          "mean": 352.6
+        },
+        "aspect_ratio_mean": 1.195,
+        "smallest_side_min": 39
+      },
+      "dog": {
+        "count": 2500,
+        "corrupt": [],
+        "width": {
+          "min": 51,
+          "max": 500,
+          "mean": 397.5
+        },
+        "height": {
+          "min": 37,
+          "max": 500,
+          "mean": 364.1
+        },
+        "aspect_ratio_mean": 1.125,
+        "smallest_side_min": 37
+      }
+    },
+    "test": {
+      "count": 500,
+      "corrupt": [],
+      "width": {
+        "min": 37,
+        "max": 500,
+        "mean": 400.3
+      },
+      "height": {
+        "min": 50,
+        "max": 500,
+        "mean": 360.6
+      },
+      "id_min": 1,
+      "id_max": 500,
+      "ids_are_contiguous_1_to_n": true,
+      "all_names_numeric": true
+    }
+  },
+  "submission": {
+    "n_rows": 500,
+    "header": [
+      "id",
+      "label"
+    ],
+    "ids_match_test_files": true,
+    "id_range": [
+      1,
+      500
+    ],
+    "label_values_in_sample": [
+      "0"
+    ]
+  },
+  "near_duplicates": {
+    "method": "pHash, Hamming <= 6",
+    "n_pairs": 40,
+    "n_cross_class": 5,
+    "n_cross_split": 12,
+    "note": "see ee6483/results/duplicates_all.json for the full list"
+  }
+}

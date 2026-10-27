@@ -1,0 +1,27 @@
+# Example configuration for the main model (M3 in the report).
+# Keys must match the argparse destination names in src/train.py.
+# CLI arguments override these values.
+#
+#   python -m ee6483.src.train --config ee6483/configs/main.yaml --exp-id E4_r18_ft --seed 42
+
+model: resnet18
+pretrained: 1
+epochs: 8
+lr: 3.0e-4
+head_lr: 1.0e-3
+wd: 1.0e-4
+batch: 64
+img_size: 224
+aug: full
+ft_strategy: lpft
+freeze_epochs: 2
+label_smoothing: 0.1
+optimizer: adamw
+sched: cosine
+warmup_epochs: 1.0
+seed: 42
+workers: 4
+grad_clip: 1.0
+patience: 3
+amp: 1
+n_per_class: 0

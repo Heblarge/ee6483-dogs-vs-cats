@@ -1,0 +1,365 @@
+
+### 2026-10-27 16:15:36 [main] E4 resnet18 lpft seed43
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E4_r18_ft --model resnet18 --epochs 8 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 224 --aug full --ft-strategy lpft --freeze-epochs 2 --seed 43 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[16:22:16]           val loss 0.2230 acc 98.82% macroF1 98.82%
+[16:23:04]   epoch   7 | train loss 0.2284 acc 98.52% | lr 2.22e-05 | 48s
+[16:23:09]           val loss 0.2204 acc 98.90% macroF1 98.90%
+[16:23:57]   epoch   8 | train loss 0.2250 acc 98.69% | lr 0.00e+00 | 47s
+[16:24:02]           val loss 0.2190 acc 98.90% macroF1 98.90%
+[16:24:02] done in 8m18s | best val acc 98.90% @ epoch 7
+(rc=0, 509s)
+
+### 2026-10-27 16:24:04 [main] E4 resnet18 lpft seed44
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E4_r18_ft --model resnet18 --epochs 8 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 224 --aug full --ft-strategy lpft --freeze-epochs 2 --seed 44 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+
+### 2026-10-27 16:31:28 [main] E4 resnet18 lpft seed44
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E4_r18_ft --model resnet18 --epochs 8 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 224 --aug full --ft-strategy lpft --freeze-epochs 2 --seed 44 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[16:37:37]           val loss 0.2225 acc 98.70% macroF1 98.70%
+[16:38:21]   epoch   7 | train loss 0.2301 acc 98.35% | lr 2.22e-05 | 44s
+[16:38:26]           val loss 0.2184 acc 98.88% macroF1 98.88%
+[16:39:10]   epoch   8 | train loss 0.2254 acc 98.68% | lr 0.00e+00 | 44s
+[16:39:15]           val loss 0.2183 acc 98.90% macroF1 98.90%
+[16:39:16] done in 7m39s | best val acc 98.90% @ epoch 8
+(rc=0, 470s)
+
+### 2026-10-27 16:39:18 [compare] E1 HOG+SVM
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.classical
+extracting train features ...
+  (8000, 4404) in 37s
+extracting val features ...
+svm_rbf: val acc 75.00%  (199s)
+svm_linear: val acc 62.65%  (229s)
+saved ee6483\results\E1_hog_svm\metrics.json
+(rc=0, 480s)
+
+### 2026-10-27 16:47:19 [compare] E2 smallcnn scratch
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E2_smallcnn --model smallcnn --epochs 14 --lr 0.001 --head-lr 0.001 --batch 64 --img-size 128 --aug full --ft-strategy scratch --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 6
+[16:54:02]           val loss 0.3142 acc 94.96% macroF1 94.96%
+[16:54:28]   epoch  13 | train loss 0.3483 acc 91.66% | lr 1.45e-05 | 25s
+[16:54:31]           val loss 0.3128 acc 95.06% macroF1 95.06%
+[16:54:57]   epoch  14 | train loss 0.3475 acc 91.74% | lr 0.00e+00 | 25s
+[16:55:00]           val loss 0.3120 acc 94.82% macroF1 94.82%
+[16:55:00] done in 7m34s | best val acc 95.06% @ epoch 13
+(rc=0, 464s)
+
+### 2026-10-27 16:55:03 [compare] E3 resnet18 frozen head
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E3_r18_frozen --model resnet18 --epochs 6 --lr 0.001 --head-lr 0.001 --batch 64 --img-size 224 --aug full --ft-strategy head --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 6
+[16:59:16]           val loss 0.2638 acc 97.42% macroF1 97.42%
+[16:59:56]   epoch   5 | train loss 0.3202 acc 93.46% | lr 9.55e-05 | 40s
+[17:00:01]           val loss 0.2600 acc 97.72% macroF1 97.72%
+[17:00:41]   epoch   6 | train loss 0.3187 acc 93.62% | lr 0.00e+00 | 40s
+[17:00:46]           val loss 0.2589 acc 97.78% macroF1 97.78%
+[17:00:46] done in 5m33s | best val acc 97.78% @ epoch 6
+(rc=0, 346s)
+
+### 2026-10-27 17:00:49 [compare] E5 resnet34 lpft seed42
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E5_r34_ft --model resnet34 --epochs 8 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 224 --aug full --ft-strategy lpft --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:04:55]   epoch   3 | train loss 0.3007 acc 94.39% | lr 2.89e-04 | 42s
+[17:05:00]           val loss 0.2867 acc 94.58% macroF1 94.57%
+[17:05:41]   epoch   4 | train loss 0.2742 acc 95.75% | lr 2.39e-04 | 42s
+[17:05:46]           val loss 0.2439 acc 97.48% macroF1 97.48%
+[17:05:46]   early stop at epoch 4 (best 97.54% @ 1)
+[17:05:46] done in 4m46s | best val acc 97.54% @ epoch 1
+(rc=0, 300s)
+
+### 2026-10-27 17:05:49 [ablation] aug none
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_aug_none --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 160 --aug none --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:07:30]           val loss 0.2704 acc 96.38% macroF1 96.38%
+[17:07:46]   epoch   2 | train loss 0.2407 acc 97.93% | lr 1.50e-04 | 16s
+[17:07:50]           val loss 0.2443 acc 97.68% macroF1 97.68%
+[17:08:06]   epoch   3 | train loss 0.2090 acc 99.73% | lr 0.00e+00 | 16s
+[17:08:10]           val loss 0.2264 acc 98.36% macroF1 98.36%
+[17:08:10] done in 2m12s | best val acc 98.36% @ epoch 3
+(rc=0, 144s)
+
+### 2026-10-27 17:08:13 [ablation] aug flip
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_aug_flip --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 160 --aug flip --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:09:57]           val loss 0.2715 acc 96.28% macroF1 96.28%
+[17:10:12]   epoch   2 | train loss 0.2548 acc 97.10% | lr 1.50e-04 | 16s
+[17:10:16]           val loss 0.2353 acc 98.04% macroF1 98.04%
+[17:10:33]   epoch   3 | train loss 0.2265 acc 98.68% | lr 0.00e+00 | 16s
+[17:10:37]           val loss 0.2231 acc 98.62% macroF1 98.62%
+[17:10:37] done in 2m13s | best val acc 98.62% @ epoch 3
+(rc=0, 146s)
+
+### 2026-10-27 17:10:39 [ablation] aug geo
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_aug_geo --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 160 --aug geo --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:12:13]           val loss 0.2689 acc 96.28% macroF1 96.28%
+[17:12:27]   epoch   2 | train loss 0.2656 acc 96.45% | lr 1.50e-04 | 14s
+[17:12:31]           val loss 0.2420 acc 97.78% macroF1 97.78%
+[17:12:45]   epoch   3 | train loss 0.2353 acc 98.04% | lr 0.00e+00 | 15s
+[17:12:49]           val loss 0.2247 acc 98.56% macroF1 98.56%
+[17:12:49] done in 1m59s | best val acc 98.56% @ epoch 3
+(rc=0, 132s)
+
+### 2026-10-27 17:12:52 [ablation] aug color
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_aug_color --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 160 --aug color --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:14:30]           val loss 0.2708 acc 96.98% macroF1 96.98%
+[17:14:56]   epoch   2 | train loss 0.2674 acc 96.39% | lr 1.50e-04 | 25s
+[17:15:00]           val loss 0.2366 acc 97.98% macroF1 97.98%
+[17:15:26]   epoch   3 | train loss 0.2361 acc 98.00% | lr 0.00e+00 | 26s
+[17:15:29]           val loss 0.2241 acc 98.48% macroF1 98.48%
+[17:15:29] done in 2m29s | best val acc 98.48% @ epoch 3
+(rc=0, 160s)
+
+### 2026-10-27 17:15:32 [ablation] aug full (base)
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_aug_full --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 160 --aug full --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:17:24]           val loss 0.2909 acc 96.64% macroF1 96.64%
+[17:17:55]   epoch   2 | train loss 0.2913 acc 94.79% | lr 1.50e-04 | 31s
+[17:18:00]           val loss 0.2382 acc 97.80% macroF1 97.80%
+[17:18:34]   epoch   3 | train loss 0.2561 acc 96.66% | lr 0.00e+00 | 34s
+[17:18:38]           val loss 0.2302 acc 98.12% macroF1 98.12%
+[17:18:38] done in 2m57s | best val acc 98.12% @ epoch 3
+(rc=0, 189s)
+
+### 2026-10-27 17:18:41 [ablation] res 96
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_res_96 --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 96 --aug full --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:20:23]           val loss 0.3135 acc 93.24% macroF1 93.23%
+[17:20:47]   epoch   2 | train loss 0.3438 acc 91.08% | lr 1.50e-04 | 24s
+[17:20:51]           val loss 0.2689 acc 95.96% macroF1 95.96%
+[17:21:14]   epoch   3 | train loss 0.2972 acc 93.94% | lr 0.00e+00 | 23s
+[17:21:17]           val loss 0.2472 acc 97.08% macroF1 97.08%
+[17:21:17] done in 2m27s | best val acc 97.08% @ epoch 3
+(rc=0, 159s)
+
+### 2026-10-27 17:21:20 [ablation] res 128
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_res_128 --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 128 --aug full --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:23:14]           val loss 0.2924 acc 96.10% macroF1 96.10%
+[17:23:41]   epoch   2 | train loss 0.3105 acc 93.33% | lr 1.50e-04 | 27s
+[17:23:45]           val loss 0.2503 acc 97.12% macroF1 97.12%
+[17:24:13]   epoch   3 | train loss 0.2693 acc 95.81% | lr 0.00e+00 | 28s
+[17:24:17]           val loss 0.2332 acc 97.94% macroF1 97.94%
+[17:24:17] done in 2m47s | best val acc 97.94% @ epoch 3
+(rc=0, 180s)
+
+### 2026-10-27 17:24:20 [ablation] res 224
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_res_224 --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 224 --aug full --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:26:35]           val loss 0.2623 acc 97.30% macroF1 97.30%
+[17:27:24]   epoch   2 | train loss 0.2751 acc 95.83% | lr 1.50e-04 | 49s
+[17:27:29]           val loss 0.2366 acc 98.48% macroF1 98.48%
+[17:28:19]   epoch   3 | train loss 0.2450 acc 97.43% | lr 0.00e+00 | 50s
+[17:28:24]           val loss 0.2233 acc 98.76% macroF1 98.76%
+[17:28:25] done in 3m55s | best val acc 98.76% @ epoch 3
+(rc=0, 247s)
+
+### 2026-10-27 17:28:27 [ablation] data 250/class
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_data_250 --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 160 --aug full --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 250 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:29:55]           val loss 0.4321 acc 93.56% macroF1 93.54%
+[17:29:56]   epoch   2 | train loss 0.4034 acc 91.74% | lr 1.50e-04 | 1s
+[17:30:00]           val loss 0.4880 acc 92.44% macroF1 92.40%
+[17:30:01]   epoch   3 | train loss 0.3271 acc 94.64% | lr 0.00e+00 | 1s
+[17:30:06]           val loss 0.3879 acc 93.34% macroF1 93.32%
+[17:30:06] done in 1m28s | best val acc 93.56% @ epoch 1
+(rc=0, 101s)
+
+### 2026-10-27 17:30:08 [ablation] data 1000/class
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_data_1000 --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 160 --aug full --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 1000 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:31:38]           val loss 0.2954 acc 95.46% macroF1 95.46%
+[17:31:42]   epoch   2 | train loss 0.3465 acc 92.14% | lr 1.50e-04 | 3s
+[17:31:46]           val loss 0.3058 acc 94.26% macroF1 94.25%
+[17:31:49]   epoch   3 | train loss 0.2986 acc 94.25% | lr 0.00e+00 | 4s
+[17:31:53]           val loss 0.2624 acc 96.76% macroF1 96.76%
+[17:31:54] done in 1m35s | best val acc 96.76% @ epoch 3
+(rc=0, 108s)
+
+### 2026-10-27 17:31:56 [ablation] data 2500/class
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_data_2500 --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 160 --aug full --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 2500 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:33:29]           val loss 0.3219 acc 93.82% macroF1 93.81%
+[17:33:36]   epoch   2 | train loss 0.3161 acc 92.93% | lr 1.50e-04 | 7s
+[17:33:40]           val loss 0.2572 acc 96.78% macroF1 96.78%
+[17:33:47]   epoch   3 | train loss 0.2736 acc 96.07% | lr 0.00e+00 | 7s
+[17:33:51]           val loss 0.2397 acc 97.90% macroF1 97.90%
+[17:33:51] done in 1m44s | best val acc 97.90% @ epoch 3
+(rc=0, 117s)
+
+### 2026-10-27 17:33:53 [ablation] data 5000/class
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_data_5000 --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 160 --aug full --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 5000 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:35:25]           val loss 0.2635 acc 96.64% macroF1 96.64%
+[17:35:38]   epoch   2 | train loss 0.3010 acc 93.97% | lr 1.50e-04 | 13s
+[17:35:41]           val loss 0.2544 acc 97.18% macroF1 97.18%
+[17:35:55]   epoch   3 | train loss 0.2665 acc 96.06% | lr 0.00e+00 | 14s
+[17:35:59]           val loss 0.2323 acc 98.20% macroF1 98.20%
+[17:35:59] done in 1m57s | best val acc 98.20% @ epoch 3
+(rc=0, 128s)
+
+### 2026-10-27 17:36:01 [ablation] ft head only
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_ft_head --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 160 --aug full --ft-strategy head --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:37:45]           val loss 0.2919 acc 95.38% macroF1 95.38%
+[17:38:11]   epoch   2 | train loss 0.3715 acc 89.26% | lr 1.50e-04 | 26s
+[17:38:15]           val loss 0.2875 acc 95.78% macroF1 95.78%
+[17:38:41]   epoch   3 | train loss 0.3631 acc 90.12% | lr 0.00e+00 | 26s
+[17:38:44]           val loss 0.2810 acc 96.24% macroF1 96.24%
+[17:38:44] done in 2m34s | best val acc 96.24% @ epoch 3
+(rc=0, 165s)
+
+### 2026-10-27 17:38:47 [ablation] ft last stage
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_ft_last --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 160 --aug full --ft-strategy last_stage --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:40:36]           val loss 0.2536 acc 97.92% macroF1 97.92%
+[17:41:04]   epoch   2 | train loss 0.2931 acc 94.66% | lr 1.50e-04 | 27s
+[17:41:08]           val loss 0.2374 acc 97.94% macroF1 97.94%
+[17:41:36]   epoch   3 | train loss 0.2725 acc 95.82% | lr 0.00e+00 | 28s
+[17:41:41]           val loss 0.2307 acc 98.20% macroF1 98.20%
+[17:41:41] done in 2m45s | best val acc 98.20% @ epoch 3
+(rc=0, 176s)
+
+### 2026-10-27 17:41:43 [ablation] ft lp-ft
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_ft_lpft --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 160 --aug full --ft-strategy lpft --freeze-epochs 1 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:43:36]   >> stage 2: backbone unfrozen at epoch 2
+[17:44:07]   epoch   2 | train loss 0.3247 acc 92.83% | lr 1.91e-04 | 30s
+[17:44:11]           val loss 0.2534 acc 97.66% macroF1 97.66%
+[17:44:42]   epoch   3 | train loss 0.2660 acc 96.12% | lr 0.00e+00 | 31s
+[17:44:46]           val loss 0.2287 acc 98.32% macroF1 98.32%
+[17:44:46] done in 2m53s | best val acc 98.32% @ epoch 3
+(rc=0, 186s)
+
+### 2026-10-27 17:44:49 [ablation] pretrained vs scratch
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_scratch --model resnet18 --epochs 6 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 160 --aug full --ft-strategy scratch --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 6
+[17:49:14]           val loss 0.3985 acc 87.18% macroF1 87.16%
+[17:49:53]   epoch   5 | train loss 0.4309 acc 84.65% | lr 2.86e-05 | 39s
+[17:49:58]           val loss 0.3723 acc 89.16% macroF1 89.14%
+[17:50:37]   epoch   6 | train loss 0.4091 acc 86.43% | lr 0.00e+00 | 39s
+[17:50:41]           val loss 0.3549 acc 90.66% macroF1 90.66%
+[17:50:42] done in 5m41s | best val acc 90.66% @ epoch 6
+(rc=0, 355s)
+
+### 2026-10-27 17:50:44 [lrsearch] lr 1e-05
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_lr_1e-5 --model resnet18 --epochs 3 --lr 1e-05 --head-lr 1e-05 --batch 64 --img-size 160 --aug full --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:53:03]           val loss 0.2733 acc 96.14% macroF1 96.14%
+[17:53:42]   epoch   2 | train loss 0.3189 acc 93.14% | lr 5.00e-06 | 39s
+[17:53:47]           val loss 0.2508 acc 97.34% macroF1 97.34%
+[17:54:27]   epoch   3 | train loss 0.3036 acc 94.13% | lr 0.00e+00 | 40s
+[17:54:32]           val loss 0.2486 acc 97.68% macroF1 97.68%
+[17:54:32] done in 3m35s | best val acc 97.68% @ epoch 3
+(rc=0, 230s)
+
+### 2026-10-27 17:54:35 [lrsearch] lr 0.0001
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_lr_1e-4 --model resnet18 --epochs 3 --lr 0.0001 --head-lr 0.0001 --batch 64 --img-size 160 --aug full --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[17:56:51]           val loss 0.2491 acc 97.76% macroF1 97.76%
+[17:57:28]   epoch   2 | train loss 0.2820 acc 95.50% | lr 5.00e-05 | 37s
+[17:57:33]           val loss 0.2323 acc 98.42% macroF1 98.42%
+[17:58:12]   epoch   3 | train loss 0.2606 acc 96.69% | lr 0.00e+00 | 39s
+[17:58:17]           val loss 0.2272 acc 98.62% macroF1 98.62%
+[17:58:17] done in 3m30s | best val acc 98.62% @ epoch 3
+(rc=0, 225s)
+
+### 2026-10-27 17:58:20 [lrsearch] lr 0.0003
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_lr_3e-4 --model resnet18 --epochs 3 --lr 0.0003 --head-lr 0.0003 --batch 64 --img-size 160 --aug full --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[18:00:36]           val loss 0.2609 acc 96.86% macroF1 96.86%
+[18:01:16]   epoch   2 | train loss 0.2920 acc 94.54% | lr 1.50e-04 | 40s
+[18:01:21]           val loss 0.2348 acc 97.96% macroF1 97.96%
+[18:01:59]   epoch   3 | train loss 0.2562 acc 96.78% | lr 0.00e+00 | 38s
+[18:02:04]           val loss 0.2269 acc 98.24% macroF1 98.24%
+[18:02:04] done in 3m32s | best val acc 98.24% @ epoch 3
+(rc=0, 227s)
+
+### 2026-10-27 18:02:06 [lrsearch] lr 0.001
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_lr_1e-3 --model resnet18 --epochs 3 --lr 0.001 --head-lr 0.001 --batch 64 --img-size 160 --aug full --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[18:04:22]           val loss 0.4167 acc 86.32% macroF1 86.08%
+[18:04:59]   epoch   2 | train loss 0.3384 acc 91.59% | lr 5.00e-04 | 37s
+[18:05:04]           val loss 0.2853 acc 94.68% macroF1 94.67%
+[18:05:40]   epoch   3 | train loss 0.2815 acc 94.91% | lr 0.00e+00 | 36s
+[18:05:45]           val loss 0.2378 acc 97.70% macroF1 97.70%
+[18:05:45] done in 3m27s | best val acc 97.70% @ epoch 3
+(rc=0, 221s)
+
+### 2026-10-27 18:05:47 [lrsearch] lr 0.003
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E7_lr_3e-3 --model resnet18 --epochs 3 --lr 0.003 --head-lr 0.003 --batch 64 --img-size 160 --aug full --ft-strategy full --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[18:08:02]           val loss 0.5493 acc 72.62% macroF1 70.94%
+[18:08:39]   epoch   2 | train loss 0.4036 acc 87.04% | lr 1.50e-03 | 37s
+[18:08:44]           val loss 0.3112 acc 93.90% macroF1 93.90%
+[18:09:21]   epoch   3 | train loss 0.3180 acc 92.66% | lr 0.00e+00 | 37s
+[18:09:26]           val loss 0.2626 acc 96.06% macroF1 96.06%
+[18:09:26] done in 3m27s | best val acc 96.06% @ epoch 3
+(rc=0, 221s)
+
+### 2026-10-27 18:09:28 [cifar] G1 cifar scratch
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train_cifar --mode g1 --epochs 25 --exp-id G1_cifar_scratch
+[18:19:53]   ep  10 | loss 0.962 tracc 79.72% | val 84.22% mF1 84.19% | 613s
+[18:24:58]   ep  15 | loss 0.844 tracc 84.88% | val 87.64% mF1 87.65% | 918s
+[18:29:47]   ep  20 | loss 0.726 tracc 90.16% | val 92.66% mF1 92.64% | 1207s
+[18:34:38]   ep  25 | loss 0.668 tracc 92.80% | val 93.42% mF1 93.42% | 1498s
+[18:35:20] TEST acc 93.60% macroF1 93.60% balanced_acc 93.60%
+[18:35:20] done in 25m40s
+(rc=0, 1554s)
+
+### 2026-10-27 18:35:22 [cifar] G2 cifar pretrained
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train_cifar --mode g2 --epochs 7 --exp-id G2_cifar_pretrained
+[18:35:34] exp=G2_cifar_pretrained method=ce mode=g2 img=160 train=45000 val=5000
+[18:37:25]   ep   1 | loss 1.220 tracc 69.71% | val 91.28% mF1 91.29% | 111s
+[18:42:04]   ep   5 | loss 0.673 tracc 94.40% | val 95.36% mF1 95.35% | 389s
+[18:44:26]   ep   7 | loss 0.656 tracc 95.20% | val 95.58% mF1 95.58% | 531s
+[18:45:14] TEST acc 95.20% macroF1 95.19% balanced_acc 95.20%
+[18:45:14] done in 9m39s
+(rc=0, 593s)
+
+### 2026-10-27 18:45:16 [imbalance] H ce
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train_cifar --mode h --method ce --epochs 18 --exp-id H_ce
+[18:49:35]   ep   5 | loss 0.925 tracc 68.26% | val 33.44% mF1 23.27% | 247s
+[18:53:04]   ep  10 | loss 0.648 tracc 77.90% | val 52.60% mF1 48.45% | 455s
+[18:56:13]   ep  15 | loss 0.466 tracc 83.81% | val 60.04% mF1 57.13% | 645s
+[18:58:19]   ep  18 | loss 0.418 tracc 85.32% | val 62.14% mF1 59.94% | 771s
+[18:58:57] TEST acc 62.44% macroF1 60.27% balanced_acc 62.44%
+[18:58:57] done in 13m29s
+(rc=0, 823s)
+
+### 2026-10-27 18:58:59 [imbalance] H resample
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train_cifar --mode h --method resample --epochs 18 --exp-id H_resample
+[19:02:55]   ep   5 | loss 1.150 tracc 59.29% | val 54.20% mF1 53.39% | 226s
+[19:06:19]   ep  10 | loss 0.682 tracc 75.37% | val 68.12% mF1 67.90% | 430s
+[19:09:05]   ep  15 | loss 0.459 tracc 84.01% | val 71.16% mF1 71.24% | 597s
+[19:10:45]   ep  18 | loss 0.404 tracc 85.98% | val 71.54% mF1 71.39% | 696s
+[19:11:15] TEST acc 72.02% macroF1 72.00% balanced_acc 72.02%
+[19:11:15] done in 12m06s
+(rc=0, 738s)
+
+### 2026-10-27 19:11:17 [imbalance] H cb
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train_cifar --mode h --method cb --epochs 18 --exp-id H_cb
+[19:14:39]   ep   5 | loss 2.010 tracc 36.41% | val 25.60% mF1 19.34% | 195s
+[19:17:25]   ep  10 | loss 1.706 tracc 45.11% | val 42.76% mF1 42.77% | 361s
+[19:20:12]   ep  15 | loss 1.384 tracc 53.69% | val 51.44% mF1 51.30% | 528s
+[19:21:53]   ep  18 | loss 1.292 tracc 55.52% | val 54.02% mF1 54.06% | 628s
+[19:22:23] TEST acc 54.04% macroF1 53.91% balanced_acc 54.04%
+[19:22:23] done in 10m58s
+(rc=0, 668s)
+
+### 2026-10-27 19:22:24 [imbalance] H decouple
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train_cifar --mode h --method decouple --epochs 18 --exp-id H_decouple
+long-tailed counts: {0: 4500, 1: 2997, 2: 1797, 3: 1077, 4: 646, 5: 387, 6: 232, 7: 139, 8: 83, 9: 50}  total=11908
+[19:22:32] exp=H_decouple method=decouple mode=h img=32 train=11908 val=5000
+[19:23:34]   ep   1 | loss 1.525 tracc 44.93% | val 23.82% mF1 17.43% | 62s
+[19:25:49]   ep   5 | loss 0.925 tracc 68.26% | val 33.44% mF1 23.27% | 197s
+[19:28:35]   ep  10 | loss 0.648 tracc 77.90% | val 52.60% mF1 48.45% | 363s
+[19:30:47]   >> decoupling: freeze backbone, re-init head, class-balanced head retrain
+(rc=1, 524s)
+STDERR:
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\111\留学\课程文件\6483\project\ee6483\src\train_cifar.py", line 279, in <module>
+    run(a, a.method)
+    ~~~^^^^^^^^^^^^^
+  File "C:\111\留学\课程文件\6483\project\ee6483\src\train_cifar.py", line 194, in run
+    nn.init.kaiming_normal_(head[1].weight)
+                            ~~~~^^^
+TypeError: 'Linear' object is not subscriptable
+
+
+### 2026-10-27 19:31:08 [imbalance] H logit_adjust
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train_cifar --mode h --method logit_adjust --epochs 18 --exp-id H_logit_adjust
+[19:34:30]   ep   5 | loss 0.925 tracc 68.26% | val 33.44% mF1 23.27% | 195s
+[19:37:21]   ep  10 | loss 0.648 tracc 77.90% | val 52.60% mF1 48.45% | 365s
+[19:40:07]   ep  15 | loss 0.466 tracc 83.81% | val 60.04% mF1 57.13% | 532s
+[19:41:48]   ep  18 | loss 0.418 tracc 85.32% | val 62.14% mF1 59.94% | 632s
+[19:42:17] TEST acc 51.56% macroF1 44.92% balanced_acc 51.56%
+[19:42:17] done in 11m01s
+(rc=0, 671s)
+
+### 2026-10-27 20:14:51 [extra] E6 resnet50 lpft
+C:\Users\18233\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe -m ee6483.src.train --exp-id E6_r50_ft --model resnet50 --epochs 6 --lr 0.0003 --head-lr 0.001 --batch 64 --img-size 160 --aug full --ft-strategy lpft --freeze-epochs 2 --seed 42 --n-per-class 0 --pretrained 1 --data-root data/cache --workers 4 --patience 3
+[20:18:44]           val loss 0.2182 acc 99.00% macroF1 99.00%
+[20:19:26]   epoch   5 | train loss 0.2248 acc 98.58% | lr 5.08e-05 | 41s
+[20:19:31]           val loss 0.2135 acc 99.16% macroF1 99.16%
+[20:20:13]   epoch   6 | train loss 0.2159 acc 99.13% | lr 0.00e+00 | 42s
+[20:20:19]           val loss 0.2124 acc 99.30% macroF1 99.30%
+[20:20:19] done in 5m17s | best val acc 99.30% @ epoch 6
+(rc=0, 330s)

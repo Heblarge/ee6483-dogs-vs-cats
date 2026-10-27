@@ -1,0 +1,111 @@
+{
+  "radius": 6,
+  "n_images": 25000,
+  "n_pairs": 40,
+  "n_groups": 35,
+  "pairs_within_class": 35,
+  "pairs_cross_class": 5,
+  "pairs_cross_split": 12,
+  "examples": [
+    {
+      "a": "train\\cat\\cat.11706.jpg",
+      "b": "train\\cat\\cat.11974.jpg",
+      "hamming": 2
+    },
+    {
+      "a": "train\\cat\\cat.10052.jpg",
+      "b": "train\\cat\\cat.1930.jpg",
+      "hamming": 2
+    },
+    {
+      "a": "train\\cat\\cat.10360.jpg",
+      "b": "train\\cat\\cat.3345.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\cat\\cat.11053.jpg",
+      "b": "train\\cat\\cat.4667.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\cat\\cat.11197.jpg",
+      "b": "train\\cat\\cat.3910.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\cat\\cat.11595.jpg",
+      "b": "train\\cat\\cat.8137.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\cat\\cat.10273.jpg",
+      "b": "val\\cat\\cat.1639.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\cat\\cat.2339.jpg",
+      "b": "val\\cat\\cat.12408.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\cat\\cat.2565.jpg",
+      "b": "val\\cat\\cat.3565.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\cat\\cat.2580.jpg",
+      "b": "val\\cat\\cat.4726.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\cat\\cat.3112.jpg",
+      "b": "val\\cat\\cat.7545.jpg",
+      "hamming": 2
+    },
+    {
+      "a": "train\\cat\\cat.3411.jpg",
+      "b": "train\\cat\\cat.4435.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\cat\\cat.4442.jpg",
+      "b": "train\\cat\\cat.9966.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\cat\\cat.4795.jpg",
+      "b": "train\\cat\\cat.9588.jpg",
+      "hamming": 2
+    },
+    {
+      "a": "train\\cat\\cat.3908.jpg",
+      "b": "val\\cat\\cat.7912.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\cat\\cat.4126.jpg",
+      "b": "val\\cat\\cat.4575.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\cat\\cat.4509.jpg",
+      "b": "val\\cat\\cat.9240.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\cat\\cat.6143.jpg",
+      "b": "train\\cat\\cat.6204.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\dog\\dog.10.jpg",
+      "b": "train\\dog\\dog.6058.jpg",
+      "hamming": 0
+    },
+    {
+      "a": "train\\cat\\cat.8456.jpg",
+      "b": "train\\dog\\dog.8736.jpg",
+      "hamming": 2
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+[17:08:23] exp=E7_aug_flip model=resnet18 seed=42 device=cuda
+[17:08:23] args={'config': None, 'data_root': 'data/cache', 'out_root': 'ee6483/results', 'exp_id': 'E7_aug_flip', 'model': 'resnet18', 'pretrained': 1, 'epochs': 3, 'lr': 0.0003, 'head_lr': 0.001, 'wd': 0.0001, 'batch': 64, 'img_size': 160, 'aug': 'flip', 'ft_strategy': 'full', 'freeze_epochs': 2, 'label_smoothing': 0.1, 'optimizer': 'adamw', 'sched': 'cosine', 'warmup_epochs': 1.0, 'seed': 42, 'n_per_class': 0, 'workers': 4, 'grad_clip': 1.0, 'patience': 3, 'limit_batches': 0, 'amp': 1}
+[17:08:23] train imgs=20000  val imgs=5000 steps/epoch=312
+[17:08:23] params=11.18M pretrained=True strategy=full
+[17:09:15]   epoch   1 | train loss 0.3183 acc 92.54% | lr 3.00e-04 | 52s
+[17:09:57]           val loss 0.2715 acc 96.28% macroF1 96.28%
+[17:10:12]   epoch   2 | train loss 0.2548 acc 97.10% | lr 1.50e-04 | 16s
+[17:10:16]           val loss 0.2353 acc 98.04% macroF1 98.04%
+[17:10:33]   epoch   3 | train loss 0.2265 acc 98.68% | lr 0.00e+00 | 16s
+[17:10:37]           val loss 0.2231 acc 98.62% macroF1 98.62%
+[17:10:37] done in 2m13s | best val acc 98.62% @ epoch 3
