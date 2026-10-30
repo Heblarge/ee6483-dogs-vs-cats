@@ -152,6 +152,11 @@ After downloading, build the resize cache once (it makes every experiment reprod
 python -m ee6483.src.data.cache_images --src data/datasets --dst data/cache --short 256
 ```
 
+The paths above are relative to this folder. If the dataset already sits at the repository
+root (`../datasets`, as the repository README suggests), pass that path instead:
+`--src ../datasets --dst ../data/cache`, and add `--data-root ../data/cache` to every
+`train` command.
+
 CIFAR-10 is downloaded automatically from the HuggingFace parquet mirror on first use.
 
 ## Quick start

@@ -10,7 +10,7 @@
 | `deliverables/report/EE6483_Group_Report.docx` | **提交用的报告**（A4，10 章 + 参考文献 + 附录，18 图 43 表） |
 | `deliverables/report/REPORT.md` | 同内容 Markdown（自动生成） |
 | `deliverables/submission.csv` | **提交用的预测结果**（500 行，261 dog / 239 cat，已通过校验） |
-| `deliverables/ee6483/` | 全部代码（27 个模块）、42 次实验的 metrics/日志、24 张图 |
+| `deliverables/ee6483/` | 全部代码（30 个模块）、42 次实验的 metrics/日志、24 张图 |
 | `deliverables/docs/` | 作业 PDF、执行方案与"计划 vs 实际"对照 |
 | `deliverables/README.md` | 逐文件说明 + 复现命令 |
 
