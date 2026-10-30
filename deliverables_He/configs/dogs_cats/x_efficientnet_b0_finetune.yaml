@@ -3,7 +3,7 @@ name: x_efficientnet_b0_finetune
 seed: 0
 output_dir: runs
 data:
-  root: datasets/datasets
+  root: ../datasets/datasets
   img_size: 224
   normalize: imagenet
   batch_size: 64

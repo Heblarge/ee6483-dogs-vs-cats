@@ -1,6 +1,9 @@
 # 数据与大文件：不进 Git，按 README 获取
 datasets/
 data/
+!deliverables_He/src/data/
+!deliverables/ee6483/src/data/
+deliverables_He/cluster/logs/
 checkpoints/
 runs/
 *.pt

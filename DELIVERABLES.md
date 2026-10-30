@@ -1,6 +1,6 @@
 # 已完成的工作（deliverables/）
 
-本仓库根目录下的 `src/`、`scripts/`、`configs/` 是**项目骨架与实施计划**（见 `PROJECT_OVERVIEW.md`），
+`deliverables_He/` 下的 `src/`、`scripts/`、`configs/` 是**项目骨架与实施计划**（见 `PROJECT_OVERVIEW.md`），
 尚未包含实现。已完成的一整套工作放在 [`deliverables/`](deliverables/)，自成一体、可直接复现。
 
 ## 里面有什么
@@ -41,4 +41,4 @@ python ee6483/scripts/validate_submission.py --sub submission.csv
 
 - 数据集（3 GB）与模型权重（1.8 GB）未提交，`.gitignore` 已排除；权重可由上面的命令重新训练得到。
 - 报告首页的组员姓名/学号三行仍需填写。
-- 本目录不改动根目录的骨架代码，两者可以并存；如需合并成一套结构，可另行整理。
+- 本目录不改动 `deliverables_He/` 的骨架代码，两者可以并存；如需合并成一套结构，可另行整理。

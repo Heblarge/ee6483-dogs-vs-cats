@@ -1,0 +1,32 @@
+# 骨干对比（统一协议）：ResNet-34，21.3M，深度对照
+# 与同目录其他文件只有 model.name / data.batch_size / train.grad_accum_steps 不同，其余必须保持一致。
+name: b_resnet34
+seed: 0
+output_dir: runs/backbones
+data:
+  root: ../datasets/datasets
+  img_size: 224
+  normalize: imagenet
+  batch_size: 64
+  num_workers: 6
+  augment:
+    random_resized_crop: {scale: [0.6, 1.0]}
+    hflip: 0.5
+model:
+  name: resnet34
+  pretrained: true
+  freeze: none
+loss: {name: cross_entropy, label_smoothing: 0.1}
+optim:
+  name: adamw
+  lr: 1.0e-3             # 分类头学习率
+  backbone_lr_mult: 0.1  # 骨干学习率 = 1e-4
+  weight_decay: 0.05
+scheduler: {name: cosine, warmup_epochs: 1}
+train:
+  epochs: 6
+  amp: true
+  grad_accum_steps: 1
+  grad_clip_norm: 1.0
+  monitor: accuracy
+  early_stop_patience: null   # 不早停：每个模型跑满相同预算，避免 Darling 版 ResNet-34 被早停截断的问题

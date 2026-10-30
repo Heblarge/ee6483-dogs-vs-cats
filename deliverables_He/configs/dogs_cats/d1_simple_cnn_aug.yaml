@@ -2,7 +2,7 @@ name: d1_simple_cnn_aug
 seed: 0
 output_dir: runs
 data:
-  root: datasets/datasets
+  root: ../datasets/datasets
   img_size: 224
   normalize: imagenet
   batch_size: 64

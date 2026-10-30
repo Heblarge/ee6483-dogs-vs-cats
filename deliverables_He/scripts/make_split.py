@@ -12,7 +12,7 @@ from src.data.datasets import list_labeled, save_split, subsample_per_class
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--root", default="datasets/datasets")
+    ap.add_argument("--root", default="../datasets/datasets")
     ap.add_argument("--split", choices=["train", "val"], required=True)
     ap.add_argument("--per-class", type=int, default=None, help="不填则导出全量清单")
     ap.add_argument("--seed", type=int, default=0)
