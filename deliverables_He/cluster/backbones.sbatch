@@ -17,7 +17,7 @@ MODELS=(resnet18 resnet34 resnet50 efficientnet_b0 convnext_tiny swin_t vit_b_16
 M=${MODELS[$SLURM_ARRAY_TASK_ID]}
 
 module load Miniforge3
-source activate "$ENV"
+set +u; source activate "$ENV"; set -u   # conda 的激活脚本不兼容 set -u
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
 echo "model=$M seeds=${SEEDS:-0 1} node=$(hostname)"
 

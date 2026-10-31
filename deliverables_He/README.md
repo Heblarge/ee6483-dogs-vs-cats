@@ -10,6 +10,7 @@
 deliverables_He/
 ├── configs/                  实验配置（YAML，每个文件 = 一个实验）  → configs/README.md
 │   └── dogs_cats/            D0~D3 及扩展对照
+│       └── backbones/        骨干对比：7 个模型，统一协议
 ├── src/
 │   ├── data/                 数据读取、预处理、增强、Mixup/CutMix   → 预处理方法与引用
 │   ├── policies/             模型库（注册表 + 各模型族）            → 选型建议与引用
@@ -21,7 +22,8 @@ deliverables_He/
 │   ├── training/             forward/backward、梯度裁剪、优化器、调度器、损失  → 训练原理与引用
 │   ├── evaluation/           指标、验证评估、测试预测与 submission 导出         → 评估约定与引用
 │   └── utils/                配置读取、随机种子
-├── scripts/                  命令行入口：train / evaluate / predict / make_split
+├── scripts/                  命令行入口：train / evaluate / predict / make_split；run_backbones.sh / summarize_backbones.py
+├── cluster/                  NTU EEE GPU 集群脚本（sync / 环境 / sbatch）  → CLUSTER_GUIDE.md
 ├── splits/                   固定样本清单 CSV（提交 Git，不含图像）
 ├── docs/                     文献阅读记录、决策记录、成员贡献表
 ├── results/                  用于报告的精简指标表与图
@@ -59,7 +61,12 @@ python scripts/evaluate.py --ckpt runs/<run_id>/checkpoints/best.pt
 
 # 4. 生成提交文件
 python scripts/predict.py --ckpt runs/<run_id>/checkpoints/best.pt --out submissions/submission.csv
+
+# 5. 骨干对比（7 个模型 × 2 seeds，跑完自动汇总到 results/backbones.md）
+bash scripts/run_backbones.sh
 ```
+
+在 NTU EEE GPU 集群上运行：见 [CLUSTER_GUIDE.md](CLUSTER_GUIDE.md)。
 
 ## 接口约定
 

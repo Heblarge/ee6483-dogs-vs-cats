@@ -11,7 +11,7 @@ source cluster/env.sh
 
 module load Miniforge3
 [ -d "$ENV" ] || conda create -y -p "$ENV" python=3.12
-source activate "$ENV"
+set +u; source activate "$ENV"; set -u   # conda 的激活脚本不兼容 set -u
 # cu128 同时支持 a40 / l40 和 Blackwell 的 rtx5090 / pro6000（后两者要求 CUDA ≥ 12.8）
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
 pip install numpy pillow pyyaml tqdm
