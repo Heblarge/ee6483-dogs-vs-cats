@@ -10,7 +10,7 @@
 | `deliverables_He/report/EE6483_Group_Report.docx` | **提交用的报告**（A4，10 章 + 参考文献 + 附录） |
 | `deliverables_He/report/REPORT.md`、`report/sections/` | 同内容 Markdown（由 sections 自动生成）及其源文件 |
 | `deliverables_He/report/backbone_comparison.md` | 骨干对比的详细版（7 个模型 × 2 seeds，集群上跑）；精简版已并入报告第 7.8 节 |
-| `deliverables_He/submissions/submission.csv` | **提交用的预测结果**（500 行，261 dog / 239 cat，已通过校验） |
+| `deliverables_He/submissions/submission.csv` | **提交用的预测结果**：ConvNeXt-T + ResNet-50 + Swin-T 各 2 seeds 集成 + TTA（500 行，259 dog / 241 cat，已通过校验）；旧版保留为 `submission_m3_ensemble.csv` |
 | `deliverables_He/ee6483/` | 报告实验的全部代码、42 次实验的 metrics/日志、图 |
 | `deliverables_He/src/`、`configs/`、`cluster/` | 配置驱动的训练框架、骨干对比配置与集群脚本 |
 | `deliverables_He/docs/` | 作业 PDF、执行方案 |
@@ -24,8 +24,9 @@
 | 从零训练的小 CNN | 95.06% |
 | ResNet-18 冻结 + 线性头 | 97.78% |
 | **ResNet-18 + LP-FT（主模型）** | **98.93 ± 0.05%**（3 seeds） |
-| ResNet-18 ×3 seeds + 水平翻转 TTA（提交用） | **99.22%** |
+| ResNet-18 ×3 seeds + 水平翻转 TTA（第一版提交） | 99.22% |
 | ConvNeXt-T（骨干对比，统一 6 epoch 协议） | 99.61 ± 0.01%（2 seeds） |
+| **ConvNeXt-T + ResNet-50 + Swin-T ×2 seeds + TTA（现提交用）** | **99.70%** |
 
 ## 怎么跑
 

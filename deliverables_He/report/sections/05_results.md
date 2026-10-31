@@ -12,7 +12,8 @@ All numbers are accuracy on the 5,000-image validation set. Where a model was tr
 | **M3** | **ResNet-18, LP-FT** | ImageNet | 224 | 11.18 M | **98.93 ± 0.05** | 3 |
 | M4 | ResNet-34, LP-FT | ImageNet | 224 | 21.29 M | 97.54 | 1 |
 | M5 | ResNet-50, LP-FT | ImageNet | 160 | 23.51 M | 99.30 | 1 |
-| **M3 ×3 + TTA** | **the submitted model** | ImageNet | 224 | 3 × 11.18 M | **99.22** | 3 |
+| M3 ×3 + TTA | main-study ensemble (first submission) | ImageNet | 224 | 3 × 11.18 M | 99.22 | 3 |
+| **Backbone ensemble ×6 + TTA** | **the submitted model** (Section 7.8: ConvNeXt-T, ResNet-50, Swin-T × 2 seeds) | ImageNet | 224 | 6 models, 23.5–27.8 M each | **99.70** | 2 per backbone |
 
 ![Model ladder](../ee6483/figures/fig_model_comparison.png)
 
@@ -24,12 +25,14 @@ All numbers are accuracy on the 5,000-image validation set. Where a model was tr
 2. Training from scratch is worse, but not catastrophically so at full budget. M1 (1.17M parameters, 14 epochs, 128 px, no pre-training) reaches 95.06%, only 2.7 points below the frozen ImageNet backbone. With 20,000 images, a small CNN can learn this binary task. The scratch-versus-pretrained gap is much larger when the budget is short (Section 7: 90.66% against 98.12% at 3 to 6 epochs) or the data is scarce (Section 7.3). Pre-training therefore substitutes for data and epochs rather than being the only viable approach.
 3. Fine-tuning beats freezing by 1.15 points (97.78% → 98.93 ± 0.05%), and Section 4.4 shows that essentially all of that gain comes from unfreezing the last residual block.
 4. The backbone-size effect is non-monotone, and small. ResNet-34 reaches 97.54% (-1.39 points vs ResNet-18, early-stopped at epoch 4), while ResNet-50 reaches 99.30% (+0.37 points, at 160 px and 6 epochs, i.e. *less* compute per image than M3). So the three sizes span 1.8 points in a non-monotone way: the 34 is an outlier that stopped early, and the 50 is the best single model we trained. Two conclusions follow. First, architecture is not the binding constraint, since the whole 18/34/50 spread is a quarter of the 7.46-point pre-training effect. Second, at this dataset size the result is sensitive to the training budget each model receives, so a single-run backbone comparison carries little information. Section 7.8 therefore repeats it for seven backbones under one fixed budget with two seeds each: ResNet-18 and ResNet-34 are then indistinguishable (99.25% vs 99.28%), and the best backbone, ConvNeXt-T, reaches 99.61 ± 0.01%.
-5. Three-seed averaging plus horizontal-flip TTA adds 0.29 points (98.93% → 99.22%) and reduces the error count from 50 to 39. This is the cheapest accuracy in the project, requiring no retraining and no new data, only variance reduction, which is why it is what we submit.
+5. Three-seed averaging plus horizontal-flip TTA adds 0.29 points (98.93% → 99.22%) and reduces the error count from 50 to 39. This is the cheapest accuracy in the project, requiring no retraining and no new data, only variance reduction.
 
-The single ResNet-50 run reaches 99.30%, which is 0.08 points above the submitted ensemble. It is one seed, trained at 160 px for 6 epochs, and the seed-to-seed standard deviation of the ResNet-18 family is 0.05, so a 0.08-point difference between one run of one model and a three-seed ensemble of another cannot be separated from run-to-run variation. Making the comparison meaningful would need three ResNet-50 seeds of its own (about one hour of GPU time) plus a decision about which resolution to use for all three. The ensemble was retained because it is the configuration whose variance is measured rather than assumed.
+The single ResNet-50 run reaches 99.30%, which is 0.08 points above the submitted ensemble. It is one seed, trained at 160 px for 6 epochs, and the seed-to-seed standard deviation of the ResNet-18 family is 0.05, so a 0.08-point difference between one run of one model and a three-seed ensemble of another cannot be separated from run-to-run variation. Making the comparison meaningful would need three ResNet-50 seeds of its own (about one hour of GPU time) plus a decision about which resolution to use for all three. This comparison was later made properly in Section 7.8, which retrains seven backbones under one budget with two seeds each; the final submission is built from its top tier (Section 5.3).
 6. The seed spread of the main model is tiny (98.90, 98.90, 99.00 → σ = 0.05 pp). At this point the task is close to its label-noise ceiling: Section 6 shows that at least 5 of the 50 single-model errors are unlearnable, so ~99.9% is the practical maximum on this validation set.
 
-## 5.2 Detailed metrics for the submitted model
+## 5.2 Detailed metrics for the main-study ensemble (M3 ×3 + TTA)
+
+The metrics below are for the ensemble of the main model, which is also the model analysed in Section 6. The final submitted ensemble reaches 99.70% (15 errors out of 5,000) on the same validation set; see Section 5.3.
 
 | Metric | Value |
 |---|---|
@@ -45,11 +48,26 @@ The confusion matrix of the *single-seed* model (the one used for the error anal
 
 ## 5.3 Test set and submission file
 
-The submitted `submission.csv` is produced by:
+The submitted `submission.csv` is produced by `scripts/ensemble_predict.py` (cluster job `cluster/ensemble.sbatch`):
 
-1. loading the three seed-42/43/44 checkpoints of M3,
+1. loading the six top-tier checkpoints of Section 7.8 (ConvNeXt-T, ResNet-50 and Swin-T, seeds 0 and 1 each),
 2. applying horizontal-flip test-time augmentation inside each model,
-3. averaging the three softmax outputs.
+3. averaging the six softmax outputs.
+
+The configuration was fixed before any result was seen; two smaller ensembles were evaluated alongside it for reference only.
+
+| Ensemble | Models | val acc (%) | Errors / 5,000 |
+|---|---|---|---|
+| ResNet-18 × 2 seeds (reference) | 2 | 99.30 | 35 |
+| ResNet-18 × 2 seeds + TTA (reference) | 2 | 99.28 | 36 |
+| ConvNeXt-T × 2 seeds (reference) | 2 | 99.66 | 17 |
+| ConvNeXt-T × 2 seeds + TTA (reference) | 2 | 99.64 | 18 |
+| Top tier × 2 seeds | 6 | 99.70 | 15 |
+| **Top tier × 2 seeds + TTA (submitted)** | 6 | **99.70** | **15** |
+
+Ensembling six top-tier models removes 24 of the 39 validation errors of the M3 ensemble. Horizontal-flip TTA no longer helps once the models are this strong (±1 error), and is kept only because it was part of the pre-registered configuration.
+
+Compared with the first submission (M3 ×3 + TTA), the new file changes 2 of the 500 test predictions, ids 374 and 453, both from dog to cat with p(dog) ≈ 0.06. By visual inspection both images are cats: two cats curled up in a cat bed (id=374) and a Siamese cat on a tiled floor (id=453). The test images were inspected only after the submission had been generated, so this did not influence the choice.
 
 | Property | Value |
 |---|---|
@@ -57,15 +75,15 @@ The submitted `submission.csv` is produced by:
 | Columns | `id,label` |
 | ids | 1 … 500, one per test image, matching the file names exactly |
 | Label convention | 1 = dog, 0 = cat |
-| Predicted dogs | 261 |
-| Predicted cats | 239 |
-| Mean max-softmax confidence | 0.94 |
+| Predicted dogs | 259 |
+| Predicted cats | 241 |
+| Mean max-softmax confidence | 0.95 |
 
 Sanity checks performed (`ee6483/scripts/validate_submission.py`):
 
 - header exactly `id,label`; 500 data rows; ids exactly `1..500` with no duplicates;
 - every label in `{0,1}`; the id order matches `sampleSubmission.csv` row by row;
-- the class balance is 52/48, consistent with a balanced test set: a strong signal that the id→file mapping and the label convention are both correct. A reversed convention or a lexicographic id sort would have produced a very different (or degenerate) distribution.
+- the class balance is 259/241 (52/48), consistent with a balanced test set: a strong signal that the id→file mapping and the label convention are both correct. A reversed convention or a lexicographic id sort would have produced a very different (or degenerate) distribution.
 
 The validator is part of the repository and must pass before any upload.
 

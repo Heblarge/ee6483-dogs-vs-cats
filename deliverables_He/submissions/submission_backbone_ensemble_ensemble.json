@@ -1,0 +1,44 @@
+{
+  "convnext": {
+    "val_acc": 99.66,
+    "val_errors": 17,
+    "n_models": 2
+  },
+  "convnext+tta": {
+    "val_acc": 99.64,
+    "val_errors": 18,
+    "n_models": 2
+  },
+  "resnet18": {
+    "val_acc": 99.3,
+    "val_errors": 35,
+    "n_models": 2
+  },
+  "resnet18+tta": {
+    "val_acc": 99.28,
+    "val_errors": 36,
+    "n_models": 2
+  },
+  "top3": {
+    "val_acc": 99.7,
+    "val_errors": 15,
+    "n_models": 6
+  },
+  "top3+tta": {
+    "val_acc": 99.7,
+    "val_errors": 15,
+    "n_models": 6
+  },
+  "chosen": {
+    "group": "top3",
+    "tta": true,
+    "checkpoints": [
+      "runs/backbones/b_convnext_tiny_s0/checkpoints/best.pt",
+      "runs/backbones/b_convnext_tiny_s1/checkpoints/best.pt",
+      "runs/backbones/b_resnet50_s0/checkpoints/best.pt",
+      "runs/backbones/b_resnet50_s1/checkpoints/best.pt",
+      "runs/backbones/b_swin_t_s0/checkpoints/best.pt",
+      "runs/backbones/b_swin_t_s1/checkpoints/best.pt"
+    ]
+  }
+}

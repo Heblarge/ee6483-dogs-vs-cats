@@ -56,6 +56,7 @@ validation accuracy, `test_acc` the CIFAR-10 test accuracy where applicable, and
 | `H_resample` | 42 | resnet18-cifar | 32 | - | resample | 11,908 | 18 | 72.26 | 72.02 | 726 |
 | `E1_hog_svm` | – | HOG+SVM (RBF) | 96 | – | – | 8000 | – | 75.00 | – | 199 |
 | `E4_ensemble` | 42+43+44 | resnet18 x3 + TTA | 224 | full | lpft | 20,000 | – | 99.22 | – | inference |
+| `backbone_ensemble` | 0+1 | convnext_tiny, resnet50, swin_t x2 + TTA | 224 | flip | full | 20,000 | – | 99.70 | – | inference |
 
 Notes:
 
@@ -67,7 +68,12 @@ Notes:
 - `H_logit_adjust` shows `sec = 0` because it is post-hoc: it reuses the `H_ce`
   checkpoint and only changes the decision rule.
 - `E4_ensemble` is the evaluation of the three `E4_r18_ft` seeds averaged with
-  horizontal-flip TTA: the configuration that produced `submission.csv`.
+  horizontal-flip TTA: the configuration of the first submission
+  (kept as `submissions/submission_m3_ensemble.csv`).
+- `backbone_ensemble` averages the six top-tier checkpoints of Section 7.8 with
+  horizontal-flip TTA: the configuration that produced the final `submission.csv`
+  (`scripts/ensemble_predict.py`; details in
+  `submissions/submission_backbone_ensemble_ensemble.json`).
 
 ## A.1b Backbone comparison runs (Section 7.8)
 
@@ -133,7 +139,7 @@ Validator output (`ee6483/scripts/validate_submission.py`):
 ```
 file      : submission.csv
 rows      : 500
-dog(1)    : 261   cat(0): 239
+dog(1)    : 259   cat(0): 241
 unique ids: 500
 PASS: submission.csv is well-formed
 ```

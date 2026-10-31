@@ -10,8 +10,10 @@
 Binary image classification of cats and dogs, with a full experimental study of transfer
 learning, an ablation matrix, a CIFAR-10 extension and a class-imbalance comparison.
 
-**Result:** 99.22% validation accuracy (three-seed ensemble with horizontal-flip TTA).
-The submitted `submission.csv` contains 500 predictions (261 dog / 239 cat).
+**Result:** 99.70% validation accuracy for the submitted ensemble (ConvNeXt-T, ResNet-50 and Swin-T,
+two seeds each, horizontal-flip TTA; report Sections 5.3 and 7.8). The submitted
+`submissions/submission.csv` contains 500 predictions (259 dog / 241 cat). The first submission
+(ResNet-18 ×3 seeds + TTA, 99.22%) is kept as `submissions/submission_m3_ensemble.csv`.
 
 | Model | Validation accuracy |
 |---|---|
@@ -19,7 +21,8 @@ The submitted `submission.csv` contains 500 predictions (261 dog / 239 cat).
 | SmallCNN from scratch | 95.06% |
 | ResNet-18, frozen backbone + linear head | 97.78% |
 | **ResNet-18, LP-FT (main model)** | **98.93 ± 0.05%** (3 seeds) |
-| ResNet-18 ×3 seeds + TTA (submitted) | **99.22%** |
+| ResNet-18 ×3 seeds + TTA (first submission) | 99.22% |
+| **ConvNeXt-T + ResNet-50 + Swin-T, ×2 seeds + TTA (submitted)** | **99.70%** |
 
 ---
 

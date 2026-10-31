@@ -9,7 +9,7 @@ Six models are trained, so that every claim in Section 7 can be measured against
 | M0 | HOG + colour histogram → StandardScaler → SVM (RBF) | – | 96×96 | – | hand-crafted feature ceiling |
 | M1 | SmallCNN (4 conv blocks) | No | 128×128 | 1.17M | what is achievable *without* ImageNet |
 | M2 | ResNet-18, frozen backbone + linear head | Yes | 224×224 | 11.18M | value of the pre-trained *representation* alone |
-| **M3** | **ResNet-18, LP-FT fine-tuned** | Yes | 224×224 | 11.18M | **main model, generates the submission** |
+| **M3** | **ResNet-18, LP-FT fine-tuned** | Yes | 224×224 | 11.18M | **main model of the study; the final submission ensembles the top backbones of Section 7.8** |
 | M4 | ResNet-34, LP-FT fine-tuned | Yes | 224×224 | 21.29M | backbone scaling |
 | M5 | ResNet-50, LP-FT fine-tuned | Yes | 160×160 | 23.51M | backbone scaling under a fixed compute budget |
 
@@ -126,14 +126,18 @@ python -m ee6483.src.train --exp-id E4_r18_ft --model resnet18 --epochs 8 \
     --lr 3e-4 --head-lr 1e-3 --batch 64 --img-size 224 --aug full \
     --ft-strategy lpft --freeze-epochs 2 --seed 42 --data-root data/cache
 
-# submission from a 3-seed ensemble with horizontal-flip TTA
+# first submission: 3-seed M3 ensemble with horizontal-flip TTA
 python -m ee6483.src.predict --ckpts \
     ee6483/results/E4_r18_ft/s42/best.pt \
     ee6483/results/E4_r18_ft/s43/best.pt \
-    ee6483/results/E4_r18_ft/s44/best.pt --out submission.csv --tta 1
+    ee6483/results/E4_r18_ft/s44/best.pt --out submissions/submission_m3_ensemble.csv --tta 1
+
+# final submission: top-tier backbones of Section 7.8 (cluster; see CLUSTER_GUIDE.md)
+sbatch cluster/backbones.sbatch      # 7 backbones x 2 seeds
+sbatch cluster/ensemble.sbatch       # -> submissions/submission_backbone_ensemble.csv
 
 # strict format check before uploading
-python ee6483/scripts/validate_submission.py --sub submission.csv
+python ee6483/scripts/validate_submission.py --sub submissions/submission.csv
 ```
 
 | Module | Responsibility |
