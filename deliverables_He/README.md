@@ -2,12 +2,18 @@
 
 项目目标、分工与进度见仓库根目录的 [PROJECT_OVERVIEW.md](../PROJECT_OVERVIEW.md)。本文件说明代码结构与运行方式。
 
+本目录包含两套相互独立的代码：
+
+- **`ee6483/` + `report/` + `submissions/`**：最终报告、提交用的 `submission.csv` 及产生它们的 42 次实验（原 `deliverables/`，见 [REPORT_GUIDE.md](REPORT_GUIDE.md)）。
+- **`src/` + `scripts/` + `configs/` + `cluster/`**：配置驱动的训练框架，用于骨干对比（`report/backbone_comparison.md`）及集群实验。下文说明这一套。
+
 > 本目录自成一体，**所有命令都在 `deliverables_He/` 下运行**。数据集仍放在仓库根目录的 `datasets/`（与其他成员的版本共用），配置中以 `../datasets/datasets` 引用。
 
 ## 目录结构
 
 ```
 deliverables_He/
+├── ee6483/                  报告实验的代码、结果与图（原 deliverables/）  → REPORT_GUIDE.md
 ├── configs/                  实验配置（YAML，每个文件 = 一个实验）  → configs/README.md
 │   └── dogs_cats/            D0~D3 及扩展对照
 │       └── backbones/        骨干对比：7 个模型，统一协议
@@ -25,10 +31,10 @@ deliverables_He/
 ├── scripts/                  命令行入口：train / evaluate / predict / make_split；run_backbones.sh / summarize_backbones.py
 ├── cluster/                  NTU EEE GPU 集群脚本（sync / 环境 / sbatch）  → CLUSTER_GUIDE.md
 ├── splits/                   固定样本清单 CSV（提交 Git，不含图像）
-├── docs/                     文献阅读记录、决策记录、成员贡献表
+├── docs/                     作业 PDF、执行方案
 ├── results/                  用于报告的精简指标表与图
-├── submissions/              经检查的最终 submission.csv
-├── report/                   报告源文件
+├── submissions/              提交用的 submission.csv（及格式模板、概率）
+├── report/                   报告（.docx、REPORT.md、sections/ 源文件与构建脚本；backbone_comparison.md：骨干对比章节）
 └── runs/                     训练输出：config、history.csv、checkpoints（不提交 Git）
 ```
 
@@ -64,6 +70,7 @@ python scripts/predict.py --ckpt runs/<run_id>/checkpoints/best.pt --out submiss
 
 # 5. 骨干对比（7 个模型 × 2 seeds，跑完自动汇总到 results/backbones.md）
 bash scripts/run_backbones.sh
+python scripts/plot_backbones.py runs/backbones results/backbones.png   # 画图，需 matplotlib
 ```
 
 在 NTU EEE GPU 集群上运行：见 [CLUSTER_GUIDE.md](CLUSTER_GUIDE.md)。

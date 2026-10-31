@@ -1,10 +1,26 @@
-# 先按 https://pytorch.org/get-started/locally/ 安装与本机 CUDA 匹配的 torch / torchvision
-torch>=2.3
-torchvision>=0.18
-numpy
-pillow
-pyyaml
+# 两套代码共用：ee6483/（报告实验）和 src/（配置驱动框架、骨干对比）
+# 先按 https://pytorch.org/get-started/locally/ 安装与本机 CUDA 匹配的 torch / torchvision，例如：
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+# 报告所用版本见报告附录 A.2（torch 2.6.0+cu124）；集群上骨干对比用 torch 2.11.0+cu128
+torch>=2.6.0
+torchvision>=0.21.0
+
+# 数据处理
+numpy>=2.0
+pillow>=10.0
+pyarrow>=15.0          # ee6483/：CIFAR-10 从 HuggingFace parquet 镜像读取
+PyYAML>=6.0
 tqdm
-# 可选：DeiT 等 timm 模型、Grad-CAM 可视化
+
+# ee6483/：传统基线与数据检查
+scikit-learn>=1.4
+scikit-image>=0.22
+imagehash>=4.3
+
+# 画图与报告
+matplotlib>=3.8
+python-docx>=1.1       # 仅重新生成 .docx 报告时需要
+
+# 可选：DeiT 等 timm 模型、Grad-CAM 可视化（src/）
 # timm
 # grad-cam

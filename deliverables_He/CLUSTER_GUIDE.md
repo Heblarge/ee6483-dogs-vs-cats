@@ -209,6 +209,8 @@ sshare -U -nP -o GrpTRESMins,GrpTRESRaw | awk -F'|' '{match($1,/billing=([0-9]+)
 |---|---|
 | `Resources` / `Priority` | 在等 GPU 空出来 |
 | `QOSMaxJobsPerUserLimit` | 你同时运行的任务数已达上限 |
+
+提交时报 `QOSMaxSubmitJobPerUserLimit`：排队加运行中的任务总数超过上限（`msc` 为 5，job array 的每个下标各算一个）。查看自己的限额：`sacctmgr -nP show qos <账户> format=Name,MaxSubmitPU,MaxJobsPU,MaxTRESPU`。
 | `QOSMaxGRESPerUser` | 你在该型号上的 GPU 数已达上限 |
 | `AssocGrpBillingMinutes` | 本月额度用完 |
 | `ReqNodeNotAvail` | 节点维护中，或 `--time` 与维护时间重叠 |
@@ -224,7 +226,7 @@ sshare -U -nP -o GrpTRESMins,GrpTRESRaw | awk -F'|' '{match($1,/billing=([0-9]+)
 | `sync.sh` | 本机 | `push`：上传代码和猫狗数据集；`pull`：取回 `runs/` 训练记录（不含 `.pt` 权重） |
 | `env.sh` | 被各 sbatch 调用 | 缓存全部重定向到 `$P/.tmp`，并设置每个任务独立的 `TMPDIR` |
 | `setup_env.sbatch` | CPU 任务 | 一次性：在 `$P/envs/ee6483` 建 conda 环境，装 PyTorch（cu128），下载 7 个模型的预训练权重 |
-| `backbones.sbatch` | GPU 任务（job array） | 骨干对比：7 个模型各占 1 块 GPU 并行，每个跑 seed 0 和 1 |
+| `backbones.sbatch` | GPU 任务（job array） | 骨干对比：7 个模型分 2 组，每组占 1 块 GPU 依次跑，每个模型跑 seed 0 和 1 |
 | `train.sbatch` | GPU 任务 | 通用：用任意配置跑一个实验 |
 
 集群上的目录结构和本仓库一致，所以配置里的 `../datasets/datasets` 不用改：
@@ -270,10 +272,10 @@ sbatch cluster/backbones.sbatch
 | 需求 | 命令 |
 |---|---|
 | 换 GPU 型号 | `sbatch --gres=gpu:l40:1 cluster/backbones.sbatch` |
-| 只补跑某几个模型 | `sbatch --array=2,6 cluster/backbones.sbatch`（下标：0 resnet18、1 resnet34、2 resnet50、3 efficientnet_b0、4 convnext_tiny、5 swin_t、6 vit_b_16） |
+| 只补跑某一组 | `sbatch --array=1 cluster/backbones.sbatch`（0：vit_b_16 resnet50 resnet18 efficientnet_b0；1：swin_t convnext_tiny resnet34） |
 | 加种子 | `SEEDS="0 1 2" sbatch cluster/backbones.sbatch` |
 
-已经跑完的 run 会自动跳过，任务中断后重新提交即可。预计 7 个模型并行各需 1–2 小时；按 a40 计算总共约 1,300–2,700 SU。
+已经跑完的 run 会自动跳过，任务中断后重新提交即可。`msc` 账户每人最多提交 5 个、同时运行 2 个任务，每种型号最多 2 块 GPU，所以只分 2 组；每组依次跑 3–4 个模型，约 4–8 小时。按 a40 计算总共约 1,300–2,700 SU。
 
 ### 5.5 跑单个实验
 
@@ -311,6 +313,7 @@ python scripts/summarize_backbones.py           # -> results/backbones.{csv,md}
 | `Disk quota exceeded` | 见 3.3 节；常见原因是 conda 环境或 `~/.vscode-server` 放在了 home |
 | 登录节点上的进程突然全没了 | 超过 16 GB 内存上限，或最后一个 SSH 会话断开了 |
 | sbatch 报 `--output` 目录不存在 | Slurm 不会自动创建日志目录；`sync.sh push` 会创建 `cluster/logs/`，或手动 `mkdir -p cluster/logs` |
+| 任务日志里 `module: command not found` | 批处理任务的 shell 没有加载 Lmod；`cluster/env.sh` 已自动 `source /etc/profile.d/z00-lmod.sh` |
 | `source activate` 报 `unbound variable` | 脚本开了 `set -u`；本项目的 sbatch 已在激活前后切换 `set +u` 和 `set -u` |
 
 ## 7. 必须遵守的规则

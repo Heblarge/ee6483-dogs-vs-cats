@@ -1,7 +1,7 @@
 # EE6483 Mini Project — Dogs vs Cats (Option 2)
 
 Code package for the Dogs vs Cats binary classification project. The repository-level
-overview, the report and the submission file are described in `../README.md`.
+overview, the report and the submission file are described in `../REPORT_GUIDE.md`.
 Everything is driven by command line arguments; every run writes the same
 `metrics.json` schema so results can be aggregated automatically.
 

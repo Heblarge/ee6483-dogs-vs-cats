@@ -1,4 +1,6 @@
 # 集群公共环境：被 setup_env.sbatch / backbones.sbatch source。按 Storage Guide 要求把缓存全部放到 SSD 项目目录。
+# 批处理任务的非交互 shell 里没有 module 命令，需手动加载 Lmod
+type module >/dev/null 2>&1 || { set +u; source /etc/profile.d/z00-lmod.sh; set -u; }
 : "${P:?请先 export P=/projects/<你的 SSD 项目目录>}"
 export TMPDIR=$P/.tmp/${SLURM_JOB_ID:-manual}
 export PIP_CACHE_DIR=$P/.tmp/pip CONDA_PKGS_DIRS=$P/.tmp/conda

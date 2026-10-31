@@ -102,7 +102,7 @@ def build_appendix_tokens(t: dict):
     t["RUN_COUNT"] = len(list(RES.rglob("metrics.json")))
 
     # ---- submission preview
-    sub = Path("submission.csv")
+    sub = Path("submissions/submission.csv")
     if sub.exists():
         with open(sub, encoding="utf-8") as fh:
             raw = fh.read().strip().splitlines()
@@ -221,7 +221,7 @@ def main():
             t["H_BEST_MANY"] = f"{np.mean(best['test']['per_class_recall'][:3])*100:.1f}"
 
     # ---- submission
-    sub = Path("submission.csv")
+    sub = Path("submissions/submission.csv")
     if sub.exists():
         import csv
 

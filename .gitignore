@@ -2,7 +2,7 @@
 datasets/
 data/
 !deliverables_He/src/data/
-!deliverables/ee6483/src/data/
+!deliverables_He/ee6483/src/data/
 deliverables_He/cluster/logs/
 checkpoints/
 runs/

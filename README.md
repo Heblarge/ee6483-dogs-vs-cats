@@ -6,8 +6,7 @@
 
 | 目录 | 作者 | 说明 |
 |---|---|---|
-| [`deliverables_He/`](deliverables_He/) | He | 模块化框架：配置驱动的训练/评估/预测、模型注册表（CNN/ResNet/EfficientNet/ConvNeXt/ViT） |
-| [`deliverables/`](deliverables/) | Darling-2 | 完整报告、42 次实验结果、submission（见 [DELIVERABLES.md](DELIVERABLES.md)） |
+| [`deliverables_He/`](deliverables_He/) | He（`ee6483/`、`report/` 源自 Darling-2） | 最终报告与 submission、42 次实验（`ee6483/`）；配置驱动的训练框架与骨干对比（`src/`、`cluster/`）。见 [DELIVERABLES.md](DELIVERABLES.md) |
 | [`deliverables_emma/`](deliverables_emma/) | Emma | DvC + CIFAR-10 + 类别不平衡，含报告与 submission |
 
 数据集统一放在根目录 `datasets/`（不提交 Git）。

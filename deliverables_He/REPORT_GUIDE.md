@@ -1,12 +1,11 @@
 # Dogs vs. Cats — EE6483 Mini Project (Option 2)
 
-> **This folder is a self-contained deliverable.** It contains the report, the full training
-> code, every experiment's metrics, the figures and the submitted predictions. All commands
-> below are run from inside `deliverables/`.
+> Guide to the report and the code that produced it (`ee6483/`, `report/`, `submissions/`).
+> All commands below are run from inside `deliverables_He/`.
 >
-> The repository root also contains a separate scaffold (`src/`, `scripts/`, `configs/`) built
-> by another group member as a project plan; this folder is the completed implementation and
-> does not modify it.
+> `deliverables_He/` also contains a second, config-driven framework (`src/`, `scripts/`,
+> `configs/`, `cluster/`) used for the backbone comparison in `report/backbone_comparison.md`;
+> see `README.md`. The two code bases are independent.
 
 Binary image classification of cats and dogs, with a full experimental study of transfer
 learning, an ablation matrix, a CIFAR-10 extension and a class-imbalance comparison.
@@ -28,11 +27,12 @@ The submitted `submission.csv` contains 500 predictions (261 dog / 239 cat).
 
 ```
 .
-├── README.md                  this file
-├── requirements.txt           Python dependencies
-├── submission.csv             the 500 test-set predictions (id, label; 1=dog, 0=cat)
-├── sampleSubmission.csv       the format template provided with the assignment
-├── submission.probs.npy       per-class probabilities behind submission.csv
+├── REPORT_GUIDE.md            this file
+├── requirements.txt           Python dependencies (both code bases)
+├── submissions/
+│   ├── submission.csv         the 500 test-set predictions (id, label; 1=dog, 0=cat)
+│   ├── sampleSubmission.csv   the format template provided with the assignment
+│   └── submission.probs.npy   per-class probabilities behind submission.csv
 │
 ├── docs/                      assignment documents and planning notes
 ├── report/                    the report, its sources and the build scripts
@@ -152,10 +152,9 @@ After downloading, build the resize cache once (it makes every experiment reprod
 python -m ee6483.src.data.cache_images --src data/datasets --dst data/cache --short 256
 ```
 
-The paths above are relative to this folder. If the dataset already sits at the repository
-root (`../datasets`, as the repository README suggests), pass that path instead:
-`--src ../datasets --dst ../data/cache`, and add `--data-root ../data/cache` to every
-`train` command.
+The paths above are relative to this folder. In this repository the dataset sits at the
+repository root (`../datasets/datasets`, shared with the other code base), so pass that path
+instead: `--src ../datasets/datasets --dst data/cache`.
 
 CIFAR-10 is downloaded automatically from the HuggingFace parquet mirror on first use.
 
@@ -169,8 +168,8 @@ python -m ee6483.src.train --config ee6483/configs/main.yaml --exp-id E4_r18_ft 
 python -m ee6483.src.train --config ee6483/configs/main.yaml --exp-id E4_r18_ft --seed 43
 python -m ee6483.src.train --config ee6483/configs/main.yaml --exp-id E4_r18_ft --seed 44
 python -m ee6483.src.predict --ckpts ee6483/results/E4_r18_ft/s4{2,3,4}/best.pt \
-    --out submission.csv --tta 1
-python ee6483/scripts/validate_submission.py --sub submission.csv
+    --out submissions/submission.csv --tta 1
+python ee6483/scripts/validate_submission.py --sub submissions/submission.csv
 
 # 2. regenerate every table and figure
 python -m ee6483.scripts.run_experiments --phases main compare ablation lrsearch cifar imbalance
