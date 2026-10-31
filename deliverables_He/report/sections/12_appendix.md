@@ -69,6 +69,27 @@ Notes:
 - `E4_ensemble` is the evaluation of the three `E4_r18_ft` seeds averaged with
   horizontal-flip TTA: the configuration that produced `submission.csv`.
 
+## A.1b Backbone comparison runs (Section 7.8)
+
+Produced by the config-driven code base (`src/`, `configs/dogs_cats/backbones/`) on the NTU EEE GPU cluster, one NVIDIA A40 per run, torch 2.11.0+cu128. Logs: `runs/backbones/b_<model>_s<seed>/history.csv`; summary: `results/backbones.csv`. All runs completed 6 epochs.
+
+| Run | Best val acc (%) | Best epoch | Last-epoch val acc (%) | Train time (s) |
+|---|---|---|---|---|
+| `b_convnext_tiny_s0` | 99.60 | 6 | 99.60 | 264 |
+| `b_convnext_tiny_s1` | 99.62 | 6 | 99.62 | 265 |
+| `b_efficientnet_b0_s0` | 99.22 | 3 | 99.16 | 249 |
+| `b_efficientnet_b0_s1` | 99.26 | 4 | 99.20 | 251 |
+| `b_resnet18_s0` | 99.28 | 5 | 99.20 | 175 |
+| `b_resnet18_s1` | 99.22 | 5 | 99.22 | 167 |
+| `b_resnet34_s0` | 99.32 | 5 | 99.24 | 177 |
+| `b_resnet34_s1` | 99.24 | 5 | 99.20 | 179 |
+| `b_resnet50_s0` | 99.56 | 5 | 99.52 | 238 |
+| `b_resnet50_s1` | 99.58 | 5 | 99.54 | 240 |
+| `b_swin_t_s0` | 99.56 | 3 | 99.52 | 296 |
+| `b_swin_t_s1` | 99.56 | 6 | 99.56 | 292 |
+| `b_vit_b_16_s0` | 99.26 | 6 | 99.26 | 394 |
+| `b_vit_b_16_s1` | 99.30 | 6 | 99.30 | 393 |
+
 ## A.2 Environment
 
 | Component | Version |

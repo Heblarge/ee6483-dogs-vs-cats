@@ -1,6 +1,6 @@
 # Backbone Comparison under a Fixed Protocol  *(supplements item f, §8)*
 
-> Drop-in section for the team report. Source data: `results/backbones.{csv,md}`,
+> Long version; a condensed version is merged into the report as Section 7.8 (`sections/07_ablation.md`). Source data: `results/backbones.{csv,md}`,
 > figure: `results/backbones.png`, per-run logs: `runs/backbones/b_<model>_s<seed>/history.csv`.
 > All runs: NTU EEE Cluster 02, one NVIDIA A40 per job, 2026-10-31 (Slurm jobs 236593_0/1).
 

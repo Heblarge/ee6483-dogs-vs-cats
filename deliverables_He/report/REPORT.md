@@ -15,7 +15,7 @@ This report studies binary cat/dog classification on 20,000 training images, 5,0
 
 The main model, an ImageNet-pretrained ResNet-18 fine-tuned with the LP-FT schedule, reaches 98.93 ± 0.05% validation accuracy over three seeds. A three-seed ensemble with horizontal-flip test-time augmentation raises this to 99.22% and produces the submitted predictions.
 
-A one-factor-at-a-time ablation ranks the design choices by the size of their effect. Pre-training is the largest factor, worth 7.46 points at a fixed budget. Training-set size is second: accuracy rises from 93.56% with 500 images to 98.12% with 20,000 and saturates beyond 10,000. The depth of fine-tuning (1.88 points) and the input resolution (0.64 points from 160 to 224 pixels) are third-order. Augmentation moves accuracy by less than half a point at all three budgets tested, with the sign depending on the schedule. Backbone size is non-monotone: ResNet-34 falls 1.39 points below ResNet-18, while ResNet-50 rises 0.37 points above it.
+A one-factor-at-a-time ablation ranks the design choices by the size of their effect. Pre-training is the largest factor, worth 7.46 points at a fixed budget. Training-set size is second: accuracy rises from 93.56% with 500 images to 98.12% with 20,000 and saturates beyond 10,000. The depth of fine-tuning (1.88 points) and the input resolution (0.64 points from 160 to 224 pixels) are third-order. Augmentation moves accuracy by less than half a point at all three budgets tested, with the sign depending on the schedule. Backbone choice is a small effect. A controlled comparison of seven ImageNet backbones at a fixed budget, two seeds each, spans 99.24% to 99.61%: ConvNeXt-T, ResNet-50 and Swin-T form a top tier about 0.3 points above ResNet-18/34, EfficientNet-B0 and ViT-B/16, and the ranking follows the ImageNet accuracy of the pretrained weights rather than the number of parameters (ViT-B/16, still improving at the end of the budget, is the exception).
 
 An analysis of all 50 validation errors shows that two thirds arise when the animal is not presented as in the training set, either because the face is hidden or because the animal is behind a fence or held in a hand. Grad-CAM attributes correct predictions to the animal's head rather than to the scene. Accuracy falls by 12.7 points under heavy blur, but by only 1.1 points under 30° rotation and 0.4 points under 25% occlusion.
 
@@ -145,7 +145,7 @@ The table below is the reading list behind this report; the "role here" column s
 
 Two observations from this list are worth stating explicitly because they shape our design:
 
-- Architecture progress has plateaued for this task size. ConvNeXt [Liu et al., CVPR 2022] shows that a ResNet trained with a modern recipe matches a Swin transformer; Kornblith et al. [CVPR 2019] show that ImageNet accuracy, rather than architectural novelty, predicts transfer accuracy. For a 20k-image binary problem the marginal return of switching from ResNet to ConvNeXt or ViT is far below the run-to-run variance. We therefore invest in the *training recipe* (augmentation, LP-FT, label smoothing, TTA, seed averaging) rather than in exotic backbones.
+- Architecture progress has plateaued for this task size. ConvNeXt [Liu et al., CVPR 2022] shows that a ResNet trained with a modern recipe matches a Swin transformer; Kornblith et al. [CVPR 2019] show that ImageNet accuracy, rather than architectural novelty, predicts transfer accuracy. For a 20k-image binary problem the marginal return of switching from ResNet to ConvNeXt or ViT is expected to be small; our controlled sweep (Section 7.8) measures it at 0.36 pp for ConvNeXt-T over ResNet-18, and none for ViT-B/16 at the same budget. We therefore invest in the *training recipe* (augmentation, LP-FT, label smoothing, TTA, seed averaging) rather than in exotic backbones.
 - The bottleneck moved from representation to data and evaluation. With ImageNet pre-training, cat/dog accuracy is essentially saturated (Section 1.4), so the informative experiments are the ones that *remove* the advantage: train from scratch, freeze the backbone, shrink the training set. This is why our ablation matrix (Section 7) is built around data quantity and transfer strategy rather than around architecture.
 
 ## 1.3 Two leading groups and a close reading of their work
@@ -546,7 +546,7 @@ Augmentation is therefore a sub-1 pp lever on this task at every budget tested, 
 
 Stating this is part of a defensible protocol: a search over everything is a search over noise at this dataset size.
 
-- Architecture width/depth: the ResNet-18/34/50 comparison in Section 7 shows the differences are within seed noise at 8 epochs; tuning depth would be tuning noise.
+- Architecture width/depth: under a fixed budget, ResNet-18 and ResNet-34 are indistinguishable (Section 7.8); the gain of ResNet-50 comes with different pretrained weights. Tuning depth would be tuning noise.
 - Optimiser family: AdamW vs SGD was checked informally (SGD+momentum needs a longer schedule to reach the same point); with an 8-epoch budget AdamW is the better default.
 - Mixup / CutMix: implemented and available, but they interact badly with a short schedule (the loss curves are no longer comparable) and did not improve validation accuracy in our runs.
 
@@ -591,7 +591,7 @@ All numbers are accuracy on the 5,000-image validation set. Where a model was tr
 1. The ladder spans 23.9 accuracy points (75.00% → 98.93%), and 22.8 of them are crossed in a single step: going from hand-crafted HOG features to a frozen deep representation (M0 → M2). Everything after that, namely unfreezing, more epochs, a bigger backbone and ensembling, competes for the last 1.2 points.
 2. Training from scratch is worse, but not catastrophically so at full budget. M1 (1.17M parameters, 14 epochs, 128 px, no pre-training) reaches 95.06%, only 2.7 points below the frozen ImageNet backbone. With 20,000 images, a small CNN can learn this binary task. The scratch-versus-pretrained gap is much larger when the budget is short (Section 7: 90.66% against 98.12% at 3 to 6 epochs) or the data is scarce (Section 7.3). Pre-training therefore substitutes for data and epochs rather than being the only viable approach.
 3. Fine-tuning beats freezing by 1.15 points (97.78% → 98.93 ± 0.05%), and Section 4.4 shows that essentially all of that gain comes from unfreezing the last residual block.
-4. The backbone-size effect is non-monotone, and small. ResNet-34 reaches 97.54% (-1.39 points vs ResNet-18, early-stopped at epoch 4), while ResNet-50 reaches 99.30% (+0.37 points, at 160 px and 6 epochs, i.e. *less* compute per image than M3). So the three sizes span 1.8 points in a non-monotone way: the 34 is an outlier that stopped early, and the 50 is the best single model we trained. Two conclusions follow. First, architecture is not the binding constraint, since the whole 18/34/50 spread is a quarter of the 7.46-point pre-training effect. Second, at this dataset size the result is sensitive to the training budget each model receives, so a single-run backbone comparison carries little information.
+4. The backbone-size effect is non-monotone, and small. ResNet-34 reaches 97.54% (-1.39 points vs ResNet-18, early-stopped at epoch 4), while ResNet-50 reaches 99.30% (+0.37 points, at 160 px and 6 epochs, i.e. *less* compute per image than M3). So the three sizes span 1.8 points in a non-monotone way: the 34 is an outlier that stopped early, and the 50 is the best single model we trained. Two conclusions follow. First, architecture is not the binding constraint, since the whole 18/34/50 spread is a quarter of the 7.46-point pre-training effect. Second, at this dataset size the result is sensitive to the training budget each model receives, so a single-run backbone comparison carries little information. Section 7.8 therefore repeats it for seven backbones under one fixed budget with two seeds each: ResNet-18 and ResNet-34 are then indistinguishable (99.25% vs 99.28%), and the best backbone, ConvNeXt-T, reaches 99.61 ± 0.01%.
 5. Three-seed averaging plus horizontal-flip TTA adds 0.29 points (98.93% → 99.22%) and reduces the error count from 50 to 39. This is the cheapest accuracy in the project, requiring no retraining and no new data, only variance reduction, which is why it is what we submit.
 
 The single ResNet-50 run reaches 99.30%, which is 0.08 points above the submitted ensemble. It is one seed, trained at 160 px for 6 epochs, and the seed-to-seed standard deviation of the ResNet-18 family is 0.05, so a 0.08-point difference between one run of one model and a three-seed ensemble of another cannot be separated from run-to-run variation. Making the comparison meaningful would need three ResNet-50 seeds of its own (about one hour of GPU time) plus a decision about which resolution to use for all three. The ensemble was retained because it is the configuration whose variance is measured rather than assumed.
@@ -914,11 +914,44 @@ The practical implication is that an ablation run at too short a budget can inve
 The ladder mixes budgets, so the Δ column is indicative rather than controlled. Two results deserve comment:
 
 - A small CNN trained from scratch reaches 95.06%: much higher than the 80–85% one might expect from the literature. Twenty thousand images is enough for a 1.17M-parameter network to learn this binary task; the task is simply easier than ImageNet-1k.
-- Backbone size is non-monotone: ResNet-34 is *worse* than ResNet-18 (97.54% vs 98.93 ± 0.05%, early-stopped at epoch 4) while ResNet-50 is *better* (99.30%, at lower resolution and fewer epochs). The spread across all three sizes is 1.8 points, a quarter of the pre-training effect, and the ordering is not stable. At this dataset size the result depends more on how many epochs each model happens to get than on the architecture, which is exactly why "architecture is second-order" is the defensible claim and "bigger is better/worse" is not.
+- Backbone size is non-monotone: ResNet-34 is *worse* than ResNet-18 (97.54% vs 98.93 ± 0.05%, early-stopped at epoch 4) while ResNet-50 is *better* (99.30%, at lower resolution and fewer epochs). The spread across all three sizes is 1.8 points, a quarter of the pre-training effect, and the ordering is not stable. At this dataset size the result depends more on how many epochs each model happens to get than on the architecture, which is exactly why "architecture is second-order" is the defensible claim and "bigger is better/worse" is not. Section 7.8 repeats the comparison under a fixed budget.
 
 ![Figure 14. All six ablation panels at a glance; red bars are the shared reference run](../ee6483/figures/fig_ablation.png)
 
-## 7.8 Ranked summary
+## 7.8 Controlled backbone comparison
+
+The ladder in Section 7.7 cannot separate architecture from budget, because each model received a different resolution, schedule and stopping epoch. To answer the architecture question properly, seven ImageNet-pretrained torchvision backbones were retrained under one fixed protocol, two seeds each (14 runs, one NVIDIA A40 per run, NTU EEE GPU cluster). The configurations (`configs/dogs_cats/backbones/`) differ only in the model name and in the batch size needed to fit memory; ViT-B/16 uses 32 × 2 gradient-accumulation steps so that the effective batch is 64 everywhere.
+
+> protocol: 224×224, RandomResizedCrop (scale 0.6–1.0) + horizontal flip, all layers trainable, AdamW (head lr 1e-3, backbone lr 1e-4, weight decay 0.05), cross-entropy with label smoothing 0.1, 1 warm-up epoch then cosine decay, 6 epochs, no early stopping, mixed precision, seeds 0 and 1.
+
+Early stopping is disabled so that every backbone receives exactly the same budget, which removes the failure mode that made ResNet-34 an outlier in Section 7.7.
+
+| Backbone | Params (M) | ImageNet top-1 of the weights | Best val acc (%) | Last-epoch val acc (%) | s / epoch |
+|---|---|---|---|---|---|
+| **ConvNeXt-T** | 27.8 | 82.5 | **99.61 ± 0.01** | **99.61 ± 0.01** | 37.8 |
+| ResNet-50 | 23.5 | 80.9 (V2 weights) | 99.57 ± 0.01 | 99.53 ± 0.01 | 33.2 |
+| Swin-T | 27.5 | 81.5 | 99.56 ± 0.00 | 99.54 ± 0.03 | 48.3 |
+| ViT-B/16 | 85.8 | 81.1 | 99.28 ± 0.03 | 99.28 ± 0.03 | 65.2 |
+| ResNet-34 | 21.3 | 73.3 (V1 weights) | 99.28 ± 0.06 | 99.22 ± 0.03 | 25.4 |
+| ResNet-18 | 11.2 | 69.8 (V1 weights) | 99.25 ± 0.04 | 99.21 ± 0.01 | 24.1 |
+| EfficientNet-B0 | 4.0 | 77.7 | 99.24 ± 0.03 | 99.18 ± 0.03 | 27.1 |
+
+Mean ± standard deviation over two seeds; on 5,000 validation images, 0.02 pp is one image. The ImageNet column is the top-1 accuracy torchvision reports for the exact checkpoint loaded. Time per epoch is the median of epochs 2–6 on one A40.
+
+![Figure 15. Backbone comparison under the fixed protocol. (a) Best validation accuracy against training time per epoch, bars ±1 std over two seeds. (b) Validation accuracy per epoch, mean of two seeds, for four representative backbones](../results/backbones.png)
+
+Four results follow.
+
+- **Two tiers, separated by more than the noise.** ConvNeXt-T, ResNet-50 and Swin-T reach 99.56–99.61%; the other four reach 99.24–99.28%. The gap of about 0.3 pp is roughly 15 validation images, while the seed-to-seed spread is at most 0.06 pp (3 images). Differences *within* a tier are inside the noise and do not rank those models.
+- **Accuracy tracks the quality of the pretrained weights, not model size.** ViT-B/16 has three times the parameters of ConvNeXt-T and ties ResNet-34. The top tier consists exactly of the three CNN-or-hierarchical backbones whose checkpoints score ≥ 80.9% on ImageNet. Within the ResNet family, ResNet-18 to ResNet-34 adds depth and gains 0.03 pp (noise), whereas ResNet-34 to ResNet-50 gains 0.29 pp. The ResNet-50 checkpoint is torchvision's V2 weights, trained with a modern recipe, so this step confounds a deeper bottleneck architecture with a better pre-training recipe. This is the transfer pattern reported by Kornblith et al. [CVPR 2019] and is consistent with Section 7.2: the downstream task inherits most of its accuracy from the upstream representation.
+- **ViT-B/16 is under-trained at this budget rather than shown to be worse.** Its curve starts lowest (98.26% after two epochs) and is still rising at epoch 6, while the convolutional and Swin models have flattened by epoch 4–5. A plain ViT lacks the locality bias of convolutions and of Swin's windowed attention, and is known to need longer fine-tuning. At a fixed 6-epoch budget it is the worst trade-off measured: 2.7× the time per epoch of ResNet-18 for the same accuracy.
+- **The conclusions do not depend on which epoch is reported.** Best and last-epoch accuracies differ by at most 0.06 pp, and the two tiers are unchanged if the last epoch is used.
+
+On cost, ResNet-50 is the cheapest top-tier backbone (33 s per epoch); ConvNeXt-T has the highest mean for 14% more time; Swin-T matches ResNet-50 at 45% more. EfficientNet-B0 has the fewest parameters but is no faster than ResNet-18 on a GPU, because its depthwise convolutions are memory-bound.
+
+Two cautions apply when relating this table to the rest of the report. First, it was produced by a separate code base (`src/`, described in `README.md`) with a lighter augmentation policy, AdamW with a 10× lower backbone learning rate, label smoothing and no early stopping. Under this protocol ResNet-18 reaches 99.25 ± 0.04%, above the 98.93 ± 0.05% of the main model M3. The two recipes differ in several respects at once and the difference was not ablated, so it should not be attributed to any single setting. Second, only two seeds were run per backbone, and the same validation set selects the epoch and reports the result.
+
+## 7.9 Ranked summary
 
 The controlled comparisons are ranked below. Each holds the budget fixed and changes one factor.
 
@@ -929,11 +962,11 @@ The controlled comparisons are ranked below. Each holds the budget fixed and cha
 | 3 | Fine-tune depth (head only to last stage) | +1.88 pp | adaptation of the last block |
 | 4 | Input resolution, 96 to 224 px | +0.64 pp on top of +1.04 from 96 to 160 | resolvable detail |
 | 5 | Augmentation, none to full | -0.24 pp | below 0.5 pp at every budget tested; sign depends on schedule |
-| 6 | Backbone size, ResNet-18/34/50 | -1.39 to +0.37 pp | non-monotone; dominated by per-model budget |
+| 6 | Backbone, 7 ImageNet models at a fixed budget (Section 7.8) | +0.37 pp spread (99.24 to 99.61) | follows the ImageNet accuracy of the weights, not parameter count |
 
 One further comparison is not controlled and is therefore excluded from the ranking: moving from hand-crafted HOG features to a frozen deep representation (M0 to M2) is worth 23.93 points. It is the largest gap anywhere in the study, but it changes the features, the classifier and the training procedure at once, so it cannot be attributed to a single factor.
 
-In summary, on this dataset the choice of initialisation and the quantity of training data dominate everything else. The depth of fine-tuning and the input resolution are second-order. Augmentation and backbone size are within noise, or negative, once the task is close to saturated. This ordering is what determined the compute allocation of the project: three seeds of one model, rather than a sweep over backbones.
+In summary, on this dataset the choice of initialisation and the quantity of training data dominate everything else. The depth of fine-tuning and the input resolution are second-order. Augmentation is within noise once the task is close to saturated. The choice of backbone is a real but small effect: under a fixed budget it spans 0.37 pp across seven models, about a twentieth of the pre-training effect, and it follows the quality of the pretrained weights rather than model size. This ordering is what determined the compute allocation of the main study: three seeds of one model, with the backbone sweep run separately on cluster GPUs.
 
 <div style="page-break-after: always;"></div>
 
@@ -992,9 +1025,9 @@ G2: ImageNet ResNet-18, upsampled inputs. The 32×32 images are resized to 160×
 | G1 CIFAR-ResNet-18 | random | 25 | 93.44% | **93.60%** | 93.60% | 26 min |
 | G2 ResNet-18 @160 | ImageNet | 7 | 95.58% | **95.20%** | 95.19% | 10 min |
 
-![Figure 15. CIFAR-10 confusion matrix](../ee6483/figures/fig_cifar_confusion.png)
+![Figure 16. CIFAR-10 confusion matrix](../ee6483/figures/fig_cifar_confusion.png)
 
-![Figure 16. Per-class accuracy](../ee6483/figures/fig_cifar_perclass.png)
+![Figure 17. Per-class accuracy](../ee6483/figures/fig_cifar_perclass.png)
 
 ### Reading the results
 
@@ -1099,9 +1132,9 @@ $$\hat{y} = \arg\max_c \big[f_c(x) + \tau \log \pi_c\big],\qquad \pi_c = \frac{n
 | Decoupling (cRT) | two-stage | 18 | 71.22% | 71.14% | 79.6% | 71.0% |
 | **Logit adjustment (tau=1.0)** | post-hoc | 18 (no extra training) | **72.99%** | **72.96%** | 81.4% | **72.0%** |
 
-![Figure 17. Imbalance comparison](../ee6483/figures/fig_imbalance.png)
+![Figure 18. Imbalance comparison](../ee6483/figures/fig_imbalance.png)
 
-![Figure 18. CIFAR-10-LT validation curves per method](../ee6483/figures/fig_imbalance_curves.png)
+![Figure 19. CIFAR-10-LT validation curves per method](../ee6483/figures/fig_imbalance_curves.png)
 
 ### The pathology, stated numerically
 
@@ -1146,12 +1179,12 @@ The ranking is not the same as the ranking in the literature (where CB loss is s
 
 ## 10.1 What we did
 
-We built and evaluated a complete cat/dog classification pipeline: a dataset audit (20,000 / 5,000 / 500 images, no corrupt files, 12 near-duplicate pairs crossing the train/validation split), a cached preprocessing and augmentation pipeline, a ladder of six classifiers from hand-crafted HOG features to a fine-tuned ResNet-50, a controlled one-factor-at-a-time ablation of six factors over 25 runs, an error analysis over all 50 validation errors with Grad-CAM and a corruption test, a transfer of the same code base to CIFAR-10, and a five-method study of class imbalance on a long-tailed CIFAR-10 variant.
+We built and evaluated a complete cat/dog classification pipeline: a dataset audit (20,000 / 5,000 / 500 images, no corrupt files, 12 near-duplicate pairs crossing the train/validation split), a cached preprocessing and augmentation pipeline, a ladder of six classifiers from hand-crafted HOG features to a fine-tuned ResNet-50, a controlled one-factor-at-a-time ablation of six factors over 25 runs, a fixed-budget comparison of seven ImageNet backbones over 14 runs, an error analysis over all 50 validation errors with Grad-CAM and a corruption test, a transfer of the same code base to CIFAR-10, and a five-method study of class imbalance on a long-tailed CIFAR-10 variant.
 
 ## 10.2 What we found
 
 1. The task is close to saturated, and transfer learning is what saturates it. The main model reaches 98.93 ± 0.05% validation accuracy over 3 seeds in eight minutes per run. The gap to the same architecture trained from scratch is 7.46 points, and the gap to hand-crafted features is 23.93 points. Two qualifications apply: a 1.17M-parameter CNN trained from scratch still reaches 95.06%, so the task is easier than the 99% headline suggests; and within the fine-tuned model almost all of the performance already sits in the frozen representation (a linear probe reaches 96.24% at the ablation budget and 97.78% when trained longer), not in the classifier on top of it.
-2. The ranking of factors is stable and counter-intuitive. Data and pre-training dominate; architecture and resolution are second-order; most hyper-parameters are third-order. ResNet-50 is +0.37 points above ResNet-18 and ResNet-34 is -1.39 below it: a non-monotone 1.8-point spread that is a quarter of the pre-training effect: and 224 px does not beat 160 px by enough to justify twice the compute. This is the practical content of question (f).
+2. The ranking of factors is stable and counter-intuitive. Data and pre-training dominate; architecture and resolution are second-order; most hyper-parameters are third-order. In the single-run ladder ResNet-34 fell 1.39 points below ResNet-18, but under a fixed budget the two are indistinguishable, and seven backbones span only 0.37 points (99.24% to 99.61%), ordered by the ImageNet accuracy of their weights rather than by size, with the under-trained ViT-B/16 as the exception. 224 px does not beat 160 px by enough to justify twice the compute. This is the practical content of question (f).
 3. The residual errors are not about semantics. Two thirds of the 50 validation errors are images where the animal's face is hidden or the animal is behind a fence or in a hand. The model knows what a cat is; it fails when the presentation differs from the training distribution. That is a data-coverage and augmentation problem, and it is where further work would pay off.
 4. The model is texture-driven. Grad-CAM concentrates on the head on correct predictions, occlusion costs almost nothing (RandomErasing trained for it), but blur costs 12.7 points. The evidence hierarchy is face geometry > fur texture > colour/context.
 5. The pipeline generalises. Moving to CIFAR-10 (10 classes, 32×32) required changing the stem, the head, the augmentation and the optimiser: and the same conclusion emerged: pre-training beats scratch (95.20% vs 93.60% test accuracy). The pipeline, not the specific model, is the reusable asset.
@@ -1164,13 +1197,13 @@ We built and evaluated a complete cat/dog classification pipeline: a dataset aud
 - One seed for most ablations. The ablation matrix uses seed 42 only; differences below ~0.4 pp are within the seed noise we measured on the main model and should not be interpreted as real.
 - The ablation uses a 3-epoch budget, which understates the value of regularisation (augmentation, label smoothing) relative to an 8-epoch budget.
 - Imbalance study is single-seed, single-ratio. ρ=100 and one seed per method; the ordering of methods is informative, the magnitudes are not.
-- Compute constrained the backbone sweep. ResNet-50 was run at 160 px rather than 224 px, and ConvNeXt/ViT were not run at all, because on an 8 GB laptop GPU their cost per epoch is 3–8× higher for a gain that Section 1.4 argues is below the seed noise.
+- The backbone sweep (Section 7.8) uses two seeds per model and a single 6-epoch recipe tuned for CNN fine-tuning, which may disadvantage ViT-B/16; it was run with a separate code base, so its numbers are not directly comparable with the main model's.
 
 ## 10.4 What we would do with more compute
 
 1. Sweep the augmentation policy properly (RandAugment magnitude, crop scale) rather than fixing it: Section 7 shows augmentation is worth less than a point at every budget tested, but it is also what makes the model robust to occlusion (Section 6.6).
 2. Train the CIFAR-10 from-scratch model for 200 epochs with cutout/AutoAugment, which is what the published 94–95% figures use, so that the pre-training gap is measured against a properly converged control.
-3. Add a ConvNeXt-T or ViT-B/16 fine-tune to test the Section 1.4 claim that architecture has plateaued. Our prediction, based on the literature and on the ResNet-18/34/50 spread, is a gain of <0.5 pp: but that is a prediction, not a measurement.
+3. Fine-tune ViT-B/16 for longer than 6 epochs: Section 7.8 shows it still improving at the end of the fixed budget, so its ceiling on this task is not yet measured. The same sweep confirmed the prediction made for ConvNeXt-T, a gain below 0.5 pp (0.36 pp over ResNet-18).
 4. Calibrate and add an open-set rejection head (temperature scaling plus a max-softmax threshold) so that the "no photo available" and animal-free images are rejected instead of being confidently misclassified.
 5. Exploit the unlabelled test set with a semi-supervised method such as FixMatch [Sohn et al., NeurIPS 2020], which would require relaxing the rule against using test data for training.
 
@@ -1318,6 +1351,27 @@ Notes:
   checkpoint and only changes the decision rule.
 - `E4_ensemble` is the evaluation of the three `E4_r18_ft` seeds averaged with
   horizontal-flip TTA: the configuration that produced `submission.csv`.
+
+## A.1b Backbone comparison runs (Section 7.8)
+
+Produced by the config-driven code base (`src/`, `configs/dogs_cats/backbones/`) on the NTU EEE GPU cluster, one NVIDIA A40 per run, torch 2.11.0+cu128. Logs: `runs/backbones/b_<model>_s<seed>/history.csv`; summary: `results/backbones.csv`. All runs completed 6 epochs.
+
+| Run | Best val acc (%) | Best epoch | Last-epoch val acc (%) | Train time (s) |
+|---|---|---|---|---|
+| `b_convnext_tiny_s0` | 99.60 | 6 | 99.60 | 264 |
+| `b_convnext_tiny_s1` | 99.62 | 6 | 99.62 | 265 |
+| `b_efficientnet_b0_s0` | 99.22 | 3 | 99.16 | 249 |
+| `b_efficientnet_b0_s1` | 99.26 | 4 | 99.20 | 251 |
+| `b_resnet18_s0` | 99.28 | 5 | 99.20 | 175 |
+| `b_resnet18_s1` | 99.22 | 5 | 99.22 | 167 |
+| `b_resnet34_s0` | 99.32 | 5 | 99.24 | 177 |
+| `b_resnet34_s1` | 99.24 | 5 | 99.20 | 179 |
+| `b_resnet50_s0` | 99.56 | 5 | 99.52 | 238 |
+| `b_resnet50_s1` | 99.58 | 5 | 99.54 | 240 |
+| `b_swin_t_s0` | 99.56 | 3 | 99.52 | 296 |
+| `b_swin_t_s1` | 99.56 | 6 | 99.56 | 292 |
+| `b_vit_b_16_s0` | 99.26 | 6 | 99.26 | 394 |
+| `b_vit_b_16_s1` | 99.30 | 6 | 99.30 | 393 |
 
 ## A.2 Environment
 

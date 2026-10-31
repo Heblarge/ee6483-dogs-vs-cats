@@ -86,7 +86,7 @@ Augmentation is therefore a sub-1 pp lever on this task at every budget tested, 
 
 Stating this is part of a defensible protocol: a search over everything is a search over noise at this dataset size.
 
-- Architecture width/depth: the ResNet-18/34/50 comparison in Section 7 shows the differences are within seed noise at 8 epochs; tuning depth would be tuning noise.
+- Architecture width/depth: under a fixed budget, ResNet-18 and ResNet-34 are indistinguishable (Section 7.8); the gain of ResNet-50 comes with different pretrained weights. Tuning depth would be tuning noise.
 - Optimiser family: AdamW vs SGD was checked informally (SGD+momentum needs a longer schedule to reach the same point); with an 8-epoch budget AdamW is the better default.
 - Mixup / CutMix: implemented and available, but they interact badly with a short schedule (the loss curves are no longer comparable) and did not improve validation accuracy in our runs.
 
