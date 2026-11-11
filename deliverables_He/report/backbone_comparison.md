@@ -1,4 +1,4 @@
-# Backbone Comparison under a Fixed Protocol  *(supplements item f, §8)*
+# Backbone Comparison under a Fixed Protocol  *(supplements item f, report §7)*
 
 > Long version; a condensed version is merged into the report as Section 7.8 (`sections/07_ablation.md`). Source data: `results/backbones.{csv,md}`,
 > figure: `results/backbones.png`, per-run logs: `runs/backbones/b_<model>_s<seed>/history.csv`.
@@ -6,7 +6,7 @@
 
 ## Question
 
-§8 compared models one change at a time against a ResNet-18 baseline. This
+Report §7 compared models one change at a time against a ResNet-18 baseline. This
 section asks a narrower question: **with the training recipe held fixed, how much
 does the choice of ImageNet-pretrained backbone change validation accuracy on
 Dogs vs. Cats, and what does it cost?** Seven torchvision backbones spanning
@@ -50,7 +50,7 @@ be cut off before it converges.
 Mean ± std over two seeds. On the 5,000-image validation set, 0.02 percentage
 points = 1 image.
 \* Top-1 accuracy that torchvision reports for the exact checkpoint loaded (`DEFAULT` weights).
-† Median of epochs 2–6 on one A40 (epoch 1 includes data-loader and cuDNN warm-up).
+† Median of epochs 2–6 on one A40 (epoch 1 includes data-loader and cuDNN warm-up). `results/backbones.csv` reports the mean over all six epochs instead.
 
 ![Backbone comparison](../results/backbones.png)
 
@@ -76,7 +76,7 @@ for four representative backbones.
    torchvision's V2 weights, trained with a modern recipe (80.9% top-1 vs 73.3%).
    This experiment therefore cannot separate "deeper bottleneck architecture" from
    "better pretraining recipe"; we report it as a confounded comparison. This is
-   consistent with §8's finding that pretraining dominates: the downstream task
+   consistent with the finding of report §7.2 that pretraining dominates: the downstream task
    inherits much of its accuracy from the upstream representation.
 
 3. **ViT-B/16 is under-trained in this budget, not necessarily worse.** Its
@@ -101,13 +101,12 @@ for four representative backbones.
    faster than ResNet-18 (depthwise convolutions are memory-bound), so its size
    advantage does not translate into training speed here.
 
-6. **Relation to §8.** §8 measured ConvNeXt-T at 99.58% and ResNet-50 at 98.92%
-   under a different recipe (160 px, 15 epochs, two-stage fine-tuning). The
-   ConvNeXt-T figure is reproduced almost exactly with 40% of the epochs. The
-   ResNet-50 figure differs by 0.65 points; candidate explanations are the input
-   resolution (224 vs 160 px, which §8 itself found to matter by ≈0.7 points) and
-   the protocols' different fine-tuning schedules. We did not run the ablation
-   that would isolate this.
+6. **Relation to report §7.7.** The model ladder of the main study measured
+   ResNet-50 (M5) at 99.30% under the `ee6483/` recipe (160 px, 6 epochs, LP-FT,
+   one seed); under this protocol it reaches 99.57 ± 0.01% at 224 px. The ladder
+   did not include ConvNeXt-T. The two recipes differ in resolution, schedule,
+   fine-tuning strategy and augmentation, and the difference was not ablated, so
+   it should not be attributed to any single setting.
 
 ## Limitations
 

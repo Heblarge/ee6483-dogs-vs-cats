@@ -28,7 +28,7 @@ A clean inverted U with a 2.6-point range, and the four regimes are easy to name
 The final setting is a backbone learning rate of 3e-4, a head learning rate of 1e-3 and the LP-FT schedule. Two points relate this choice to the sweep:
 
 1. The sweep ties the two learning rates together, so it identifies the *safe region*, not the final values. Decoupling them (small for the backbone, large for the head) is what allows the head to converge quickly without damaging the backbone, and it is why the final model uses an asymmetric pair that is not a point on this curve.
-2. The sweep is run at 3 epochs; the final model is run at 8. Longer schedules tolerate (and benefit from) larger steps, which is why the final backbone lr (3e-4) is above the 3-epoch optimum (1e-4). The sweep's role is to exclude the destructive region, not to pick the final number: the final number comes from the three-seed confirmation in Section 5 (98.93 ± 0.05%), which is 0.3 points above the best point of the sweep.
+2. The sweep is run at 3 epochs; the final model is run at 8. Longer schedules tolerate (and benefit from) larger steps, which is why the final backbone lr (3e-4) is above the 3-epoch optimum (1e-4). The sweep's role is to exclude the destructive region, not to pick the final number: the final number comes from the three-seed confirmation in Section 5 (98.93 ± 0.06%), which is 0.3 points above the best point of the sweep.
 
 ## 4.3 Input resolution
 
@@ -79,7 +79,7 @@ Augmentation is therefore a sub-1 pp lever on this task at every budget tested, 
 | Label smoothing | 0.1 | web labels contain errors; also improves the calibration of the confidences used in Section 6 |
 | Warm-up | 1 epoch (0.3 epoch in stage 2) | prevents the first large steps from destabilising a freshly initialised head |
 | Gradient clipping | 1.0 | cheap insurance; rarely active but prevents a single bad batch from diverging the run |
-| AMP | on | 1.66× faster and 38% less peak memory, measured on a fixed 64×3×224×224 batch (66 ms vs 110 ms per step, 953 vs 1,543 MiB); no measurable accuracy difference at fp16 |
+| AMP | on | 1.66× faster and 38% less peak memory, measured on a fixed 64×3×224×224 batch (66 ms vs 110 ms per step, 953 vs 1,543 MiB; a one-off measurement not saved with the results); fp32 accuracy was not re-measured |
 | Seeds | 42, 43, 44 | three is the minimum that gives a usable standard deviation for a non-deterministic pipeline |
 
 ## 4.7 Settings deliberately left untuned
@@ -87,8 +87,8 @@ Augmentation is therefore a sub-1 pp lever on this task at every budget tested, 
 Stating this is part of a defensible protocol: a search over everything is a search over noise at this dataset size.
 
 - Architecture width/depth: under a fixed budget, ResNet-18 and ResNet-34 are indistinguishable (Section 7.8); the gain of ResNet-50 comes with different pretrained weights. Tuning depth would be tuning noise.
-- Optimiser family: AdamW vs SGD was checked informally (SGD+momentum needs a longer schedule to reach the same point); with an 8-epoch budget AdamW is the better default.
-- Mixup / CutMix: implemented and available, but they interact badly with a short schedule (the loss curves are no longer comparable) and did not improve validation accuracy in our runs.
+- Optimiser family: AdamW vs SGD was not compared in a controlled run. AdamW was kept as the common default for short fine-tuning schedules; SGD with momentum typically needs a longer schedule.
+- Mixup / CutMix: available in the config-driven code base (`src/data/mix.py`) but not used in any reported run, so their effect on this task was not measured; with a short schedule they also make loss curves harder to compare.
 
 ## 4.8 Sensitivity summary
 

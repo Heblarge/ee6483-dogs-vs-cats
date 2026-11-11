@@ -23,7 +23,7 @@
 | HOG + SVM | 75.00% |
 | 从零训练的小 CNN | 95.06% |
 | ResNet-18 冻结 + 线性头 | 97.78% |
-| **ResNet-18 + LP-FT（主模型）** | **98.93 ± 0.05%**（3 seeds） |
+| **ResNet-18 + LP-FT（主模型）** | **98.93 ± 0.06%**（3 seeds） |
 | ResNet-18 ×3 seeds + 水平翻转 TTA（第一版提交） | 99.22% |
 | ConvNeXt-T（骨干对比，统一 6 epoch 协议） | 99.61 ± 0.01%（2 seeds） |
 | **ConvNeXt-T + ResNet-50 + Swin-T ×2 seeds + TTA（现提交用）** | **99.70%** |

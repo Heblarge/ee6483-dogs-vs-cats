@@ -1,7 +1,10 @@
 # Appendix: Complete Experiment Log
 
-Everything reported in the body of this document is derived from the 42 run
-directories under `ee6483/results/` and the backbone runs of A.1b. This appendix
+Everything reported in the body of this document is derived from the 42
+`metrics.json` files under `ee6483/results/` (40 training runs, the HOG+SVM
+baseline and the seed-ensemble evaluation) and the backbone runs of A.1b. The
+last row of the table below (`backbone_ensemble`) is an inference-only
+evaluation of the A.1b checkpoints, so the table has 43 rows. This appendix
 prints the per-run results so that any number in the main text can be traced to
 a run directory; the commands are in `ee6483/scripts/run_experiments.py` and,
 for the runs launched by hand, in the notes below.

@@ -15,7 +15,7 @@ over a training set $\{(x_i,y_i)\}_{i=1}^N$ drawn from a data distribution $P_{t
 
 ### 1.1.2 Why this "easy" problem is not easy
 
-Humans solve cat/dog discrimination at above 99.9% accuracy, yet the problem concentrates almost every difficulty that makes visual recognition hard:
+Humans find cat/dog discrimination almost trivial, yet the problem concentrates almost every difficulty that makes visual recognition hard:
 
 1. Large intra-class variation. "Dog" covers 340+ breeds that differ in size (Chihuahua vs. Great Dane, a 40× range in body mass), ear shape, coat length and colour. The same pixel-level variation exists within "cat". A classifier must be invariant to all of it while remaining sensitive to the much smaller cat/dog differences.
 2. Small inter-class distance in specific sub-populations. Puppies and kittens share body proportions (large head-to-body ratio, short snout); long-haired cats and small fluffy dogs (Pomeranian, Shih Tzu) share texture. These are the samples that dominate the residual error of any strong model.
@@ -104,7 +104,7 @@ Diagnosis (He et al., CVPR 2016). The paper starts from an empirical puzzle: a 5
 
 Fix. Re-parameterise each block to learn a residual $F(x) = H(x) - x$, so the block output is $F(x) + x$. If the identity is optimal, driving $F$ to zero is easier than learning the identity through non-linearities. The paper also shows that shortcut connections add neither parameters nor computational cost, which is what makes depth "free".
 
-Evidence and impact. the 152-layer ResNet won ILSVRC 2015 with 3.57% top-5 error, and the ablation is unusually clean: plain vs. residual at 18/34 layers, with and without shortcuts, isolates exactly one variable. The follow-up [He et al., ECCV 2016] moved BN and ReLU before the convolution (pre-activation) and improved optimisation further, which is why modern ResNets use `BN-ReLU-conv` ordering and a zero-initialised last BN in each block.
+Evidence and impact. the 152-layer ResNet won ILSVRC 2015 with 3.57% top-5 error, and the ablation is unusually clean: plain vs. residual at 18/34 layers, with and without shortcuts, isolates exactly one variable. The follow-up [He et al., ECCV 2016] moved BN and ReLU before the convolution (pre-activation) and improved optimisation further, This pre-activation (`BN-ReLU-conv`) ordering is used in ResNet-v2 and Wide ResNets; the torchvision ResNets used in this project keep the original post-activation (`conv-BN-ReLU`) ordering. Zero-initialising the last BN of each residual block is a separate, commonly used training trick.
 
 Why it matters for us. Our backbone is a ResNet, and the LP-FT finding [Kumar et al., ICLR 2022] that fine-tuning *distorts* pretrained features is essentially a statement about how much of the residual network should be allowed to move. A frozen ResNet-18 with a linear head (M2) is a strong feature extractor; unfreezing everything at a large learning rate destroys some of that structure before the head has learned to use it: which is exactly the accuracy dip we observe at the first unfrozen epoch and why we warm up the backbone learning rate.
 

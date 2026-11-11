@@ -436,7 +436,8 @@ def fig_model_comparison(res_root: Path, out: Path):
         for mf in sorted((res_root / exp).glob("s*/metrics.json")):
             rs.append(json.loads(mf.read_text(encoding="utf-8"))["best_val_acc"] * 100)
         if rs:
-            vals.append((lab, float(np.mean(rs)), float(np.std(rs)), len(rs)))
+            # sample std (ddof=1), the convention used throughout the report
+            vals.append((lab, float(np.mean(rs)), float(np.std(rs, ddof=1)) if len(rs) > 1 else 0.0, len(rs)))
     if not vals:
         return
     fig, ax = plt.subplots(figsize=(6.3, 3.0))

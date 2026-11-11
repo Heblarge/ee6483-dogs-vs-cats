@@ -111,7 +111,7 @@ Details that matter: no vertical flip (an upside-down animal is out of distribut
 ## 3.6 Reproducibility
 
 - `set_seed(s)` fixes `PYTHONHASHSEED`, `random`, `numpy`, `torch` and `torch.cuda` for $s \in \{42,43,44\}$, with `cudnn.deterministic=True` and `cudnn.benchmark=False`.
-- AMP kernels are not bit-exact even with deterministic flags, so every headline number is reported as mean ± std over three seeds, not as a single run.
+- AMP kernels are not bit-exact even with deterministic flags. The main model (M3) is therefore reported as mean ± sample standard deviation over three seeds, and the backbone comparison of Section 7.8 over two seeds; every other run is single-seed, and this is stated where its result is used.
 - Each Dogs-vs-Cats run (`ee6483.src.train`) writes `metrics.json` (with the full argument dictionary), `curves.csv`, `train.log` and `best.pt`; the CIFAR runs (`ee6483.src.train_cifar`) write `metrics.json` (class counts, epochs and per-epoch history, without the argument dictionary), `train.log` and `best.pt`. The orchestrator appends the exact command line to `results/run_log.txt`.
 - Data are cached once at short-side 256 px, so every experiment sees identical pixels regardless of when it ran.
 - k-fold cross-validation is not used. The assignment fixes the train/validation split, and re-partitioning it would change the validation set that every reported number refers to, making the results incomparable across models and with the provided baseline. Three seeds serve the same purpose, estimating run-to-run variance, while keeping a single fixed validation set.

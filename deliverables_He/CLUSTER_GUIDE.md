@@ -275,7 +275,7 @@ sbatch cluster/backbones.sbatch
 | 只补跑某一组 | `sbatch --array=1 cluster/backbones.sbatch`（0：vit_b_16 resnet50 resnet18 efficientnet_b0；1：swin_t convnext_tiny resnet34） |
 | 加种子 | `SEEDS="0 1 2" sbatch cluster/backbones.sbatch` |
 
-已经跑完的 run 会自动跳过，任务中断后重新提交即可。`msc` 账户每人最多提交 5 个、同时运行 2 个任务，每种型号最多 2 块 GPU，所以只分 2 组；每组依次跑 3–4 个模型，约 4–8 小时。按 a40 计算总共约 1,300–2,700 SU。
+已经跑完的 run 会自动跳过，任务中断后重新提交即可。`msc` 账户每人最多提交 5 个、同时运行 2 个任务，每种型号最多 2 块 GPU，所以只分 2 组；每组依次跑 3–4 个模型。实测 14 个 run 的训练时间合计约 1 GPU·小时（报告附录 A.1b，3,580 s），按 a40 约 180–250 SU（含启动和评估开销）；排队时间另计。
 
 ### 5.5 跑单个实验
 

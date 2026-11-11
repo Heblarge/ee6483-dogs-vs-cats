@@ -108,7 +108,7 @@ ee6483/
 | HOG + SVM (8k images) | 75.00% | ~8 min |
 | SmallCNN from scratch @128, 14 ep | 95.06% | ~8 min |
 | ResNet18 frozen + linear head, 6 ep | 97.78% | ~6 min |
-| **ResNet18 fine-tuned @224 (LP-FT), 8 ep** | **98.93% ± 0.05** (3 seeds) | ~8 min/seed |
+| **ResNet18 fine-tuned @224 (LP-FT), 8 ep** | **98.93% ± 0.06** (3 seeds) | ~8 min/seed |
 | ResNet18 ×3 seeds + hflip TTA | **99.22%** | inference only |
 | ResNet34 fine-tuned @224 | 97.54% | ~11 min |
 | ResNet18 from scratch @160, 6 ep (ablation) | 90.66% | ~4 min |

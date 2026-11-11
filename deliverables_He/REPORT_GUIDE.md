@@ -19,7 +19,7 @@ two seeds each, horizontal-flip TTA; report Sections 5.3 and 7.8). The submitted
 | HOG + SVM (classical baseline) | 75.00% |
 | SmallCNN from scratch | 95.06% |
 | ResNet-18, frozen backbone + linear head | 97.78% |
-| **ResNet-18, LP-FT (main model)** | **98.93 ± 0.05%** (3 seeds) |
+| **ResNet-18, LP-FT (main model)** | **98.93 ± 0.06%** (3 seeds) |
 | ResNet-18 ×3 seeds + TTA (reference ensemble) | 99.22% |
 | **ConvNeXt-T + ResNet-50 + Swin-T, ×2 seeds + TTA (submitted)** | **99.70%** |
 

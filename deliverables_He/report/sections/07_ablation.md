@@ -11,12 +11,12 @@ Each table changes exactly one thing relative to that reference. The short sched
 Three caveats apply.
 
 1. 3 epochs under-fits. The reference reaches 98.12% in 3 epochs at 160 px, versus 98.93% in 8 epochs at 224 px, so the task is already close to saturated at this budget. When a model is near the ceiling, most knobs stop mattering: that is itself one of our findings, but it means the small effects below should not be extrapolated to a harder task.
-2. Single seed. The seed-to-seed standard deviation of the main model is 0.05 pp over three seeds (98.90, 98.90, 99.00). Differences below 0.3 pp are reported as no measurable effect.
+2. Single seed. The seed-to-seed (sample) standard deviation of the main model is 0.06 pp over three seeds (98.90, 98.90, 99.00). Differences below 0.3 pp are reported as no measurable effect.
 3. The reference is not the final model. The final model uses 224 px and 8 epochs (Section 5). The ablation answers "which choices matter", not "what is the best possible number".
 
 ## 7.2 The largest effect: pre-training
 
-This is the only fully controlled comparison in the study: identical architecture, data, augmentation, resolution and optimiser; only the initialisation differs. The from-scratch model was given twice the epochs to compensate, so the 7.46-point gap is the combined effect of pre-training and the longer schedule; it is an upper bound on the pure initialisation effect.
+Architecture, data, augmentation, resolution and optimiser are identical; the initialisation and the training length differ, because the from-scratch model was given twice the epochs (6 vs 3) to compensate for starting from random weights. The extra epochs favour the from-scratch model, so the 7.46-point gap is a conservative estimate of the pre-training effect at this budget rather than an exact isolation of it.
 
 | Level | Epochs | val acc (%) | Δ |
 |---|---|---|---|
@@ -106,14 +106,14 @@ The practical implication is that an ablation run at too short a budget can inve
 | M0 HOG + SVM | 8k images | 75.00 | −23.93 |
 | M1 SmallCNN, from scratch | 14 ep @128 | 95.06 | −3.87 |
 | M2 ResNet-18 frozen + linear | 6 ep @224 | 97.78 | −1.15 |
-| **M3 ResNet-18 LP-FT** | 8 ep @224 | **98.93 ± 0.05** | 0 |
+| **M3 ResNet-18 LP-FT** | 8 ep @224 | **98.93 ± 0.06** | 0 |
 | M4 ResNet-34 LP-FT | 8 ep @224 | 97.54 | -1.39 |
 | M5 ResNet-50 LP-FT | 6 ep @160 | 99.30 | +0.37 |
 
 The ladder mixes budgets, so the Δ column is indicative rather than controlled. Two results deserve comment:
 
 - A small CNN trained from scratch reaches 95.06%: much higher than the 80–85% one might expect from the literature. Twenty thousand images is enough for a 1.17M-parameter network to learn this binary task; the task is simply easier than ImageNet-1k.
-- Backbone size is non-monotone: ResNet-34 is *worse* than ResNet-18 (97.54% vs 98.93 ± 0.05%, early-stopped at epoch 4) while ResNet-50 is *better* (99.30%, at lower resolution and fewer epochs). The spread across all three sizes is 1.8 points, a quarter of the pre-training effect, and the ordering is not stable. At this dataset size the result depends more on how many epochs each model happens to get than on the architecture, which is exactly why "architecture is second-order" is the defensible claim and "bigger is better/worse" is not. Section 7.8 repeats the comparison under a fixed budget.
+- Backbone size is non-monotone: ResNet-34 is *worse* than ResNet-18 (97.54% vs 98.93 ± 0.06%, early-stopped at epoch 4) while ResNet-50 is *better* (99.30%, at lower resolution and fewer epochs). The spread across all three sizes is 1.8 points, a quarter of the pre-training effect, and the ordering is not stable. At this dataset size the result depends more on how many epochs each model happens to get than on the architecture, which is exactly why "architecture is second-order" is the defensible claim and "bigger is better/worse" is not. Section 7.8 repeats the comparison under a fixed budget.
 
 ![All six ablation panels at a glance; red bars are the shared reference run](../ee6483/figures/fig_ablation.png)
 
@@ -135,7 +135,7 @@ Early stopping is disabled so that every backbone receives exactly the same budg
 | ResNet-18 | 11.2 | 69.8 (V1 weights) | 99.25 ± 0.04 | 99.21 ± 0.01 | 24.1 |
 | EfficientNet-B0 | 4.0 | 77.7 | 99.24 ± 0.03 | 99.18 ± 0.03 | 27.1 |
 
-Mean ± standard deviation over two seeds; on 5,000 validation images, 0.02 pp is one image. The ImageNet column is the top-1 accuracy torchvision reports for the exact checkpoint loaded. Time per epoch is the median of epochs 2–6 on one A40.
+Mean ± sample standard deviation over two seeds; on 5,000 validation images, 0.02 pp is one image. The ImageNet column is the top-1 accuracy torchvision reports for the exact checkpoint loaded. Time per epoch is the median of epochs 2–6 on one A40; the `sec_per_epoch` column of `results/backbones.csv` is instead the mean over all six epochs, including the slower first epoch, and is therefore larger.
 
 ![Backbone comparison under the fixed protocol. (a) Best validation accuracy against training time per epoch, bars ±1 std over two seeds. (b) Validation accuracy per epoch, mean of two seeds, for four representative backbones](../results/backbones.png)
 
@@ -148,11 +148,11 @@ Four results follow.
 
 On cost, ResNet-50 is the cheapest top-tier backbone (33 s per epoch); ConvNeXt-T has the highest mean for 14% more time; Swin-T matches ResNet-50 at 45% more. EfficientNet-B0 has the fewest parameters but is no faster than ResNet-18 on a GPU, because its depthwise convolutions are memory-bound.
 
-Two cautions apply when relating this table to the rest of the report. First, it was produced by a separate code base (`src/`, described in `README.md`) with a lighter augmentation policy, AdamW with a 10× lower backbone learning rate, label smoothing and no early stopping. Under this protocol ResNet-18 reaches 99.25 ± 0.04%, above the 98.93 ± 0.05% of the main model M3. The two recipes differ in several respects at once and the difference was not ablated, so it should not be attributed to any single setting. Second, only two seeds were run per backbone, and the same validation set selects the epoch and reports the result.
+Two cautions apply when relating this table to the rest of the report. First, it was produced by a separate code base (`src/`, described in `README.md`) with a lighter augmentation policy, AdamW with a 10× lower backbone learning rate, label smoothing and no early stopping. Under this protocol ResNet-18 reaches 99.25 ± 0.04%, above the 98.93 ± 0.06% of the main model M3. The two recipes differ in several respects at once and the difference was not ablated, so it should not be attributed to any single setting. Second, only two seeds were run per backbone, and the same validation set selects the epoch and reports the result.
 
 ## 7.9 Ranked summary
 
-The controlled comparisons are ranked below. Each holds the budget fixed and changes one factor.
+The controlled comparisons are ranked below. Each changes one factor at a fixed budget, except the pre-training row, where the from-scratch arm received twice the epochs (Section 7.2).
 
 | Rank | Factor | Effect on validation accuracy | Mechanism |
 |---|---|---|---|
