@@ -17,7 +17,7 @@ The main model, an ImageNet-pretrained ResNet-18 fine-tuned with the LP-FT sched
 
 A one-factor-at-a-time ablation ranks the design choices by the size of their effect. Pre-training is the largest factor, worth up to 7.46 points at a fixed budget (the from-scratch arm received twice the epochs; see Section 7.2). Training-set size is second: accuracy rises from 93.56% with 500 images to 98.12% with 20,000 and saturates beyond 10,000. The depth of fine-tuning (1.96 points from head-only to last stage) and the input resolution (0.64 points from 160 to 224 pixels) are third-order. Augmentation moves accuracy by less than half a point at all three budgets tested, with the sign depending on the schedule. Backbone choice is a small effect. A controlled comparison of seven ImageNet backbones at a fixed budget, two seeds each, spans 99.24% to 99.61%: ConvNeXt-T, ResNet-50 and Swin-T form a top tier about 0.3 points above ResNet-18/34, EfficientNet-B0 and ViT-B/16, and the ranking follows the ImageNet accuracy of the pretrained weights rather than the number of parameters (ViT-B/16, still improving at the end of the budget, is the exception).
 
-An analysis of all 50 validation errors shows that two thirds arise when the animal is not presented as in the training set, either because the face is hidden or because the animal is behind a fence or held in a hand. Grad-CAM attributes correct predictions to the animal's head rather than to the scene. Accuracy falls by 12.7 points under heavy blur, but by only 1.1 points under 30° rotation and 0.4 points under 25% occlusion.
+An analysis of all 50 validation errors shows that two thirds arise when the animal is not presented as in the training set, either because the face is hidden or because the animal is behind a fence or held in a hand. Grad-CAM highlights the animal's head in the inspected correct predictions. Accuracy falls by 12.7 points under heavy blur, but by only 1.1 points under 30° rotation and 0.4 points under a central square mask whose side is 25% of the original image's shorter dimension (approximately 6.25% of a square original's area).
 
 The pipeline is then applied to CIFAR-10, where the ImageNet stem must be replaced by a 3×3 stride-1 stem to avoid destroying a 32-pixel image. Training from scratch reaches 93.60% test accuracy and ImageNet pre-training reaches 95.20%. On a long-tailed CIFAR-10 variant with a 90:1 imbalance ratio, four remedies are compared against plain cross-entropy. Post-hoc logit adjustment performs best, raising test accuracy from 62.44% to 72.99% and macro-F1 from 60.27% to 72.96% without retraining.
 
@@ -646,11 +646,11 @@ Ensembling six top-tier models removes 24 of the 39 validation errors of the M3 
 | Predicted cats | 241 |
 | Mean max-softmax confidence | 0.95 |
 
-Sanity checks performed (`ee6483/scripts/validate_submission.py`):
+Sanity checks performed (CSV format validator plus a separate per-id probability comparison):
 
 - header exactly `id,label`; 500 data rows; ids exactly `1..500` with no duplicates;
 - every label in `{0,1}`; the id order matches `sampleSubmission.csv` row by row;
-- the class balance is 259/241 (52/48), consistent with a balanced test set: a strong signal that the id→file mapping and the label convention are both correct. A reversed convention or a lexicographic id sort would have produced a very different (or degenerate) distribution.
+- prediction ids and labels agree row by row between `submission.csv` and `submission_backbone_ensemble_probs.csv`; each label agrees with the probability decision under cat=0, dog=1. The loader derives ids from image filenames and checks the training class mapping. The 259/241 class count is descriptive only: it cannot detect predictions assigned to the wrong ids or verify the semantic correctness of labels.
 
 The validator is part of the repository and must pass before any upload.
 
@@ -658,7 +658,7 @@ No test accuracy is reported, because the test set has no labels. We also did no
 
 ## 5.4 A note on the optimism of validation accuracy
 
-Validation accuracy was used for early stopping and for choosing among M0–M5, so the reported numbers are mildly optimistic relative to a model that had never seen the validation set. The bias is small, with 5,000 validation images and about 10 compared configurations, but it is real. The appropriate statement is that *the reference ensemble's 99.22% is a validation-set number obtained with model selection performed on the same set; the submitted ensemble's 99.70% carries an even larger selection bias (the top three backbones were chosen on this validation set); the test set is unlabelled, so we cannot quantify the gap.*
+Validation accuracy was used for early stopping and model selection, so the reported results are subject to selection optimism. The reference ensemble's 99.22% and submitted ensemble's 99.70% were measured on the same validation set used for selection; choosing the top three backbone families adds another selection step. Without an independent labelled holdout or a nested evaluation, we cannot quantify the size of this bias or claim a numerical upper bound. The unlabelled test set cannot resolve this uncertainty.
 
 ## 5.5 Runtime
 
@@ -748,7 +748,7 @@ Why the model is wrong. The mesh introduces a strong, regular high-frequency pat
 
 What this reveals about the model's weakness. A human resolves this instantly by integrating the visible face through the mesh. The network's receptive field at the deepest layer covers the whole image, so it *could* in principle do the same, but nothing in the training objective forces it to be robust to structured occlusion: `RandomErasing` (which we use) inserts a *solid* rectangle, not a *high-frequency* pattern, so it does not train this invariance.
 
-Consistency with the robustness test. This is exactly what the corruption experiment in Section 6.6 shows quantitatively: blur, which also destroys high-frequency texture, costs 12.7 points, while a 25% solid occlusion costs only 0.4 points. The model is texture-driven, and any corruption that attacks texture attacks it.
+Consistency with the robustness test. Section 6.6 shows a 12.7-point loss under heavy blur and a 0.4-point loss under a central square mask whose side is 25% of the original image's shorter dimension. This supports sensitivity to blur under the tested conditions. It does not isolate texture from shape cues or establish the cause of the fence-related errors.
 
 ## 6.6 Grad-CAM and the robustness test
 
@@ -775,16 +775,18 @@ Robustness test. We apply seven deterministic perturbations (plus the clean cond
 | brightness ×1.6 | 98.48 | −0.5 |
 | brightness ×0.45 | 98.74 | −0.3 |
 | rotation 30° | 97.94 | −1.1 |
-| 25% central occlusion | 98.56 | −0.4 |
+| Central square mask, side = 25% of original short side | 98.56 | −0.4 |
 | Gaussian noise σ=25 | 94.58 | −4.4 |
 
-![Figure 11. Robustness](../ee6483/figures/fig_robustness.png)
+The mask is applied before resizing and centre cropping. Its side length is approximately 0.25 × min(height, width), with integer rounding. It covers approximately 6.25% of a square original image, and a smaller proportion of a rectangular original; the fraction of the final model input depends on the subsequent crop. This experiment did not test a mask covering 25% of the image area.
+
+![Figure 11. Robustness of the single-seed reference model. The occ25 label denotes a central square mask with side length 25% of the original image's shorter dimension, not 25% of its area](../ee6483/figures/fig_robustness.png)
 
 Three conclusions:
 
-1. Blur is by far the most damaging (−12.7 pp). Accuracy under heavy blur collapses to 86%, i.e. worse than a small CNN trained on clean data would score on clean images. Since blur removes exactly the high-frequency band that encodes fur texture, this is direct evidence that the decision is texture-driven rather than shape-driven.
-2. Occlusion is almost free (−0.4 pp): the RandomErasing augmentation did its job. This is a case where a training-time choice produced a measurable robustness benefit, which is a point in favour of the augmentation policy in Section 2.
-3. Colour is nearly irrelevant (−0.3 to −0.5 pp). Combined with conclusion 1, the model's evidence hierarchy is: face geometry > fur texture > colour/context. That ordering explains both case studies above.
+1. Heavy blur causes the largest observed drop (−12.7 pp). This is consistent with reliance on fine visual detail, but blur also affects edges and shape information; these measurements alone cannot distinguish texture reliance from shape reliance.
+2. The tested central mask causes a smaller drop (−0.4 pp). RandomErasing is a possible contributor, but no matched robustness comparison with RandomErasing disabled was performed, so its causal contribution is unknown. The small mask also limits how broadly this result can be generalised to occlusion.
+3. The two brightness changes cause drops of about 0.3–0.5 pp. This supports robustness to those particular illumination changes. It does not establish robustness to hue or saturation changes, or a ranking of colour, texture and shape cues.
 
 ## 6.7 The test set: qualitative inspection
 
@@ -795,7 +797,7 @@ The test set is unlabelled, so the labels shown are the submitted ensemble's pre
 - The four least-confident cat predictions are a black-and-white cat behind cage bars with overlaid text (id=216, 0.84), a black cat on a dark rug (id=242, 0.85), a black-and-white cat held up by a hand in front of a chain-link fence, with a numbered tag (id=159, 0.91), and a grey cat on a strongly patterned red blanket (id=30, 0.93). Occlusion, low contrast and texture-heavy backgrounds are among the failure factors identified on the labelled validation set.
 - The four least-confident dog predictions are a black puppy held in a hand (id=313, 0.84), a puppy sitting in a cage (id=261, 0.86), a low-resolution, pixelated close-up of a dog's face (id=302, 0.86) and a "No Photo Available" placeholder (id=328, 0.87). The first three predictions are visually plausible; the placeholder exposes the closed-set limitation because the model must choose cat or dog even when neither is present.
 - The most-confident examples remain visually straightforward: two cat images (ids 176 and 198, both 0.96) and two dog images (ids 254 and 243, both 0.96). One dog image contains several animals behind a fence, showing that the ensemble can remain stable under multiple subjects and structured occlusion.
-- The submitted prediction distribution is 259 dog / 241 cat (52/48), consistent with a roughly balanced test set. A reversed label convention or lexicographic id sort would produce a very different or degenerate distribution, so this is weak but useful evidence that the id mapping and class convention are correct.
+- The submitted prediction distribution is 259 dog / 241 cat (52/48). This is a descriptive count, not a check of image-to-label alignment: permuting predictions among ids leaves the count unchanged, and reversing labels simply swaps the two counts. Alignment is checked using numeric image ids and the explicit cat=0, dog=1 convention, as described in Section 5.3.
 
 ## 6.8 Two test-set cases: one strength, one weakness
 
@@ -805,7 +807,7 @@ The test set carries no labels, so the two cases below are chosen for what they 
 
 *Case 2, a weakness: an image that contains no animal (id=328, predicted dog, p=0.87).* The input is a "No Photo Available" placeholder graphic. The weakness is structural rather than a training failure: a two-way softmax must put its mass somewhere, so an input outside the label space cannot be rejected. A maximum-softmax threshold or explicit rejection class would address this, but would require a validation set containing out-of-distribution images to calibrate the threshold (Section 6.9). The relatively high confidence shows that higher in-distribution accuracy does not imply reliable behaviour outside the label space.
 
-The pair also illustrates where the model's remaining error budget lies. It is confident and correct when the animal is visible and well framed, however many animals or scales are present; it is uncertain, but still forced to answer, when the input is not an animal at all.
+These two examples illustrate visually plausible recognition of dogs alongside a confident assignment to an input containing no animal. They do not establish a test error rate, and the placeholder shows why confidence alone is insufficient to identify inputs outside the model's label space.
 
 ## 6.9 Limitations: closed-set assumption and calibration
 
@@ -913,7 +915,7 @@ The sign flips between the two full-data budgets, and the magnitude stays below 
 
 - Augmentation is a sub-1 pp lever on this task, at every budget and data size we tested. The task is saturated by pre-training; there is almost no headroom for regularisation to recover, and the residual errors (Section 6) are label noise and ambiguous viewpoints that no augmentation can fix.
 - Its sign depends on the schedule. At 3 epochs the strong transforms (RandAugment + RandomErasing) remove information faster than a short schedule can exploit it, so they cost 0.24 pp; at 8 epochs they have time to pay off and gain 0.24 pp (0.36 pp when data is scarce). All three numbers are within a few tenths of a point and should not be over-interpreted.
-- The background-shortcut argument for RandomErasing survives qualitatively. Section 6 shows the model attends to the animal rather than the background, and occlusion robustness is high (a 25% occlusion costs 0.4 pp): which is what RandomErasing is supposed to buy. On this dataset the shortcut was never strong enough to be the limiting factor, so the benefit is small.
+- RandomErasing may contribute to the measured robustness, but this was not isolated experimentally. Section 6 reports a 0.4 pp drop for a central mask whose side is 25% of the original image's short side (about 6.25% of a square original's area). A matched robustness comparison with and without RandomErasing is required to attribute this result to that augmentation.
 
 The practical implication is that an ablation run at too short a budget can invert the sign of a real effect. The full augmentation policy is retained in the main model because it is neutral to positive at the 8-epoch budget actually used, and because it is what gives the model its robustness to occlusion (Section 6).
 
@@ -1207,22 +1209,22 @@ We built and evaluated a complete cat/dog classification pipeline: a dataset aud
 1. The task is close to saturated, and transfer learning is what saturates it. The main model reaches 98.93 ± 0.05% validation accuracy over 3 seeds in eight minutes per run. The gap to the same architecture trained from scratch is 7.46 points, and the gap to hand-crafted features is 23.93 points. Two qualifications apply: a 1.17M-parameter CNN trained from scratch still reaches 95.06%, so the task is easier than the 99% headline suggests; and within the fine-tuned model almost all of the performance already sits in the frozen representation (a linear probe reaches 96.24% at the ablation budget and 97.78% when trained longer), not in the classifier on top of it.
 2. The ranking of factors is stable and counter-intuitive. Data and pre-training dominate; architecture and resolution are second-order; most hyper-parameters are third-order. In the single-run ladder ResNet-34 fell 1.39 points below ResNet-18, but under a fixed budget the two are indistinguishable, and seven backbones span only 0.37 points (99.24% to 99.61%), ordered by the ImageNet accuracy of their weights rather than by size, with the under-trained ViT-B/16 as the exception. 224 px does not beat 160 px by enough to justify twice the compute. This is the practical content of question (f).
 3. The residual errors are not about semantics. Two thirds of the 50 validation errors are images where the animal's face is hidden or the animal is behind a fence or in a hand. The model knows what a cat is; it fails when the presentation differs from the training distribution. That is a data-coverage and augmentation problem, and it is where further work would pay off.
-4. The model is texture-driven. Grad-CAM concentrates on the head on correct predictions, occlusion costs almost nothing (RandomErasing trained for it), but blur costs 12.7 points. The evidence hierarchy is face geometry > fur texture > colour/context.
+4. The reference model is sensitive to heavy blur (−12.7 pp), while the tested small central mask and brightness changes cause smaller drops. Grad-CAM highlights the head in the inspected correct examples. These observations suggest useful follow-up experiments, but do not isolate texture from shape cues or prove a causal benefit from RandomErasing.
 5. The pipeline generalises. Moving to CIFAR-10 (10 classes, 32×32) required changing the stem, the head, the augmentation and the optimiser: and the same conclusion emerged: pre-training beats scratch (95.20% vs 93.60% test accuracy). The pipeline, not the specific model, is the reusable asset.
 6. Imbalance is fixable cheaply. On CIFAR-10-LT (ρ=100) the best of five methods lifts test accuracy from 62.44% to 72.99% and macro-F1 from 60.27% to 72.96%, with most of the gain on the rarest classes; post-hoc logit adjustment achieves much of this with no retraining at all.
 
 ## 10.3 Limitations
 
-- Validation accuracy is mildly optimistic. It was used for early stopping and for model selection, so it is not an unbiased estimate of generalisation. With 5,000 validation images and ~8 compared configurations the bias is small (order 0.1 pp) but non-zero.
+- Validation accuracy is subject to selection optimism because it was used for early stopping, configuration comparison and backbone selection. Its magnitude has not been estimated; an independent labelled holdout or nested evaluation would be needed to assess it.
 - The test set is unlabelled, so we cannot report test accuracy. Every claim about test images in Section 6 is a manual visual judgement and is labelled as such.
-- One seed for most ablations. The ablation matrix uses seed 42 only; differences below ~0.4 pp are within the seed noise we measured on the main model and should not be interpreted as real.
+- One seed for most ablations. The ablation matrix uses seed 42 only, so run-to-run uncertainty for those configurations is unknown. The main model's three-seed standard deviation (about 0.05 pp) cannot be transferred to all ablations or used as a universal significance threshold. Small differences require repeated runs before a stable ranking can be claimed.
 - The ablation uses a 3-epoch budget, which understates the value of regularisation (augmentation, label smoothing) relative to an 8-epoch budget.
 - Imbalance study is single-seed, single-ratio. ρ=100 and one seed per method; the ordering of methods is informative, the magnitudes are not.
 - The backbone sweep (Section 7.8) uses two seeds per model and a single 6-epoch recipe tuned for CNN fine-tuning, which may disadvantage ViT-B/16; it was run with a separate code base, so its numbers are not directly comparable with the main model's.
 
 ## 10.4 What we would do with more compute
 
-1. Sweep the augmentation policy properly (RandAugment magnitude, crop scale) rather than fixing it: Section 7 shows augmentation is worth less than a point at every budget tested, but it is also what makes the model robust to occlusion (Section 6.6).
+1. Study augmentation policies under matched budgets and repeated seeds, including robustness comparisons with and without RandomErasing. Section 7 reports gains below one point at the tested budgets; Section 6.6 does not establish which augmentation component causes the observed occlusion robustness.
 2. Train the CIFAR-10 from-scratch model for 200 epochs with cutout/AutoAugment, which is what the published 94–95% figures use, so that the pre-training gap is measured against a properly converged control.
 3. Fine-tune ViT-B/16 for longer than 6 epochs: Section 7.8 shows it still improving at the end of the fixed budget, so its ceiling on this task is not yet measured. The same sweep confirmed the prediction made for ConvNeXt-T, a gain below 0.5 pp (0.36 pp over ResNet-18).
 4. Calibrate and add an open-set rejection head (temperature scaling plus a max-softmax threshold) so that the "no photo available" and animal-free images are rejected instead of being confidently misclassified.
@@ -1245,7 +1247,6 @@ curl -fL -o data/cifar/train.parquet https://huggingface.co/datasets/uoft-cs/cif
 curl -fL -o data/cifar/test.parquet https://huggingface.co/datasets/uoft-cs/cifar10/resolve/main/plain_text/test-00000-of-00001.parquet
 python -m ee6483.scripts.run_experiments --phases main compare ablation augcheck lrsearch extra cifar imbalance
 python -m ee6483.scripts.aggregate                                # -> results/summary.{csv,md}
-python -m ee6483.src.analyze --which all                          # -> figures/
 python -m ee6483.src.analyze_cifar                                # -> CIFAR / imbalance figures
 python -m ee6483.scripts.dump_errors                              # -> all 50 validation errors
 
@@ -1256,6 +1257,11 @@ python scripts/ensemble_predict.py --out submissions/submission_backbone_ensembl
   --group convnext="$(ckpts convnext_tiny)" --group resnet18="$(ckpts resnet18)" \
   --group top3="$(ckpts convnext_tiny),$(ckpts resnet50),$(ckpts swin_t)" --choose top3 --tta
 cp submissions/submission_backbone_ensemble.csv submissions/submission.csv
+python ee6483/scripts/validate_submission.py --sub submissions/submission.csv
+
+# Regenerate Figure 12 only after the final ensemble probability CSV is refreshed.
+python -m ee6483.src.analyze --which all \
+  --test-probs submissions/submission_backbone_ensemble_probs.csv
 
 python report/build_report.py && python report/md_to_docx.py      # -> report/REPORT.md, .docx
 ```
@@ -1405,10 +1411,8 @@ Notes:
   be verified from the saved files.
 - `H_logit_adjust` shows `sec = 0` because it is post-hoc: its `metrics.json` is
   written by `ee6483/scripts/eval_logit_adjust.py`, which reuses the `H_ce`
-  checkpoint and only changes the decision rule. The `train.log` in the same
-  folder is a superseded record of an earlier in-training implementation (test
-  accuracy 51.56%); it is kept for completeness and explained in the
-  `README.md` of that folder.
+  checkpoint and only changes the decision rule. It has no separate training
+  log or checkpoint; its history is copied from `H_ce`.
 - The `H_*` runs save the class counts, epochs and per-epoch history in
   `metrics.json`, but not the full argument dictionary that the `E*` runs save;
   their arguments are the defaults of `ee6483/src/train_cifar.py` plus the
@@ -1498,8 +1502,11 @@ PASS: submission.csv is well-formed
 The validator is run before every upload. It checks the header, the row count,
 that the ids are exactly 1…500 with no duplicates, that every label is in
 {0, 1}, that the id order matches `sampleSubmission.csv` row by row, and that
-the predicted class balance is not degenerate (which is the symptom of a
-reversed label convention or a lexicographic id sort).
+the predicted class balance is not degenerate. Class counts cannot detect
+predictions permuted among ids or a reversed semantic label convention.
+Those require checks of filename-derived numeric ids, the explicit class
+mapping, and the per-id prediction records; the CSV validator alone cannot
+verify the model's semantic predictions.
 
 ## A.4 Dataset integrity summary
 

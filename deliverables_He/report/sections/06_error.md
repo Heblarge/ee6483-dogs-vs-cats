@@ -70,7 +70,7 @@ Why the model is wrong. The mesh introduces a strong, regular high-frequency pat
 
 What this reveals about the model's weakness. A human resolves this instantly by integrating the visible face through the mesh. The network's receptive field at the deepest layer covers the whole image, so it *could* in principle do the same, but nothing in the training objective forces it to be robust to structured occlusion: `RandomErasing` (which we use) inserts a *solid* rectangle, not a *high-frequency* pattern, so it does not train this invariance.
 
-Consistency with the robustness test. This is exactly what the corruption experiment in Section 6.6 shows quantitatively: blur, which also destroys high-frequency texture, costs 12.7 points, while a 25% solid occlusion costs only 0.4 points. The model is texture-driven, and any corruption that attacks texture attacks it.
+Consistency with the robustness test. Section 6.6 shows a 12.7-point loss under heavy blur and a 0.4-point loss under a central square mask whose side is 25% of the original image's shorter dimension. This supports sensitivity to blur under the tested conditions. It does not isolate texture from shape cues or establish the cause of the fence-related errors.
 
 ## 6.6 Grad-CAM and the robustness test
 
@@ -97,16 +97,18 @@ Robustness test. We apply seven deterministic perturbations (plus the clean cond
 | brightness ×1.6 | 98.48 | −0.5 |
 | brightness ×0.45 | 98.74 | −0.3 |
 | rotation 30° | 97.94 | −1.1 |
-| 25% central occlusion | 98.56 | −0.4 |
+| Central square mask, side = 25% of original short side | 98.56 | −0.4 |
 | Gaussian noise σ=25 | 94.58 | −4.4 |
 
-![Robustness](../ee6483/figures/fig_robustness.png)
+The mask is applied before resizing and centre cropping. Its side length is approximately 0.25 × min(height, width), with integer rounding. It covers approximately 6.25% of a square original image, and a smaller proportion of a rectangular original; the fraction of the final model input depends on the subsequent crop. This experiment did not test a mask covering 25% of the image area.
+
+![Robustness of the single-seed reference model. The occ25 label denotes a central square mask with side length 25% of the original image's shorter dimension, not 25% of its area](../ee6483/figures/fig_robustness.png)
 
 Three conclusions:
 
-1. Blur is by far the most damaging (−12.7 pp). Accuracy under heavy blur collapses to 86%, i.e. worse than a small CNN trained on clean data would score on clean images. Since blur removes exactly the high-frequency band that encodes fur texture, this is direct evidence that the decision is texture-driven rather than shape-driven.
-2. Occlusion is almost free (−0.4 pp): the RandomErasing augmentation did its job. This is a case where a training-time choice produced a measurable robustness benefit, which is a point in favour of the augmentation policy in Section 2.
-3. Colour is nearly irrelevant (−0.3 to −0.5 pp). Combined with conclusion 1, the model's evidence hierarchy is: face geometry > fur texture > colour/context. That ordering explains both case studies above.
+1. Heavy blur causes the largest observed drop (−12.7 pp). This is consistent with reliance on fine visual detail, but blur also affects edges and shape information; these measurements alone cannot distinguish texture reliance from shape reliance.
+2. The tested central mask causes a smaller drop (−0.4 pp). RandomErasing is a possible contributor, but no matched robustness comparison with RandomErasing disabled was performed, so its causal contribution is unknown. The small mask also limits how broadly this result can be generalised to occlusion.
+3. The two brightness changes cause drops of about 0.3–0.5 pp. This supports robustness to those particular illumination changes. It does not establish robustness to hue or saturation changes, or a ranking of colour, texture and shape cues.
 
 ## 6.7 The test set: qualitative inspection
 
@@ -117,7 +119,7 @@ The test set is unlabelled, so the labels shown are the submitted ensemble's pre
 - The four least-confident cat predictions are a black-and-white cat behind cage bars with overlaid text (id=216, 0.84), a black cat on a dark rug (id=242, 0.85), a black-and-white cat held up by a hand in front of a chain-link fence, with a numbered tag (id=159, 0.91), and a grey cat on a strongly patterned red blanket (id=30, 0.93). Occlusion, low contrast and texture-heavy backgrounds are among the failure factors identified on the labelled validation set.
 - The four least-confident dog predictions are a black puppy held in a hand (id=313, 0.84), a puppy sitting in a cage (id=261, 0.86), a low-resolution, pixelated close-up of a dog's face (id=302, 0.86) and a "No Photo Available" placeholder (id=328, 0.87). The first three predictions are visually plausible; the placeholder exposes the closed-set limitation because the model must choose cat or dog even when neither is present.
 - The most-confident examples remain visually straightforward: two cat images (ids 176 and 198, both 0.96) and two dog images (ids 254 and 243, both 0.96). One dog image contains several animals behind a fence, showing that the ensemble can remain stable under multiple subjects and structured occlusion.
-- The submitted prediction distribution is 259 dog / 241 cat (52/48), consistent with a roughly balanced test set. A reversed label convention or lexicographic id sort would produce a very different or degenerate distribution, so this is weak but useful evidence that the id mapping and class convention are correct.
+- The submitted prediction distribution is 259 dog / 241 cat (52/48). This is a descriptive count, not a check of image-to-label alignment: permuting predictions among ids leaves the count unchanged, and reversing labels simply swaps the two counts. Alignment is checked using numeric image ids and the explicit cat=0, dog=1 convention, as described in Section 5.3.
 
 ## 6.8 Two test-set cases: one strength, one weakness
 
@@ -127,7 +129,7 @@ The test set carries no labels, so the two cases below are chosen for what they 
 
 *Case 2, a weakness: an image that contains no animal (id=328, predicted dog, p=0.87).* The input is a "No Photo Available" placeholder graphic. The weakness is structural rather than a training failure: a two-way softmax must put its mass somewhere, so an input outside the label space cannot be rejected. A maximum-softmax threshold or explicit rejection class would address this, but would require a validation set containing out-of-distribution images to calibrate the threshold (Section 6.9). The relatively high confidence shows that higher in-distribution accuracy does not imply reliable behaviour outside the label space.
 
-The pair also illustrates where the model's remaining error budget lies. It is confident and correct when the animal is visible and well framed, however many animals or scales are present; it is uncertain, but still forced to answer, when the input is not an animal at all.
+These two examples illustrate visually plausible recognition of dogs alongside a confident assignment to an input containing no animal. They do not establish a test error rate, and the placeholder shows why confidence alone is insufficient to identify inputs outside the model's label space.
 
 ## 6.9 Limitations: closed-set assumption and calibration
 

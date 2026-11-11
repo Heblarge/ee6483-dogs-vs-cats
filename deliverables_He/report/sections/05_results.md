@@ -77,11 +77,11 @@ Ensembling six top-tier models removes 24 of the 39 validation errors of the M3 
 | Predicted cats | 241 |
 | Mean max-softmax confidence | 0.95 |
 
-Sanity checks performed (`ee6483/scripts/validate_submission.py`):
+Sanity checks performed (CSV format validator plus a separate per-id probability comparison):
 
 - header exactly `id,label`; 500 data rows; ids exactly `1..500` with no duplicates;
 - every label in `{0,1}`; the id order matches `sampleSubmission.csv` row by row;
-- the class balance is 259/241 (52/48), consistent with a balanced test set: a strong signal that the id→file mapping and the label convention are both correct. A reversed convention or a lexicographic id sort would have produced a very different (or degenerate) distribution.
+- prediction ids and labels agree row by row between `submission.csv` and `submission_backbone_ensemble_probs.csv`; each label agrees with the probability decision under cat=0, dog=1. The loader derives ids from image filenames and checks the training class mapping. The 259/241 class count is descriptive only: it cannot detect predictions assigned to the wrong ids or verify the semantic correctness of labels.
 
 The validator is part of the repository and must pass before any upload.
 
@@ -89,7 +89,7 @@ No test accuracy is reported, because the test set has no labels. We also did no
 
 ## 5.4 A note on the optimism of validation accuracy
 
-Validation accuracy was used for early stopping and for choosing among M0–M5, so the reported numbers are mildly optimistic relative to a model that had never seen the validation set. The bias is small, with 5,000 validation images and about 10 compared configurations, but it is real. The appropriate statement is that *the reference ensemble's 99.22% is a validation-set number obtained with model selection performed on the same set; the submitted ensemble's 99.70% carries an even larger selection bias (the top three backbones were chosen on this validation set); the test set is unlabelled, so we cannot quantify the gap.*
+Validation accuracy was used for early stopping and model selection, so the reported results are subject to selection optimism. The reference ensemble's 99.22% and submitted ensemble's 99.70% were measured on the same validation set used for selection; choosing the top three backbone families adds another selection step. Without an independent labelled holdout or a nested evaluation, we cannot quantify the size of this bias or claim a numerical upper bound. The unlabelled test set cannot resolve this uncertainty.
 
 ## 5.5 Runtime
 

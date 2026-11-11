@@ -5,7 +5,8 @@ Checks (any failure => exit code 1):
   * exactly 500 data rows
   * ids are exactly 1..500 (no duplicates, no missing)
   * every label is in {0, 1}
-  * label convention: 1 = dog, 0 = cat (verified against the file, not assumed)
+The required convention is 1 = dog, 0 = cat. This format validator cannot
+verify its semantic meaning without the image loader and prediction records.
   * prediction distribution is not degenerate (warns if the minority class < 35%)
 """
 from __future__ import annotations

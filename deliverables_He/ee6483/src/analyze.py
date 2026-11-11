@@ -205,6 +205,8 @@ class Perturb:
         if n == "rot30":
             return im.rotate(30, expand=False)
         if n == "occ25":
+            # Historical key: 25% of the original SHORT SIDE, not 25% area.
+            # Applied before the evaluation resize/centre crop.
             a = np.asarray(im).copy()
             h, w = a.shape[:2]
             s = int(0.25 * min(h, w))

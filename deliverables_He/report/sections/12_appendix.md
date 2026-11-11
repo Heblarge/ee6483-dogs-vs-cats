@@ -74,10 +74,8 @@ Notes:
   be verified from the saved files.
 - `H_logit_adjust` shows `sec = 0` because it is post-hoc: its `metrics.json` is
   written by `ee6483/scripts/eval_logit_adjust.py`, which reuses the `H_ce`
-  checkpoint and only changes the decision rule. The `train.log` in the same
-  folder is a superseded record of an earlier in-training implementation (test
-  accuracy 51.56%); it is kept for completeness and explained in the
-  `README.md` of that folder.
+  checkpoint and only changes the decision rule. It has no separate training
+  log or checkpoint; its history is copied from `H_ce`.
 - The `H_*` runs save the class counts, epochs and per-epoch history in
   `metrics.json`, but not the full argument dictionary that the `E*` runs save;
   their arguments are the defaults of `ee6483/src/train_cifar.py` plus the
@@ -167,8 +165,11 @@ PASS: submission.csv is well-formed
 The validator is run before every upload. It checks the header, the row count,
 that the ids are exactly 1…500 with no duplicates, that every label is in
 {0, 1}, that the id order matches `sampleSubmission.csv` row by row, and that
-the predicted class balance is not degenerate (which is the symptom of a
-reversed label convention or a lexicographic id sort).
+the predicted class balance is not degenerate. Class counts cannot detect
+predictions permuted among ids or a reversed semantic label convention.
+Those require checks of filename-derived numeric ids, the explicit class
+mapping, and the per-id prediction records; the CSV validator alone cannot
+verify the model's semantic predictions.
 
 ## A.4 Dataset integrity summary
 
