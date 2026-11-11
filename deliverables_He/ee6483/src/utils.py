@@ -94,12 +94,13 @@ def load_yaml(path: str | os.PathLike) -> dict:
         return yaml.safe_load(f) or {}
 
 
-def merge_args_with_yaml(args, yaml_path: str | None):
+def merge_args_with_yaml(args, yaml_path: str | None, cli_keys=None):
     """CLI args override yaml values; yaml fills anything left at default."""
     if not yaml_path:
         return args
     cfg = load_yaml(yaml_path)
-    cli_keys = getattr(args, "_cli_keys", set())
+    if cli_keys is None:
+        cli_keys = set()
     for k, v in cfg.items():
         if not hasattr(args, k):
             print(f"[config] warning: unknown key '{k}' in {yaml_path}, ignored")

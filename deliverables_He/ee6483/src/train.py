@@ -107,7 +107,8 @@ def make_scheduler(optimizer, total_steps: int, warmup_steps: int, kind: str = "
 
 def main(argv=None):
     args = parse_args(argv)
-    args = merge_args_with_yaml(args, args.config)
+    cli_keys = args.__dict__.pop("_cli_keys", set())
+    args = merge_args_with_yaml(args, args.config, cli_keys)
 
     set_seed(args.seed)
     device = get_device()
