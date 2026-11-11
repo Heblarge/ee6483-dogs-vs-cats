@@ -1,0 +1,15 @@
+runs/backbones/b_convnext_tiny_s0/checkpoints/best.pt: val acc 99.60%
+runs/backbones/b_convnext_tiny_s1/checkpoints/best.pt: val acc 99.62%
+runs/backbones/b_resnet18_s0/checkpoints/best.pt: val acc 99.28%
+runs/backbones/b_resnet18_s1/checkpoints/best.pt: val acc 99.22%
+runs/backbones/b_resnet50_s0/checkpoints/best.pt: val acc 99.56%
+runs/backbones/b_resnet50_s1/checkpoints/best.pt: val acc 99.58%
+runs/backbones/b_swin_t_s0/checkpoints/best.pt: val acc 99.56%
+runs/backbones/b_swin_t_s1/checkpoints/best.pt: val acc 99.56%
+convnext             val acc 99.66%  errors 17  (2 models)
+convnext+tta         val acc 99.64%  errors 18  (2 models)
+resnet18             val acc 99.30%  errors 35  (2 models)
+resnet18+tta         val acc 99.28%  errors 36  (2 models)
+top3                 val acc 99.70%  errors 15  (6 models)
+top3+tta             val acc 99.70%  errors 15  (6 models)
+采用 top3+tta：已写出 500 条预测 -> submissions/submission_backbone_ensemble.csv（dog 259 / cat 241）

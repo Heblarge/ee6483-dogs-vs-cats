@@ -42,6 +42,9 @@ On a small, well-curated binary problem, the pre-trained representation and the 
 # Sections 2-9 (ee6483/): Python 3.13, torch 2.6.0+cu124, torchvision 0.21.0, RTX 3070 Ti Laptop (8 GB)
 python -m ee6483.src.data.check_data --root ../datasets/datasets   # -> results/data_report.json
 python -m ee6483.src.data.cache_images --src ../datasets/datasets --dst data/cache --short 256
+mkdir -p data/cifar
+curl -fL -o data/cifar/train.parquet https://huggingface.co/datasets/uoft-cs/cifar10/resolve/main/plain_text/train-00000-of-00001.parquet
+curl -fL -o data/cifar/test.parquet https://huggingface.co/datasets/uoft-cs/cifar10/resolve/main/plain_text/test-00000-of-00001.parquet
 python -m ee6483.scripts.run_experiments --phases main compare ablation augcheck lrsearch extra cifar imbalance
 python -m ee6483.scripts.aggregate                                # -> results/summary.{csv,md}
 python -m ee6483.src.analyze --which all                          # -> figures/
@@ -50,9 +53,10 @@ python -m ee6483.scripts.dump_errors                              # -> all 50 va
 
 # Section 7.8 and the final submission (src/): torch 2.11.0+cu128, one A40 per run
 bash scripts/run_backbones.sh                                     # 7 backbones x seeds 0, 1
+ckpts() { printf 'runs/backbones/b_%s_s0/checkpoints/best.pt,runs/backbones/b_%s_s1/checkpoints/best.pt' "$1" "$1"; }
 python scripts/ensemble_predict.py --out submissions/submission_backbone_ensemble.csv \
-  --group convnext=<2 ConvNeXt-T checkpoints> --group resnet18=<2 ResNet-18 checkpoints> \
-  --group top3=<6 ConvNeXt-T / ResNet-50 / Swin-T checkpoints> --choose top3 --tta
+  --group convnext="$(ckpts convnext_tiny)" --group resnet18="$(ckpts resnet18)" \
+  --group top3="$(ckpts convnext_tiny),$(ckpts resnet50),$(ckpts swin_t)" --choose top3 --tta
 cp submissions/submission_backbone_ensemble.csv submissions/submission.csv
 
 python report/build_report.py && python report/md_to_docx.py      # -> report/REPORT.md, .docx
@@ -65,3 +69,13 @@ checkpoint lists for the ensemble are in
 non-bit-exact, so re-runs should match to within the seed noise reported in the text,
 not to the last digit. The numbers in the section files are maintained by hand
 (Appendix A.5).
+
+Tracked metrics without their git-ignored checkpoints are treated as incomplete and
+are retrained automatically, overwriting the tracked files, so reproductions should be run
+in a separate checkout. The recipes, prescribed seeds and six-model ensemble are
+frozen for reproduction: reruns must not be cherry-picked or retuned after observing
+validation results. Validation is used for early stopping/model selection only; the
+dog/cat test set remains prediction-only, and logit-adjustment tau is selected on the
+CIFAR validation split before a single test evaluation. This prevents direct leakage,
+although the residual validation-selection bias noted in Section 10.3 cannot be made
+exactly zero without a new held-out set.

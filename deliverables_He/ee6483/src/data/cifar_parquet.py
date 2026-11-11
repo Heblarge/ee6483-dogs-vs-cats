@@ -16,6 +16,10 @@ from PIL import Image
 from torch.utils.data import Dataset
 
 CIFAR_CLASSES = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
+HF_FILES = {
+    "train.parquet": "train-00000-of-00001.parquet",
+    "test.parquet": "test-00000-of-00001.parquet",
+}
 
 
 class CIFAR10Parquet(Dataset):
@@ -41,8 +45,11 @@ def get_cifar(root: str | Path, train: bool, transform=None):
     name = "train.parquet" if train else "test.parquet"
     p = root / name
     if not p.exists():
+        remote_name = HF_FILES[name]
         raise FileNotFoundError(
             f"{p} not found. Download it with:\n"
-            f"  curl -L -o {p} https://huggingface.co/datasets/uoft-cs/cifar10/resolve/main/plain_text/{name}"
+            f"  mkdir -p {root}\n"
+            f"  curl -fL -o {p} "
+            f"https://huggingface.co/datasets/uoft-cs/cifar10/resolve/main/plain_text/{remote_name}"
         )
     return CIFAR10Parquet(p, transform)

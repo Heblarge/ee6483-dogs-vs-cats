@@ -1,8 +1,8 @@
 """Evaluate the seed-ensemble (+ optional TTA) on the validation set.
 
-Produces ee6483/results/E4_ensemble/metrics.json so the number reported for the
-submitted model is measured with exactly the same procedure used to build
-submission.csv (average of three seeds, horizontal-flip TTA).
+Produces ee6483/results/E4_ensemble/metrics.json for the ResNet-18 reference
+ensemble used in the controlled study (average of three seeds, horizontal-flip
+TTA). The final submission is produced separately by scripts/ensemble_predict.py.
 """
 from __future__ import annotations
 

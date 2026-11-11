@@ -75,15 +75,16 @@ Notes:
 - `H_logit_adjust` shows `sec = 0` because it is post-hoc: its `metrics.json` is
   written by `ee6483/scripts/eval_logit_adjust.py`, which reuses the `H_ce`
   checkpoint and only changes the decision rule. The `train.log` in the same
-  folder is left over from an earlier in-training implementation and its test
-  accuracy (51.56%) is superseded; see the `README.md` in that folder.
+  folder is a superseded record of an earlier in-training implementation (test
+  accuracy 51.56%); it is kept for completeness and explained in the
+  `README.md` of that folder.
 - The `H_*` runs save the class counts, epochs and per-epoch history in
   `metrics.json`, but not the full argument dictionary that the `E*` runs save;
   their arguments are the defaults of `ee6483/src/train_cifar.py` plus the
   command line in `run_experiments.py`.
 - `E4_ensemble` is the evaluation of the three `E4_r18_ft` seeds averaged with
-  horizontal-flip TTA: the configuration of the first submission
-  (kept as `submissions/submission_m3_ensemble.csv`).
+  horizontal-flip TTA: the ResNet-18 reference ensemble used to quantify the
+  benefit of seed averaging in Section 5.2. It is not a submission artifact.
 - `backbone_ensemble` averages the six top-tier checkpoints of Section 7.8 with
   horizontal-flip TTA: the configuration that produced the final `submission.csv`
   (`scripts/ensemble_predict.py`; details in

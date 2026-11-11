@@ -39,26 +39,28 @@ python -m ee6483.src.data.check_data --root data/datasets
 # 1) offline resize cache (cuts epoch time ~2x)
 python -m ee6483.src.data.cache_images --src data/datasets --dst data/cache --short 256
 
+# CIFAR-10 parquet data (required by the cifar and imbalance phases)
+mkdir -p data/cifar
+curl -fL -o data/cifar/train.parquet \
+  https://huggingface.co/datasets/uoft-cs/cifar10/resolve/main/plain_text/train-00000-of-00001.parquet
+curl -fL -o data/cifar/test.parquet \
+  https://huggingface.co/datasets/uoft-cs/cifar10/resolve/main/plain_text/test-00000-of-00001.parquet
+
 # 2) main model, 3 seeds (the settings are in configs/main.yaml; CLI overrides yaml)
 for s in 42 43 44; do
   python -m ee6483.src.train --config ee6483/configs/main.yaml \
       --exp-id E4_r18_ft --seed $s --data-root data/cache
 done
 
-# 3) submission (3-seed ensemble + horizontal-flip TTA)
-python -m ee6483.src.predict \
-    --ckpts ee6483/results/E4_r18_ft/s42/best.pt \
-            ee6483/results/E4_r18_ft/s43/best.pt \
-            ee6483/results/E4_r18_ft/s44/best.pt \
-    --out submission.csv --tta 1
+# 3) reference-ensemble validation (analysis only; does not create a submission)
+python -m ee6483.scripts.eval_ensemble --data-root data/cache --tta 1
 
-# 4) validate before uploading
-python ee6483/scripts/validate_submission.py --sub submission.csv
-
-# 5) everything else: comparisons, ablations, learning-rate sweep, CIFAR-10, imbalance, figures
+# 4) everything else: comparisons, ablations, learning-rate sweep, CIFAR-10, imbalance, figures
 python -m ee6483.scripts.run_experiments \
-    --phases main compare ablation lrsearch cifar imbalance extra figure
+    --phases main compare ablation augcheck lrsearch cifar imbalance extra figure
 python -m ee6483.scripts.aggregate            # -> results/summary.{csv,md}
+python -m ee6483.src.analyze --which all \
+    --test-probs submissions/submission_backbone_ensemble_probs.csv
 python -m ee6483.src.analyze_cifar            # CIFAR / imbalance figures
 python -m ee6483.scripts.find_duplicates      # near-duplicate audit (needs imagehash)
 ```
@@ -88,9 +90,16 @@ ee6483/
   `cudnn.deterministic=True`, `benchmark=False`.
 * AMP kernels are not bit-exact, so every headline number is reported as
   mean ± std over three seeds rather than a single run.
-* Each run stores its full argument dictionary inside `metrics.json` and
-  `best.pt`, and the orchestrator appends the exact command line to
+* Each Dogs-vs-Cats run stores its full argument dictionary inside
+  `metrics.json` and `best.pt` (the CIFAR `G*`/`H*` runs store it only in
+  `best.pt`), and the orchestrator appends the exact command line to
   `results/run_log.txt`.
+* A run is skipped only when both its metrics and checkpoint exist. This is
+  intentional because metrics are tracked in git while checkpoints are not.
+  Run reproductions in a separate checkout: in this working copy every run
+  would be retrained and its tracked `metrics.json` overwritten.
+* Recipes and seed lists are frozen for reproduction. Do not discard an
+  unfavourable seed or retune after looking at validation/test results.
 
 ## 6. Measured results (this hardware)
 

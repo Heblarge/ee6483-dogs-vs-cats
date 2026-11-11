@@ -12,8 +12,7 @@ learning, an ablation matrix, a CIFAR-10 extension and a class-imbalance compari
 
 **Result:** 99.70% validation accuracy for the submitted ensemble (ConvNeXt-T, ResNet-50 and Swin-T,
 two seeds each, horizontal-flip TTA; report Sections 5.3 and 7.8). The submitted
-`submissions/submission.csv` contains 500 predictions (259 dog / 241 cat). The first submission
-(ResNet-18 ×3 seeds + TTA, 99.22%) is kept as `submissions/submission_m3_ensemble.csv`.
+`submissions/submission.csv` contains 500 predictions (259 dog / 241 cat).
 
 | Model | Validation accuracy |
 |---|---|
@@ -21,7 +20,7 @@ two seeds each, horizontal-flip TTA; report Sections 5.3 and 7.8). The submitted
 | SmallCNN from scratch | 95.06% |
 | ResNet-18, frozen backbone + linear head | 97.78% |
 | **ResNet-18, LP-FT (main model)** | **98.93 ± 0.05%** (3 seeds) |
-| ResNet-18 ×3 seeds + TTA (first submission) | 99.22% |
+| ResNet-18 ×3 seeds + TTA (reference ensemble) | 99.22% |
 | **ConvNeXt-T + ResNet-50 + Swin-T, ×2 seeds + TTA (submitted)** | **99.70%** |
 
 ---
@@ -35,7 +34,8 @@ two seeds each, horizontal-flip TTA; report Sections 5.3 and 7.8). The submitted
 ├── submissions/
 │   ├── submission.csv         the 500 test-set predictions (id, label; 1=dog, 0=cat)
 │   ├── sampleSubmission.csv   the format template provided with the assignment
-│   └── submission.probs.npy   per-class probabilities behind submission.csv
+│   ├── submission_backbone_ensemble_probs.csv  final per-image probabilities
+│   └── submission_backbone_ensemble_ensemble.json  ensemble composition and validation results
 │
 ├── docs/                      assignment documents and planning notes
 ├── report/                    the report, its sources and the build scripts
@@ -82,7 +82,7 @@ two seeds each, horizontal-flip TTA; report Sections 5.3 and 7.8). The submitted
 
 | File | Purpose |
 |---|---|
-| `run_experiments.py` | Runs the whole matrix phase by phase (`main`, `compare`, `ablation`, `lrsearch`, `cifar`, `imbalance`); skips runs that already have a `metrics.json` |
+| `run_experiments.py` | Runs the whole matrix phase by phase (`main`, `compare`, `ablation`, `augcheck`, `lrsearch`, `extra`, `cifar`, `imbalance`); skips a training run only when both a valid `metrics.json` and a non-empty `best.pt` exist |
 | `aggregate.py` | Collects every `results/**/metrics.json` into `summary.csv` and `summary.md` |
 | `validate_submission.py` | Strict format check for `submission.csv` — run before every upload |
 | `eval_ensemble.py` | Evaluates the seed ensemble (+TTA) on the validation set |
@@ -120,13 +120,15 @@ show all 50 validation errors, `fig_error_cases.png` is an earlier layout).
 | `EE6483_Group_Report.docx` | **The submitted report** (A4, 10 sections + references + appendix) |
 | `REPORT.md` | The same report as Markdown (generated) |
 | `sections/*.md` | The source of each section, one file per section |
-| `make_tokens.py` | Reads `results/**/metrics.json` and writes `tokens.json` — every number in the report comes from here |
-| `build_report.py` | Assembles `sections/*.md` into `REPORT.md`, substitutes the tokens, numbers the figures |
+| `make_tokens.py` | Legacy helper that writes `tokens.json`; retained for old `{{TOKEN}}` placeholders, which the current section files do not use |
+| `build_report.py` | Assembles `sections/*.md` into `REPORT.md`, substitutes any legacy tokens, and numbers the figures |
 | `md_to_docx.py` | Converts `REPORT.md` into the `.docx` (headings, tables, figures, LaTeX→Unicode) |
 | `tokens.json` | The resolved values used in the last build |
 
-The report is generated, not hand-assembled: re-running the pipeline after new experiments
-updates every table and every number quoted in the prose.
+The document structure is generated, but the numerical prose and tables in `sections/*.md`
+are maintained by hand. After an experiment changes, compare the section text with
+`results/summary.csv`, the relevant `metrics.json` files and `results/backbones.csv` before
+rebuilding the document.
 
 ### `docs/` — assignment material
 
@@ -136,6 +138,7 @@ updates every table and every number quoted in the prose.
 | `EE6483_project_briefing.pdf` | The briefing slides |
 | `BEST_PLAN.md` | The execution plan, with a "plan vs actual" comparison at the top |
 | `PROJECT_PLAN.md` | The first version of the plan (superseded, kept for history) |
+| `RECHECK_2026-11-11.md` | Server-side clean reproduction audit after the completion, data-download and test-leakage fixes |
 
 ---
 
@@ -159,41 +162,81 @@ The paths above are relative to this folder. In this repository the dataset sits
 repository root (`../datasets/datasets`, shared with the other code base), so pass that path
 instead: `--src ../datasets/datasets --dst data/cache`.
 
-CIFAR-10 is downloaded automatically from the HuggingFace parquet mirror on first use.
+CIFAR-10 is not downloaded implicitly. Fetch the two HuggingFace parquet shards before the
+`cifar` or `imbalance` phases:
+
+```bash
+mkdir -p data/cifar
+curl -fL -o data/cifar/train.parquet \
+  https://huggingface.co/datasets/uoft-cs/cifar10/resolve/main/plain_text/train-00000-of-00001.parquet
+curl -fL -o data/cifar/test.parquet \
+  https://huggingface.co/datasets/uoft-cs/cifar10/resolve/main/plain_text/test-00000-of-00001.parquet
+echo '8428b53a88a11ac374111006708df51469e315a22ac6d66470afd9c78d2ae883  data/cifar/train.parquet' | sha256sum -c -
+echo '841389e6f2d64f28bf17310e430aebac20ec3ba611a3c5e231dc93c645ce84de  data/cifar/test.parquet' | sha256sum -c -
+```
 
 ## Quick start
+
+> **Run reproductions in a separate checkout** (for example a fresh clone or a copy on the
+> cluster), not in this working copy. Checkpoints are not in git, so `run_experiments.py`
+> treats every run here as incomplete, retrains it and overwrites the tracked
+> `ee6483/results/**/metrics.json` files that the report numbers come from.
 
 ```bash
 pip install -r requirements.txt          # see the note about the CUDA build inside
 
-# 1. reproduce the M3 baseline ensemble (three ResNet-18 seeds, the first submission).
-#    It writes submission_m3_ensemble.csv and does NOT touch the final submission.csv.
+# 1. reproduce the ResNet-18 reference ensemble used in the controlled study.
 python -m ee6483.src.train --config ee6483/configs/main.yaml --data-root ../datasets/datasets --exp-id E4_r18_ft --seed 42
 python -m ee6483.src.train --config ee6483/configs/main.yaml --data-root ../datasets/datasets --exp-id E4_r18_ft --seed 43
 python -m ee6483.src.train --config ee6483/configs/main.yaml --data-root ../datasets/datasets --exp-id E4_r18_ft --seed 44
-python -m ee6483.src.predict --ckpts ee6483/results/E4_r18_ft/s4{2,3,4}/best.pt \
-    --data-root ../datasets/datasets --out submissions/submission_m3_ensemble.csv --tta 1
-python ee6483/scripts/validate_submission.py --sub submissions/submission_m3_ensemble.csv
+python -m ee6483.scripts.eval_ensemble --data-root ../datasets/datasets --tta 1
 
-# 2. reproduce the FINAL submission (six top-tier backbones, Section 7.8; needs the
+# 2. reproduce the submission (six top-tier backbones, Section 7.8; needs the
 #    cluster checkpoints, see CLUSTER_GUIDE.md and
 #    submissions/submission_backbone_ensemble_ensemble.json for the exact lists)
 bash scripts/run_backbones.sh
+ckpts() { printf 'runs/backbones/b_%s_s0/checkpoints/best.pt,runs/backbones/b_%s_s1/checkpoints/best.pt' "$1" "$1"; }
 python scripts/ensemble_predict.py --out submissions/submission_backbone_ensemble.csv \
-    --group convnext=<2 ckpts> --group resnet18=<2 ckpts> --group top3=<6 ckpts> --choose top3 --tta
+    --group convnext="$(ckpts convnext_tiny)" \
+    --group resnet18="$(ckpts resnet18)" \
+    --group top3="$(ckpts convnext_tiny),$(ckpts resnet50),$(ckpts swin_t)" \
+    --choose top3 --tta
 cp submissions/submission_backbone_ensemble.csv submissions/submission.csv
 python ee6483/scripts/validate_submission.py --sub submissions/submission.csv
 
 # 3. regenerate every table and figure
 python -m ee6483.scripts.run_experiments --phases main compare ablation augcheck lrsearch extra cifar imbalance
 python -m ee6483.scripts.aggregate
-python -m ee6483.src.analyze --which all
+python -m ee6483.src.analyze --which all \
+    --test-probs submissions/submission_backbone_ensemble_probs.csv
 python -m ee6483.src.analyze_cifar
 
 # 4. regenerate the report (numbers in report/sections/*.md are maintained by hand)
 python report/build_report.py
 python report/md_to_docx.py
 ```
+
+`run_experiments.py` deliberately treats a tracked `metrics.json` without its ignored
+checkpoint as incomplete and retrains that run. Use `--force` only when intentionally
+replacing a complete run.
+
+## Retraining protocol and overfitting controls
+
+The published recipes, seeds and final ensemble membership are frozen before a reproduction
+run. A rerun is for regenerating missing artifacts, not for searching until a favourable seed
+appears:
+
+- keep every prescribed seed, including an unfavourable rerun; do not cherry-pick;
+- use validation data for early stopping and model selection only, and never train on it;
+- choose logit-adjustment `tau` on validation data, then evaluate the chosen value once on the
+  CIFAR-10 test set;
+- do not change epochs, augmentation or the six-model final ensemble after seeing rerun scores;
+- compare multi-seed means and variability rather than accepting a single best checkpoint;
+- keep the 500-image dog/cat test set prediction-only: visual inspection must not influence
+  model or hyper-parameter selection.
+
+These controls prevent direct leakage and cherry-picking. They cannot mathematically guarantee
+zero validation-selection bias; that remaining limitation is stated in Section 10.3.
 
 ## Environment
 

@@ -1,7 +1,8 @@
-"""Compute every number quoted in the report prose from the raw metrics.json files.
+"""Legacy helper for generating ``report/tokens.json`` from raw result files.
 
-Writes report/tokens.json; build_report.py substitutes {{TOKEN}} placeholders.
-This keeps the text and the experiments in sync by construction.
+``build_report.py`` can still substitute ``{{TOKEN}}`` placeholders, but the
+current section sources do not use them.  Report values are maintained manually
+and must be checked against the result files after an experiment changes.
 """
 from __future__ import annotations
 

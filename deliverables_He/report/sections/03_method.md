@@ -112,7 +112,7 @@ Details that matter: no vertical flip (an upside-down animal is out of distribut
 
 - `set_seed(s)` fixes `PYTHONHASHSEED`, `random`, `numpy`, `torch` and `torch.cuda` for $s \in \{42,43,44\}$, with `cudnn.deterministic=True` and `cudnn.benchmark=False`.
 - AMP kernels are not bit-exact even with deterministic flags, so every headline number is reported as mean ± std over three seeds, not as a single run.
-- Each run writes `metrics.json` (with the full argument dictionary), `curves.csv`, `train.log` and `best.pt`; the orchestrator appends the exact command line to `results/run_log.txt`.
+- Each Dogs-vs-Cats run (`ee6483.src.train`) writes `metrics.json` (with the full argument dictionary), `curves.csv`, `train.log` and `best.pt`; the CIFAR runs (`ee6483.src.train_cifar`) write `metrics.json` (class counts, epochs and per-epoch history, without the argument dictionary), `train.log` and `best.pt`. The orchestrator appends the exact command line to `results/run_log.txt`.
 - Data are cached once at short-side 256 px, so every experiment sees identical pixels regardless of when it ran.
 - k-fold cross-validation is not used. The assignment fixes the train/validation split, and re-partitioning it would change the validation set that every reported number refers to, making the results incomparable across models and with the provided baseline. Three seeds serve the same purpose, estimating run-to-run variance, while keeping a single fixed validation set.
 
@@ -126,13 +126,10 @@ python -m ee6483.src.train --exp-id E4_r18_ft --model resnet18 --epochs 8 \
     --lr 3e-4 --head-lr 1e-3 --batch 64 --img-size 224 --aug full \
     --ft-strategy lpft --freeze-epochs 2 --seed 42 --data-root data/cache
 
-# first submission: 3-seed M3 ensemble with horizontal-flip TTA
-python -m ee6483.src.predict --ckpts \
-    ee6483/results/E4_r18_ft/s42/best.pt \
-    ee6483/results/E4_r18_ft/s43/best.pt \
-    ee6483/results/E4_r18_ft/s44/best.pt --out submissions/submission_m3_ensemble.csv --tta 1
+# reference-ensemble validation for the controlled study (no test submission)
+python -m ee6483.scripts.eval_ensemble --data-root data/cache --tta 1
 
-# final submission: top-tier backbones of Section 7.8 (cluster; see CLUSTER_GUIDE.md)
+# submitted model: top-tier backbones of Section 7.8 (cluster; see CLUSTER_GUIDE.md)
 sbatch cluster/backbones.sbatch      # 7 backbones x 2 seeds
 sbatch cluster/ensemble.sbatch       # -> submissions/submission_backbone_ensemble.csv
 

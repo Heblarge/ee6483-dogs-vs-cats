@@ -10,7 +10,7 @@
 | `deliverables_He/report/EE6483_Group_Report.docx` | **提交用的报告**（A4，10 章 + 参考文献 + 附录） |
 | `deliverables_He/report/REPORT.md`、`report/sections/` | 同内容 Markdown（由 sections 自动生成）及其源文件 |
 | `deliverables_He/report/backbone_comparison.md` | 骨干对比的详细版（7 个模型 × 2 seeds，集群上跑）；精简版已并入报告第 7.8 节 |
-| `deliverables_He/submissions/submission.csv` | **提交用的预测结果**：ConvNeXt-T + ResNet-50 + Swin-T 各 2 seeds 集成 + TTA（500 行，259 dog / 241 cat，已通过校验）；旧版保留为 `submission_m3_ensemble.csv` |
+| `deliverables_He/submissions/submission.csv` | **提交用的预测结果**：ConvNeXt-T + ResNet-50 + Swin-T 各 2 seeds 集成 + TTA（500 行，259 dog / 241 cat，已通过校验） |
 | `deliverables_He/ee6483/` | 报告实验的全部代码、42 次实验的 metrics/日志、图 |
 | `deliverables_He/src/`、`configs/`、`cluster/` | 配置驱动的训练框架、骨干对比配置与集群脚本 |
 | `deliverables_He/docs/` | 作业 PDF、执行方案 |

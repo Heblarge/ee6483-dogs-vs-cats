@@ -1,7 +1,8 @@
 """Assemble report/sections/*.md into a single REPORT.md, in a fixed order.
 
-Tokens of the form {{NAME}} are replaced from report/tokens.json so that numbers
-quoted in the prose always match the latest metrics.json (no hand-copied digits).
+The current section sources contain hand-checked numbers.  For backwards
+compatibility, any legacy ``{{NAME}}`` placeholders are still replaced from
+``report/tokens.json``; the build does not otherwise derive prose from metrics.
 """
 from __future__ import annotations
 

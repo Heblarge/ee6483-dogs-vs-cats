@@ -49,7 +49,16 @@ def main():
     from ..src.train_cifar import stratified_split
 
     device = get_device()
-    ck = torch.load(args.ce_ckpt, map_location="cpu", weights_only=False)
+    ce_ckpt = Path(args.ce_ckpt)
+    if not ce_ckpt.is_file():
+        raise FileNotFoundError(
+            f"CE checkpoint not found: {ce_ckpt}. Run the H_ce experiment first; "
+            "a tracked metrics.json alone is not sufficient."
+        )
+    ce_metrics_path = ce_ckpt.parent / "metrics.json"
+    if not ce_metrics_path.is_file():
+        raise FileNotFoundError(f"CE metrics not found next to checkpoint: {ce_metrics_path}")
+    ck = torch.load(ce_ckpt, map_location="cpu", weights_only=False)
     model = build_cifar_resnet("resnet18", 10)
     model.load_state_dict(ck["model"])
     model.to(device).eval()
@@ -60,29 +69,34 @@ def main():
     tr = get_cifar(args.data_root, True, build_cifar_eval_transform())
     _, va_idx = stratified_split(tr.targets, 5000, ck["args"].get("seed", 42))
     val_loader = DataLoader(Subset(tr, va_idx), batch_size=512, shuffle=False, num_workers=4)
-    test = get_cifar(args.data_root, False, build_cifar_eval_transform())
-    test_loader = DataLoader(test, batch_size=512, shuffle=False, num_workers=4)
 
     vlog, vtgt = get_logits(model, val_loader, device)
-    tlog, ttgt = get_logits(model, test_loader, device)
 
-    ce_metrics = json.loads((Path(args.ce_ckpt).parent / "metrics.json").read_text(encoding="utf-8"))
+    ce_metrics = json.loads(ce_metrics_path.read_text(encoding="utf-8"))
     counts = ck["args"].get("class_counts") or ce_metrics["class_counts"]
     cnt = torch.tensor([counts[str(c)] for c in range(10)], dtype=torch.float32)
     prior = cnt / cnt.sum()
 
-    print(f"{'tau':>6} {'val acc':>9} {'test acc':>9} {'test mF1':>9}")
+    # Select tau using validation data only.  Do not calculate or print test metrics
+    # inside this loop: even if the code does not use them, exposing them while tuning
+    # makes accidental test-set selection possible.
+    print(f"{'tau':>6} {'val acc':>9}")
     best = None
     for tau in [0.0, 0.25, 0.5, 0.75, 1.0, 1.5]:
         vp = F.softmax(vlog - tau * torch.log(prior + 1e-12), 1).numpy()
         v_acc = float((vp.argmax(1) == vtgt.numpy()).mean())
-        tp = F.softmax(tlog - tau * torch.log(prior + 1e-12), 1).numpy()
-        m = summarise(ttgt.numpy(), tp.argmax(1), tp)
-        print(f"{tau:>6} {v_acc*100:>8.2f}% {m['acc']*100:>8.2f}% {m['macro_f1']*100:>8.2f}%")
+        print(f"{tau:>6} {v_acc*100:>8.2f}%")
         if best is None or v_acc > best[0]:
-            best = (v_acc, tau, m)
+            best = (v_acc, tau)
 
-    v_acc, tau, m = best
+    v_acc, tau = best
+    # Only now touch the labelled test split.  It is not available during tau
+    # selection, so test performance cannot influence the chosen value.
+    test = get_cifar(args.data_root, False, build_cifar_eval_transform())
+    test_loader = DataLoader(test, batch_size=512, shuffle=False, num_workers=4)
+    tlog, ttgt = get_logits(model, test_loader, device)
+    tp = F.softmax(tlog - tau * torch.log(prior + 1e-12), 1).numpy()
+    m = summarise(ttgt.numpy(), tp.argmax(1), tp)
     out = {
         "exp_id": "H_logit_adjust", "method": "logit_adjust", "mode": "h", "seed": ck["args"].get("seed", 42),
         "best_val_acc": v_acc, "test": m, "class_counts": counts,

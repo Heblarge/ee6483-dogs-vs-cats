@@ -8,6 +8,7 @@ every job appends its command line to results/run_log.txt for reproducibility.
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 import time
@@ -118,18 +119,45 @@ PHASES = {
 }
 
 
-def already_done(cmd: list[str]) -> bool:
-    """Skip a training job whose metrics.json already exists."""
+def _option(cmd: list[str], name: str, default: str) -> str:
+    """Return a simple ``--name value`` option from a generated command."""
+    return cmd[cmd.index(name) + 1] if name in cmd else default
+
+
+def expected_artifacts(cmd: list[str]) -> tuple[Path, Path] | None:
+    """Return the metrics/checkpoint pair produced by a training command."""
     if "--exp-id" not in cmd:
+        return None
+    exp = _option(cmd, "--exp-id", "")
+    seed = _option(cmd, "--seed", "42")
+    root = Path(_option(cmd, "--out-root", "ee6483/results"))
+    run_dir = root / exp / f"s{seed}"
+    return run_dir / "metrics.json", run_dir / "best.pt"
+
+
+def already_done(cmd: list[str]) -> bool:
+    """Return true only when both usable metrics and a checkpoint exist.
+
+    Metrics are tracked in git while checkpoints are intentionally ignored.  Requiring
+    both prevents a fresh clone from skipping training and then failing in evaluation.
+    """
+    artifacts = expected_artifacts(cmd)
+    if artifacts is None:
         return False
-    exp = cmd[cmd.index("--exp-id") + 1]
-    seed = cmd[cmd.index("--seed") + 1] if "--seed" in cmd else "42"
-    return (Path("ee6483/results") / exp / f"s{seed}" / "metrics.json").exists()
+    metrics, checkpoint = artifacts
+    if not checkpoint.is_file() or checkpoint.stat().st_size == 0:
+        return False
+    try:
+        payload = json.loads(metrics.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    return isinstance(payload, dict) and bool(payload)
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--phases", nargs="+", default=["main", "compare", "ablation", "cifar", "imbalance", "figure"])
+    ap.add_argument("--phases", nargs="+", choices=sorted(PHASES),
+                    default=["main", "compare", "ablation", "cifar", "imbalance", "figure"])
     ap.add_argument("--force", action="store_true", help="re-run finished experiments")
     args = ap.parse_args()
     rc_all = 0
@@ -137,11 +165,17 @@ def main():
         print(f"\n########## PHASE {ph} ##########", flush=True)
         for cmd, tag in PHASES[ph]:
             if not args.force and already_done(cmd):
-                print(f"skip (done): {tag}", flush=True)
+                print(f"skip (metrics + checkpoint present): {tag}", flush=True)
                 continue
+            artifacts = expected_artifacts(cmd)
+            if not args.force and artifacts is not None and artifacts[0].exists():
+                missing = [str(p) for p in artifacts if not p.exists() or p.stat().st_size == 0]
+                if missing:
+                    print(f"rerun incomplete job ({', '.join(missing)} missing): {tag}", flush=True)
             rc_all |= job(cmd, f"[{ph}] {tag}")
     print("\nALL DONE", rc_all)
+    return rc_all
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

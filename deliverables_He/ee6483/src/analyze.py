@@ -7,6 +7,7 @@ point during the project.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 from pathlib import Path
 
@@ -318,19 +319,30 @@ def fig_ablation(res_root: Path, out: Path):
 def fig_test_confidence(root: Path, probs_path: Path, out: Path, n_low: int = 8, n_high: int = 4):
     """Test-set predictions: least and most confident, balanced across predicted classes.
 
-    The test set is unlabelled, so this is a qualitative check only. Two
-    corrections keep the panel representative: the picks are balanced between
-    the two predicted classes, and near-duplicate images (the dataset contains
-    repeated placeholder graphics) are suppressed.
+    ``probs_path`` accepts either a two-column NumPy probability array or the
+    final ensemble CSV with ``id,label,p_dog`` columns. The test set is
+    unlabelled, so this is a qualitative check only. Picks are balanced between
+    predicted classes and perceptual near-duplicates are suppressed.
     """
     if not probs_path.exists():
         print("no submission probs found, skip test figure")
         return
     import imagehash
 
-    probs = np.load(probs_path)
     test_files = sorted((root / "test").glob("*.jpg"), key=lambda p: int(p.stem))
     ids = np.array([int(p.stem) for p in test_files])
+    if probs_path.suffix.lower() == ".npy":
+        probs = np.load(probs_path)
+    else:
+        with probs_path.open(encoding="utf-8", newline="") as f:
+            rows = {int(r["id"]): float(r["p_dog"]) for r in csv.DictReader(f)}
+        missing = sorted(set(ids) - rows.keys())
+        if missing:
+            raise ValueError(f"probability CSV is missing test ids: {missing[:10]}")
+        p_dog = np.array([rows[i] for i in ids], dtype=np.float64)
+        probs = np.column_stack([1.0 - p_dog, p_dog])
+    if len(probs) != len(test_files):
+        raise ValueError(f"{probs_path} has {len(probs)} rows for {len(test_files)} test images")
     pred = probs.argmax(1)
     conf = probs.max(1)
 
@@ -340,24 +352,26 @@ def fig_test_confidence(root: Path, probs_path: Path, out: Path, n_low: int = 8,
         with Image.open(f) as im:
             hashes[i] = imagehash.phash(im.convert("L").resize((64, 64)))
 
-    def pick(order):
-        chosen = []
+    def take_unique(order, count, chosen):
+        picked = []
         for i in order:
-            if len(chosen) >= len(pred) // 2:
+            if len(picked) >= count:
                 break
             if any(hashes[i] - hashes[j] <= 4 for j in chosen):
                 continue
-            if sum(1 for j in chosen if pred[j] == pred[i]) >= max(1, len(order) // 4):
-                continue
             chosen.append(i)
-        return chosen
+            picked.append(i)
+        return picked
 
-    low, high = [], []
+    low, high, chosen = [], [], []
     for cls in (0, 1):
         idx = np.where(pred == cls)[0]
         idx = idx[np.argsort(conf[idx])]
-        low += list(idx[: n_low // 2])
-        high += list(idx[-n_high // 2:][::-1])
+        low += take_unique(idx, n_low // 2, chosen)
+    for cls in (0, 1):
+        idx = np.where(pred == cls)[0]
+        idx = idx[np.argsort(conf[idx])][::-1]
+        high += take_unique(idx, n_high // 2, chosen)
     picks = low + high
 
     ncol = 4
@@ -370,8 +384,9 @@ def fig_test_confidence(root: Path, probs_path: Path, out: Path, n_low: int = 8,
         ax.set_title(f"id={ids[i]}  {NAMES[pred[i]]} {conf[i]:.2f}", fontsize=6.8)
     for ax in axes[len(picks):]:
         ax.axis("off")
-    fig.suptitle("Test set (unlabelled): four least-confident predictions per class (top two rows) "
-                 "and two most-confident per class (bottom row)", fontsize=8.5, y=1.01)
+    fig.suptitle("Final six-model ensemble on the unlabelled test set: four least-confident "
+                 "predictions per class (top two rows) and two most-confident per class "
+                 "(bottom row)", fontsize=8.2, y=1.01)
     fig.tight_layout()
     save(fig, out / "fig_test_confidence.png")
 
@@ -444,6 +459,7 @@ def main():
     ap.add_argument("--res-root", default="ee6483/results")
     ap.add_argument("--out", default="ee6483/figures")
     ap.add_argument("--ckpt", default="ee6483/results/E4_r18_ft/s42/best.pt")
+    ap.add_argument("--test-probs", default="submissions/submission_backbone_ensemble_probs.csv")
     ap.add_argument("--which", default="all")
     args = ap.parse_args()
 
@@ -464,18 +480,19 @@ def main():
         ck = Path(args.ckpt)
         if not ck.exists():
             print("checkpoint missing, skip error analysis")
-            return
-        model, a = load_model(ck, device)
-        ds = PerturbedFolder(root / "val", build_eval_transform(a["img_size"]), Perturb("none"))
-        probs, tgts = collect_val_preds(model, DataLoader(ds, batch_size=128, num_workers=4), device)
-        fig_confusion(probs, tgts, out)
-        fig_errors(probs, tgts, root, out)
-        rob = fig_robustness(model, root, a["img_size"], out, device)
-        (out / "robustness.json").write_text(json.dumps(rob, indent=2), encoding="utf-8")
-        fig_test_confidence(root, Path("submission.probs.npy"), out)
-        # summary numbers for the report
-        acc = (probs.argmax(1) == tgts).mean()
-        print(f"val accuracy recomputed: {acc*100:.2f}%  errors={int((probs.argmax(1)!=tgts).sum())}")
+        else:
+            model, a = load_model(ck, device)
+            ds = PerturbedFolder(root / "val", build_eval_transform(a["img_size"]), Perturb("none"))
+            probs, tgts = collect_val_preds(model, DataLoader(ds, batch_size=128, num_workers=4), device)
+            fig_confusion(probs, tgts, out)
+            fig_errors(probs, tgts, root, out)
+            rob = fig_robustness(model, root, a["img_size"], out, device)
+            (out / "robustness.json").write_text(json.dumps(rob, indent=2), encoding="utf-8")
+            # summary numbers for the report
+            acc = (probs.argmax(1) == tgts).mean()
+            print(f"val accuracy recomputed: {acc*100:.2f}%  errors={int((probs.argmax(1)!=tgts).sum())}")
+    if args.which in ("all", "test"):
+        fig_test_confidence(root, Path(args.test_probs), out)
 
 
 if __name__ == "__main__":

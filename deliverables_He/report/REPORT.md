@@ -421,7 +421,7 @@ Details that matter: no vertical flip (an upside-down animal is out of distribut
 
 - `set_seed(s)` fixes `PYTHONHASHSEED`, `random`, `numpy`, `torch` and `torch.cuda` for $s \in \{42,43,44\}$, with `cudnn.deterministic=True` and `cudnn.benchmark=False`.
 - AMP kernels are not bit-exact even with deterministic flags, so every headline number is reported as mean ± std over three seeds, not as a single run.
-- Each run writes `metrics.json` (with the full argument dictionary), `curves.csv`, `train.log` and `best.pt`; the orchestrator appends the exact command line to `results/run_log.txt`.
+- Each Dogs-vs-Cats run (`ee6483.src.train`) writes `metrics.json` (with the full argument dictionary), `curves.csv`, `train.log` and `best.pt`; the CIFAR runs (`ee6483.src.train_cifar`) write `metrics.json` (class counts, epochs and per-epoch history, without the argument dictionary), `train.log` and `best.pt`. The orchestrator appends the exact command line to `results/run_log.txt`.
 - Data are cached once at short-side 256 px, so every experiment sees identical pixels regardless of when it ran.
 - k-fold cross-validation is not used. The assignment fixes the train/validation split, and re-partitioning it would change the validation set that every reported number refers to, making the results incomparable across models and with the provided baseline. Three seeds serve the same purpose, estimating run-to-run variance, while keeping a single fixed validation set.
 
@@ -435,13 +435,10 @@ python -m ee6483.src.train --exp-id E4_r18_ft --model resnet18 --epochs 8 \
     --lr 3e-4 --head-lr 1e-3 --batch 64 --img-size 224 --aug full \
     --ft-strategy lpft --freeze-epochs 2 --seed 42 --data-root data/cache
 
-# first submission: 3-seed M3 ensemble with horizontal-flip TTA
-python -m ee6483.src.predict --ckpts \
-    ee6483/results/E4_r18_ft/s42/best.pt \
-    ee6483/results/E4_r18_ft/s43/best.pt \
-    ee6483/results/E4_r18_ft/s44/best.pt --out submissions/submission_m3_ensemble.csv --tta 1
+# reference-ensemble validation for the controlled study (no test submission)
+python -m ee6483.scripts.eval_ensemble --data-root data/cache --tta 1
 
-# final submission: top-tier backbones of Section 7.8 (cluster; see CLUSTER_GUIDE.md)
+# submitted model: top-tier backbones of Section 7.8 (cluster; see CLUSTER_GUIDE.md)
 sbatch cluster/backbones.sbatch      # 7 backbones x 2 seeds
 sbatch cluster/ensemble.sbatch       # -> submissions/submission_backbone_ensemble.csv
 
@@ -584,7 +581,7 @@ All numbers are accuracy on the 5,000-image validation set. Where a model was tr
 | **M3** | **ResNet-18, LP-FT** | ImageNet | 224 | 11.18 M | **98.93 ± 0.05** | 3 |
 | M4 | ResNet-34, LP-FT | ImageNet | 224 | 21.29 M | 97.54 | 1 |
 | M5 | ResNet-50, LP-FT | ImageNet | 160 | 23.51 M | 99.30 | 1 |
-| M3 ×3 + TTA | main-study ensemble (first submission) | ImageNet | 224 | 3 × 11.18 M | 99.22 | 3 |
+| M3 ×3 + TTA | ResNet-18 reference ensemble | ImageNet | 224 | 3 × 11.18 M | 99.22 | 3 |
 | **Backbone ensemble ×6 + TTA** | **the submitted model** (Section 7.8: ConvNeXt-T, ResNet-50, Swin-T × 2 seeds) | ImageNet | 224 | 6 models, 23.5–27.8 M each | **99.70** | 2 per backbone |
 
 ![Figure 5. Model ladder](../ee6483/figures/fig_model_comparison.png)
@@ -599,12 +596,12 @@ All numbers are accuracy on the 5,000-image validation set. Where a model was tr
 4. The backbone-size effect is non-monotone, and small. ResNet-34 reaches 97.54% (-1.39 points vs ResNet-18, early-stopped at epoch 4), while ResNet-50 reaches 99.30% (+0.37 points, at 160 px and 6 epochs, i.e. *less* compute per image than M3). So the three sizes span 1.8 points in a non-monotone way: the 34 is an outlier that stopped early, and the 50 is the best single model we trained. Two conclusions follow. First, architecture is not the binding constraint, since the whole 18/34/50 spread is a quarter of the 7.46-point pre-training effect. Second, at this dataset size the result is sensitive to the training budget each model receives, so a single-run backbone comparison carries little information. Section 7.8 therefore repeats it for seven backbones under one fixed budget with two seeds each: ResNet-18 and ResNet-34 are then indistinguishable (99.25% vs 99.28%), and the best backbone, ConvNeXt-T, reaches 99.61 ± 0.01%.
 5. Three-seed averaging plus horizontal-flip TTA adds 0.29 points (98.93% → 99.22%) and reduces the error count from 50 to 39. This is the cheapest accuracy in the project, requiring no retraining and no new data, only variance reduction.
 
-M0 (HOG+SVM) is the exception to the 5,000-image validation protocol: it was trained on 8,000 and validated on 2,000 images because feature extraction is CPU-bound; all other rows use the full 5,000-image validation set. The single ResNet-50 run reaches 99.30%, which is 0.08 points above the earlier M3 ensemble (99.22%) but 0.40 points below the final submitted backbone ensemble (99.70%). It is one seed, trained at 160 px for 6 epochs, and the seed-to-seed standard deviation of the ResNet-18 family is 0.05, so a 0.08-point difference between one run of one model and a three-seed ensemble of another cannot be separated from run-to-run variation. Making the comparison meaningful would need three ResNet-50 seeds of its own (about one hour of GPU time) plus a decision about which resolution to use for all three. This comparison was later made properly in Section 7.8, which retrains seven backbones under one budget with two seeds each; the final submission is built from its top tier (Section 5.3).
+M0 (HOG+SVM) is the exception to the 5,000-image validation protocol: it was trained on 8,000 and validated on 2,000 images because feature extraction is CPU-bound; all other rows use the full 5,000-image validation set. The single ResNet-50 run reaches 99.30%, which is 0.08 points above the M3 reference ensemble (99.22%) but 0.40 points below the submitted backbone ensemble (99.70%). It is one seed, trained at 160 px for 6 epochs, and the seed-to-seed standard deviation of the ResNet-18 family is 0.05, so a 0.08-point difference between one run of one model and a three-seed ensemble of another cannot be separated from run-to-run variation. Making the comparison meaningful would need three ResNet-50 seeds of its own (about one hour of GPU time) plus a decision about which resolution to use for all three. This comparison was later made properly in Section 7.8, which retrains seven backbones under one budget with two seeds each; the submitted model is built from its top tier (Section 5.3).
 6. The seed spread of the main model is tiny (98.90, 98.90, 99.00 → σ = 0.05 pp). At this point the task is approaching its label-noise ceiling: Section 6 attributes 5 of the 50 single-model errors to label noise, non-photographic content or severely degraded images. At least three of them (Section 6, category 5) are mislabelled or contradictory, so a sound classifier should not be expected to get them right; this suggests a practical ceiling in the region of 99.9% on this validation set, as an estimate rather than a hard bound.
 
-## 5.2 Detailed metrics for the main-study ensemble (M3 ×3 + TTA)
+## 5.2 Detailed metrics for the ResNet-18 reference ensemble (M3 ×3 + TTA)
 
-The metrics below are for the ensemble of the main model, which is also the model analysed in Section 6. They are not the submitted model: the final submitted backbone ensemble reaches 99.70% (15 errors out of 5,000) on the same validation set; see Section 5.3.
+The metrics below quantify seed averaging for the controlled ResNet-18 study. Sections 6.2–6.6 use one M3 seed for model-level interpretability, while Sections 6.7–6.8 use the submitted ensemble for test-set inspection. The submitted backbone ensemble reaches 99.70% (15 errors out of 5,000); see Section 5.3.
 
 | Metric | Value |
 |---|---|
@@ -637,9 +634,7 @@ The three backbone families were selected after the controlled comparison in Sec
 | Top tier × 2 seeds | 6 | 99.70 | 15 |
 | **Top tier × 2 seeds + TTA (submitted)** | 6 | **99.70** | **15** |
 
-Ensembling six top-tier models removes 24 of the 39 validation errors of the M3 ensemble. Horizontal-flip TTA no longer helps once the models are this strong (±1 error), and is kept only because it was part of the pre-registered configuration.
-
-Compared with the first submission (M3 ×3 + TTA), the new file changes 2 of the 500 test predictions, ids 374 and 453, both from dog to cat with p(dog) ≈ 0.06. By visual inspection both images are cats: two cats curled up in a cat bed (id=374) and a Siamese cat on a tiled floor (id=453). The test images were inspected only after the submission had been generated, so this did not influence the choice.
+Ensembling six top-tier models removes 24 of the 39 validation errors of the M3 reference ensemble. Horizontal-flip TTA no longer helps once the models are this strong (±1 error), and is kept only because it was part of the pre-registered configuration.
 
 | Property | Value |
 |---|---|
@@ -663,7 +658,7 @@ No test accuracy is reported, because the test set has no labels. We also did no
 
 ## 5.4 A note on the optimism of validation accuracy
 
-Validation accuracy was used for early stopping and for choosing among M0–M5, so the reported numbers are mildly optimistic relative to a model that had never seen the validation set. The bias is small, with 5,000 validation images and about 10 compared configurations, but it is real. The appropriate statement is that *the main-model ensemble's 99.22% is a validation-set number obtained with model selection performed on the same set; the final submitted ensemble's 99.70% carries an even larger selection bias (the top three backbones were chosen on this validation set); the test set is unlabelled, so we cannot quantify the gap.*
+Validation accuracy was used for early stopping and for choosing among M0–M5, so the reported numbers are mildly optimistic relative to a model that had never seen the validation set. The bias is small, with 5,000 validation images and about 10 compared configurations, but it is real. The appropriate statement is that *the reference ensemble's 99.22% is a validation-set number obtained with model selection performed on the same set; the submitted ensemble's 99.70% carries an even larger selection bias (the top three backbones were chosen on this validation set); the test set is unlabelled, so we cannot quantify the gap.*
 
 ## 5.5 Runtime
 
@@ -690,7 +685,7 @@ A prediction can only be called correct or incorrect where a label exists. The t
 | Sections | Data | Labels | What it supports |
 |---|---|---|---|
 | 6.2 to 6.6 | validation set (5,000 images) | Yes | quantitative error rate, failure taxonomy, Grad-CAM, robustness |
-| 6.7 | test set (500 images) | No | qualitative only: confidence distribution and inspection of extreme cases |
+| 6.7 to 6.8 | test set (500 images) | No | qualitative only: submitted-ensemble confidence distribution and inspection of extreme cases |
 
 Statements about whether a particular test prediction is correct are manual judgements and are identified as such.
 
@@ -701,7 +696,7 @@ Statements about whether a particular test prediction is correct are manual judg
 | **true cat** | 2,482 (99.28%) | 18 (0.72%) |
 | **true dog** | 32 (1.28%) | 2,468 (98.72%) |
 
-50 errors out of 5,000 (99.00% accuracy) for the single-seed model (seed 42); the three-seed main-model ensemble makes 39 errors on the same set, i.e. ensembling removes about a fifth of them. The final submitted backbone ensemble makes 15 errors (Section 5.3); this chapter analyses the main model, not that ensemble. The errors are asymmetric: the model confuses dogs for cats about 1.8× more often than the reverse. Two plausible causes, both consistent with the case studies below:
+50 errors out of 5,000 (99.00% accuracy) for the single-seed reference model (M3, seed 42); the three-seed ResNet-18 reference ensemble makes 39 errors on the same set, i.e. ensembling removes about a fifth of them. The submitted backbone ensemble makes 15 errors (Section 5.3). Sections 6.2–6.6 use the single model because attribution methods such as Grad-CAM require one network; Sections 6.7–6.8 switch explicitly to the submitted ensemble for test-set inspection. The single-model errors are asymmetric: it confuses dogs for cats about 1.8× more often than the reverse. Two plausible causes, both consistent with the case studies below:
 
 1. The "dog" class has far more visual diversity (340+ breeds, from 1 kg to 90 kg), so its decision region is broader and its boundary is fuzzier on the cat side.
 2. Several dog breeds are small, long-haired and round-faced (Pomeranian, Shih Tzu, Bichon): i.e. they sit inside the cat region of feature space. The opposite direction has no strong analogue.
@@ -793,22 +788,22 @@ Three conclusions:
 
 ## 6.7 The test set: qualitative inspection
 
-![Figure 12. Test-set predictions of the main-study model (M3 ×3 + TTA), four least confident and two most confident per class. Labels are M3's predictions, not ground truth: id=374, labelled dog, actually shows two cats and is an M3 error that the final submitted ensemble corrects](../ee6483/figures/fig_test_confidence.png)
+![Figure 12. Submitted six-model ensemble: four least-confident and two most-confident predictions per class on the unlabelled test set. Perceptual near-duplicates are suppressed; labels are predictions, not ground truth](../ee6483/figures/fig_test_confidence.png)
 
-The test set is unlabelled, so the labels shown are the model's predictions and any judgement about whether a prediction is correct is a visual assessment by the authors. Sections 6.7 and 6.8 describe the main-study ensemble (M3 ×3 + TTA); differences in the final submitted ensemble (Section 5.3) are noted where they occur.
+The test set is unlabelled, so the labels shown are the submitted ensemble's predictions and any judgement about whether a prediction appears plausible is a visual assessment by the authors. The panel is generated directly from `submission_backbone_ensemble_probs.csv`; it therefore describes the same six checkpoints and horizontal-flip TTA configuration as `submission.csv`. Perceptual near-duplicates are suppressed so that a repeated image cannot fill several slots. The second test-set placeholder (id=464, dog 0.88) is not shown because it is the fifth least-confident dog prediction, just above id=328, not because of this filter.
 
-- The four least confident cat predictions are a white cat on a patterned blanket (id=475, 0.68), a black cat on a rug (id=242, 0.72), a cat on the back of a chair (id=306, 0.75) and a dark tabby in a tiled room (id=46, 0.80). Each is a low-contrast or cluttered scene where a human would also hesitate, so the confidence is informative rather than miscalibrated.
-- The four least confident dog predictions include the two "No Photo Available" placeholders (ids 464 and 328, 0.51 and 0.52), a small dog on a carpet (id=49, 0.60) and an image of a cat bed (id=374, 0.62). On closer inspection id=374 shows two cats curled up inside the bed, so M3 is wrong here: the cat-bed context and the tangled bodies, with neither face fully visible, pull it towards dog. The final ensemble corrects it (p(dog) = 0.06), as it does id=453, a Siamese cat that M3 also labels dog. The placeholders are the lowest-confidence inputs in the whole test set, which is the behaviour a closed-set classifier should exhibit on an input that contains no animal: it hedges rather than committing.
-- The four most confident predictions are unambiguous: kittens on a cushion (id=200, 0.99), cats in a crate (id=176, 0.99), a black dog with a white puppy (id=157, 0.99) and a spaniel outdoors (id=323, 0.98). High confidence coincides with clear, frontal, well-lit subjects.
-- The predicted class distribution is 261 dog / 239 cat (52/48) for M3 and 259 / 241 for the final ensemble, consistent with a roughly balanced test set. A reversed label convention or a lexicographic id sort would produce a very different distribution, so this is weak but real evidence that the submission pipeline is correct.
+- The four least-confident cat predictions are a black-and-white cat behind cage bars with overlaid text (id=216, 0.84), a black cat on a dark rug (id=242, 0.85), a black-and-white cat held up by a hand in front of a chain-link fence, with a numbered tag (id=159, 0.91), and a grey cat on a strongly patterned red blanket (id=30, 0.93). Occlusion, low contrast and texture-heavy backgrounds are among the failure factors identified on the labelled validation set.
+- The four least-confident dog predictions are a black puppy held in a hand (id=313, 0.84), a puppy sitting in a cage (id=261, 0.86), a low-resolution, pixelated close-up of a dog's face (id=302, 0.86) and a "No Photo Available" placeholder (id=328, 0.87). The first three predictions are visually plausible; the placeholder exposes the closed-set limitation because the model must choose cat or dog even when neither is present.
+- The most-confident examples remain visually straightforward: two cat images (ids 176 and 198, both 0.96) and two dog images (ids 254 and 243, both 0.96). One dog image contains several animals behind a fence, showing that the ensemble can remain stable under multiple subjects and structured occlusion.
+- The submitted prediction distribution is 259 dog / 241 cat (52/48), consistent with a roughly balanced test set. A reversed label convention or lexicographic id sort would produce a very different or degenerate distribution, so this is weak but useful evidence that the id mapping and class convention are correct.
 
 ## 6.8 Two test-set cases: one strength, one weakness
 
 The test set carries no labels, so the two cases below are chosen for what they reveal about the model rather than for a score. In both, the judgement that the prediction is right or wrong is a visual one.
 
-*Case 1, a strength: two dogs of very different size (id=157, predicted dog, p=0.99).* The image contains a large black dog and a small white puppy side by side, at different scales and with different coat colours. The model assigns 0.99 to dog. Two properties of the training set are being handled at once: the presence of two animals, which would be ambiguous under a single-label target, and a scale ratio of roughly ten to one, which is the largest within-class variation in the dataset. This is the behaviour one would want from a system deployed on user photographs, where multiple animals and mixed sizes are common.
+*Case 1, a strength: several dogs behind a fence (id=243, predicted dog, p=0.96).* The image contains multiple dogs at different depths and scales, with a chain-link fence crossing the scene. The submitted ensemble remains confident despite multiple subjects, structured occlusion and a strong background pattern—the same factors that cause some single-model validation errors. This is the behaviour one would want from a system deployed on user photographs, where framing is rarely as clean as the training examples.
 
-*Case 2, a weakness: an image that contains no animal (id=464, predicted dog, p=0.51).* The input is a "No Photo Available" placeholder graphic. The model returns "dog" with 0.51 confidence, which is the lowest value in the whole test set but is still a commitment. The weakness is structural rather than a training failure: a two-way softmax must put its mass somewhere, so an input outside the label space cannot be rejected. A maximum-softmax threshold or an explicit rejection class would fix it, at the cost of a validation set containing out-of-distribution images to calibrate the threshold (Section 6.9). The stronger final ensemble makes this weakness worse rather than better: it labels both placeholders dog with p ≈ 0.88 (ids 464 and 328), so it no longer hedges on them, and a confidence threshold calibrated for M3 would not transfer to it. Higher in-distribution accuracy does not imply better behaviour on inputs outside the label space.
+*Case 2, a weakness: an image that contains no animal (id=328, predicted dog, p=0.87).* The input is a "No Photo Available" placeholder graphic. The weakness is structural rather than a training failure: a two-way softmax must put its mass somewhere, so an input outside the label space cannot be rejected. A maximum-softmax threshold or explicit rejection class would address this, but would require a validation set containing out-of-distribution images to calibrate the threshold (Section 6.9). The relatively high confidence shows that higher in-distribution accuracy does not imply reliable behaviour outside the label space.
 
 The pair also illustrates where the model's remaining error budget lies. It is confident and correct when the animal is visible and well framed, however many animals or scales are present; it is uncertain, but still forced to answer, when the input is not an animal at all.
 
@@ -816,8 +811,8 @@ The pair also illustrates where the model's remaining error budget lies. It is c
 
 Two limitations follow from the analysis above.
 
-1. The classifier is closed-set and cannot return "neither". Images that contain no animal are still assigned a label. The two placeholder graphics in the test set (ids 464 and 328, a "No Photo Available" graphic that does not occur in train or val, unlike the six of Section 2.2) are the clearest case: they receive the two lowest confidences in the whole test set (0.51 and 0.52), so the model does hedge, but a maximum-softmax threshold would be a more reliable rejection rule than reading the confidence by eye. The standard remedies, such as thresholding the maximum softmax probability [Hendrycks & Gimpel, ICLR 2017], OpenMax [Bendale & Boult, CVPR 2016] or an energy score, are post-hoc and cost nothing to add, but they need a validation set containing out-of-distribution images to calibrate the threshold, which this dataset does not provide.
-2. Confidence is informative but not calibrated. Mean maximum-softmax confidence is 0.94 on the test set and 0.99 on correctly classified validation images, against an accuracy of 0.99; the two coincide on the validation set, so the confidences can be read as rough probabilities there, but nothing guarantees this on new data. Temperature scaling [Guo et al., ICML 2017] fitted on the validation set would make the calibration explicit. It was not applied because it does not change the argmax and therefore does not change the submission.
+1. The classifier is closed-set and cannot return "neither". Images that contain no animal are still assigned a label. The two test-set placeholders, which show the same graphic (ids 464 and 328, a "No Photo Available" graphic that does not occur in train or validation, unlike the six of Section 2.2) are the clearest case: both are predicted dog with probabilities 0.88 and 0.87. Standard remedies such as maximum-softmax thresholding [Hendrycks & Gimpel, ICLR 2017], OpenMax [Bendale & Boult, CVPR 2016] or an energy score are post-hoc, but they need a validation set containing out-of-distribution images to calibrate the rejection threshold, which this dataset does not provide.
+2. Confidence is informative but not calibrated. Mean maximum-softmax confidence is 0.95 on the unlabelled test set, but without labels no calibration error can be measured there. Temperature scaling fitted on the labelled validation set would make calibration explicit. It was not applied because it does not change the argmax and therefore does not change the submission.
 
 <div style="page-break-after: always;"></div>
 
@@ -1245,6 +1240,9 @@ On a small, well-curated binary problem, the pre-trained representation and the 
 # Sections 2-9 (ee6483/): Python 3.13, torch 2.6.0+cu124, torchvision 0.21.0, RTX 3070 Ti Laptop (8 GB)
 python -m ee6483.src.data.check_data --root ../datasets/datasets   # -> results/data_report.json
 python -m ee6483.src.data.cache_images --src ../datasets/datasets --dst data/cache --short 256
+mkdir -p data/cifar
+curl -fL -o data/cifar/train.parquet https://huggingface.co/datasets/uoft-cs/cifar10/resolve/main/plain_text/train-00000-of-00001.parquet
+curl -fL -o data/cifar/test.parquet https://huggingface.co/datasets/uoft-cs/cifar10/resolve/main/plain_text/test-00000-of-00001.parquet
 python -m ee6483.scripts.run_experiments --phases main compare ablation augcheck lrsearch extra cifar imbalance
 python -m ee6483.scripts.aggregate                                # -> results/summary.{csv,md}
 python -m ee6483.src.analyze --which all                          # -> figures/
@@ -1253,9 +1251,10 @@ python -m ee6483.scripts.dump_errors                              # -> all 50 va
 
 # Section 7.8 and the final submission (src/): torch 2.11.0+cu128, one A40 per run
 bash scripts/run_backbones.sh                                     # 7 backbones x seeds 0, 1
+ckpts() { printf 'runs/backbones/b_%s_s0/checkpoints/best.pt,runs/backbones/b_%s_s1/checkpoints/best.pt' "$1" "$1"; }
 python scripts/ensemble_predict.py --out submissions/submission_backbone_ensemble.csv \
-  --group convnext=<2 ConvNeXt-T checkpoints> --group resnet18=<2 ResNet-18 checkpoints> \
-  --group top3=<6 ConvNeXt-T / ResNet-50 / Swin-T checkpoints> --choose top3 --tta
+  --group convnext="$(ckpts convnext_tiny)" --group resnet18="$(ckpts resnet18)" \
+  --group top3="$(ckpts convnext_tiny),$(ckpts resnet50),$(ckpts swin_t)" --choose top3 --tta
 cp submissions/submission_backbone_ensemble.csv submissions/submission.csv
 
 python report/build_report.py && python report/md_to_docx.py      # -> report/REPORT.md, .docx
@@ -1268,6 +1267,16 @@ checkpoint lists for the ensemble are in
 non-bit-exact, so re-runs should match to within the seed noise reported in the text,
 not to the last digit. The numbers in the section files are maintained by hand
 (Appendix A.5).
+
+Tracked metrics without their git-ignored checkpoints are treated as incomplete and
+are retrained automatically, overwriting the tracked files, so reproductions should be run
+in a separate checkout. The recipes, prescribed seeds and six-model ensemble are
+frozen for reproduction: reruns must not be cherry-picked or retuned after observing
+validation results. Validation is used for early stopping/model selection only; the
+dog/cat test set remains prediction-only, and logit-adjustment tau is selected on the
+CIFAR validation split before a single test evaluation. This prevents direct leakage,
+although the residual validation-selection bias noted in Section 10.3 cannot be made
+exactly zero without a new held-out set.
 
 <div style="page-break-after: always;"></div>
 
@@ -1397,15 +1406,16 @@ Notes:
 - `H_logit_adjust` shows `sec = 0` because it is post-hoc: its `metrics.json` is
   written by `ee6483/scripts/eval_logit_adjust.py`, which reuses the `H_ce`
   checkpoint and only changes the decision rule. The `train.log` in the same
-  folder is left over from an earlier in-training implementation and its test
-  accuracy (51.56%) is superseded; see the `README.md` in that folder.
+  folder is a superseded record of an earlier in-training implementation (test
+  accuracy 51.56%); it is kept for completeness and explained in the
+  `README.md` of that folder.
 - The `H_*` runs save the class counts, epochs and per-epoch history in
   `metrics.json`, but not the full argument dictionary that the `E*` runs save;
   their arguments are the defaults of `ee6483/src/train_cifar.py` plus the
   command line in `run_experiments.py`.
 - `E4_ensemble` is the evaluation of the three `E4_r18_ft` seeds averaged with
-  horizontal-flip TTA: the configuration of the first submission
-  (kept as `submissions/submission_m3_ensemble.csv`).
+  horizontal-flip TTA: the ResNet-18 reference ensemble used to quantify the
+  benefit of seed averaging in Section 5.2. It is not a submission artifact.
 - `backbone_ensemble` averages the six top-tier checkpoints of Section 7.8 with
   horizontal-flip TTA: the configuration that produced the final `submission.csv`
   (`scripts/ensemble_predict.py`; details in

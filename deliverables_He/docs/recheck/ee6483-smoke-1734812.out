@@ -1,0 +1,1 @@
+SMOKE PASS NVIDIA A40 torch.Size([8, 3, 32, 32]) torch.Size([8]) torch.Size([8, 10])

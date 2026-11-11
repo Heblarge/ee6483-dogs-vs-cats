@@ -240,7 +240,12 @@ def main():
             flush_table(doc, table_buf); table_buf = []
 
         s = ln.strip()
-        if not s or s.startswith("<div") or s == "---":
+        if not s or s == "---":
+            i += 1
+            continue
+        if s.startswith("<div"):
+            if "page-break-after" in s or "page-break-before" in s:
+                doc.add_page_break()
             i += 1
             continue
 
