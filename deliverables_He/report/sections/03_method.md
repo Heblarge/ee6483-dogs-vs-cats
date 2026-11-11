@@ -38,9 +38,9 @@ Tensor shapes through the network (batch size $B$, input 224×224):
 
 ![Architecture of the main model with tensor shapes at every stage](../ee6483/figures/fig_architecture.png)
 
-The classification head is a *fresh* layer: its weights are Kaiming-initialised and its bias is zero, so at the start of training the model outputs a near-uniform distribution and the first epochs are spent learning the head, not damaging the backbone. This is the mechanism behind the LP-FT strategy in Section 3.4.
+The classification head is a *fresh* `Linear(512→2)` layer (behind dropout 0.2) with PyTorch's default initialisation: a Kaiming-uniform variant for the weights and small uniform values in ±1/√512 for the bias. At the start of training the logits are therefore small, the model outputs a near-uniform distribution, and the first epochs are spent learning the head, not damaging the backbone. This is the mechanism behind the LP-FT strategy in Section 3.4.
 
-`torchvision.models.resnet18(weights="IMAGENET1K_V1")` supplies the first 512-dimensional feature extractor; everything from `layer1` to `layer4` is loaded from the ImageNet checkpoint.
+`torchvision.models.resnet18(weights="DEFAULT")`, which for ResNet-18 resolves to `IMAGENET1K_V1` (the only ImageNet checkpoint torchvision provides for it), supplies the first 512-dimensional feature extractor; everything from `layer1` to `layer4` is loaded from the ImageNet checkpoint.
 
 ### M1: SmallCNN (the from-scratch control)
 

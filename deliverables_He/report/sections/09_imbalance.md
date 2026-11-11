@@ -15,7 +15,7 @@ Kang et al. [ICLR 2020] show that (2) dominates: if you freeze a representation 
 
 We use CIFAR-10 with an exponential long-tailed training distribution (the "CIFAR-10-LT" protocol):
 
-$$n_i = n_{max}\cdot \rho^{-i/(C-1)},\qquad i=0,\dots,9,\quad \rho=100,\ n_{max}=5{,}000$$
+$$n_i = n_{max}\cdot \rho^{-i/(C-1)},\qquad i=0,\dots,9,\quad \rho=100,\ n_{max}=5000$$
 
 which gives the per-class counts below. Only the *training* set is subsampled; validation and test keep the original balanced distribution, because the goal is to classify well on a balanced test set, not to reproduce the training prior.
 
@@ -31,7 +31,7 @@ The validation split (5,000, stratified) and the 10,000-image test set are untou
 
 Five methods are implemented so that the comparison spans the three families in the literature: data-level, loss-level and post-hoc.
 
-The classifier is the CIFAR-ResNet-18 of Section 8 (model G1), retrained from scratch on the long-tailed training set. Only the loss, the sampling procedure or the decision rule changes between methods, so any difference in the results is attributable to the treatment of imbalance rather than to a change of architecture.
+The classifier is the CIFAR-ResNet-18 of Section 8 (model G1), retrained from scratch on the long-tailed training set. The architecture is the same for every method; what changes is the loss, the sampling procedure or the decision rule. One exception should be kept in mind when reading the results: the class-balanced loss row uses a longer, 30-epoch run (Appendix A.1), so it differs from the others in schedule as well as in loss, and is not a strictly one-variable comparison. The 18-epoch CB run is reported alongside it.
 
 ### 9.3.1 Cross-entropy baseline (CE)
 
@@ -46,7 +46,7 @@ $$p_j \propto \frac{1}{n_{c(j)}}$$
 so that every batch is approximately class-balanced (`WeightedRandomSampler`, replacement=True). Tail images are therefore repeated many times per epoch.
 
 *Why it should work:* it removes the classifier bias directly: the empirical label distribution seen by the loss becomes uniform.
-*Known risk:* the tail classes are effectively oversampled by a factor of 10, so they overfit; this must be paired with strong augmentation. Our augmentation includes RandomCrop+flip+RandAugment+RandomErasing, which mitigates but does not eliminate it.
+*Known risk:* the sampler draws about 11,908 / 10 ≈ 1,190 images per class per epoch, so each of the 50 truck images is seen about 24 times per epoch (against roughly 0.26 times for an airplane image); the tail classes therefore overfit, and this must be paired with strong augmentation. Our augmentation includes RandomCrop+flip+RandAugment+RandomErasing, which mitigates but does not eliminate it.
 
 ### 9.3.3 Class-balanced loss (loss-level)
 
@@ -57,11 +57,11 @@ $$w_c \propto \frac{1}{E_{n_c}},\qquad \mathcal{L} = -\sum_c w_c\, y_c \log p_c$
 The intuition: as $n$ grows, additional samples add progressively less new information, so the "effective" size saturates and the weights should not diverge like $1/n$. With $\beta \to 1$ this recovers inverse-frequency weighting; with $\beta \to 0$ it recovers plain CE. We normalise the weights to mean 1 so the effective learning rate is unchanged.
 
 *Why it should work:* it re-balances the loss without changing the data distribution, so no sample is repeated and there is no extra overfitting risk.
-*Known risk:* with a 10:1 ratio the weights are mild; the gradient is still dominated by head-class batches early in training.
+*Known risk:* at a 90:1 ratio and $\beta=0.9999$ the weights are far from mild: $E_{4500}\approx 3624$ against $E_{50}\approx 49.9$, so a truck sample weighs about 73 times as much as an airplane sample. Head-class samples then contribute little gradient, which can slow the learning of the shared representation.
 
 ### 9.3.4 Decoupling / cRT (two-stage)
 
-Kang et al. [ICLR 2020]: train normally for 80% of the schedule, then freeze the backbone, re-initialise the classifier, and re-train only the classifier with class-balanced sampling for the remaining 20%.
+Kang et al. [ICLR 2020]: train normally for about 80% of the schedule, then freeze the backbone, re-initialise the classifier, and re-train only the classifier with class-balanced sampling for the rest. In our 18-epoch run the first stage is epochs 1–14 (identical to the CE baseline) and the classifier is re-trained in epochs 15–18.
 
 *Why it should work:* it follows the causal analysis of Section 9.1. the representation is nearly unbiased, the classifier is the biased part, so fix only the classifier and do not disturb the features.
 *Implementation note:* the head is re-initialised (Kaiming) rather than merely re-tuned, because the existing head has already absorbed the prior; and the second stage uses a 10× smaller learning rate with a short cosine decay.
@@ -70,9 +70,11 @@ Kang et al. [ICLR 2020]: train normally for 80% of the schedule, then freeze the
 
 Menon et al. [ICLR 2021]. Train with plain CE, then at *inference* shift the logits by the log-prior:
 
-$$\hat{y} = \arg\max_c \big[f_c(x) + \tau \log \pi_c\big],\qquad \pi_c = \frac{n_c}{\sum_j n_j},\ \tau = 1$$
+$$\hat{y} = \arg\max_c \big[f_c(x) - \tau \log \pi_c\big],\qquad \pi_c = \frac{n_c}{\sum_j n_j}$$
 
-*Why it should work:* under a multinomial-logit model this is the Bayes-optimal correction for the balanced error rate, and it costs nothing at training time: no retraining, no extra hyper-parameter search.
+Subtracting $\tau \log \pi_c$ raises the scores of rare classes (small $\pi_c$) relative to frequent ones. The strength $\tau$ is chosen on the validation split from $\{0, 0.25, 0.5, 0.75, 1.0, 1.5\}$ and then applied once to the test set (`ee6483/scripts/eval_logit_adjust.py`).
+
+*Why it should work:* under a multinomial-logit model this is the Bayes-optimal correction for the balanced error rate, and it costs nothing at training time: no retraining, only a one-dimensional sweep over $\tau$ on cached validation logits.
 *Known risk:* it assumes the training prior is the only source of bias; if the representation itself is skewed, the correction is incomplete.
 
 ## 9.4 Results
@@ -103,16 +105,16 @@ The two rarest classes collapse to 22-24% recall, barely above the 10% chance le
 
 ### What each method does
 
-1. Logit adjustment is the winner, and it requires no retraining. Applying `argmax f_c(x) - tau·log(pi_c)` to the *already trained* CE model raises test accuracy from 62.44% to 72.99% (+10.6 pp) and macro-F1 from 60.27% to 72.96%. The optimal tau selected on the validation split is exactly 1.0, which is what the theory predicts for a multinomial-logit model: a satisfying confirmation that the mechanism is the one the paper describes (a prior shift in the logits) rather than an accidental regularisation effect.
+1. Logit adjustment is the winner, and it requires no retraining. Applying `argmax f_c(x) - tau·log(pi_c)` to the *already trained* CE model raises test accuracy from 62.44% to 72.99% (+10.6 pp) and macro-F1 from 60.27% to 72.96%. The tau selected on the validation split from the six-value grid is 1.0, which coincides with the value the theory gives for a multinomial-logit model. Because the grid is coarse this is a consistency check rather than a confirmation, but it agrees with the mechanism the paper describes (a prior shift in the logits).
 2. Re-sampling works but trades head for tail. +9.6 pp overall; head-class recall drops from 90.3% to 85.8% while the tail rises from 39.5% to 64.5%. This is the expected behaviour: repeating tail samples makes the effective training distribution uniform.
-3. Decoupling works for the reason Kang et al. give. The training log shows it directly: validation accuracy is 52.6% at epoch 10; the backbone is then frozen and the head re-initialised, and four epochs later (epoch 14) validation accuracy is 70.0%. The representation was already fine; the classifier was the biased part, and re-training it on a balanced stream recovered 18 points in 4 epochs. Final test accuracy 71.22%. Table entries are rounded to one decimal, so the many/few averages quoted above can differ from recomputation on the rounded per-class recalls by up to 0.3 points.
+3. Decoupling works for the reason Kang et al. give. The training log shows it directly: epochs 1–14 are identical to the CE baseline and end at 61.0% validation accuracy; the backbone is then frozen and the head re-initialised, and after one epoch of class-balanced head re-training (epoch 15) validation accuracy is 70.0%. With the representation fixed, re-training only the classifier gained 8.9 points in one epoch, which is the pattern expected if the classifier, not the representation, carries most of the bias. Final test accuracy 71.22%. Table entries are rounded to one decimal, so the many/few averages quoted above can differ from recomputation on the rounded per-class recalls by up to 0.3 points.
 4. Class-balanced loss gives no gain at this schedule. It reaches 59.50%, *below* plain CE. The training curves explain why: at epoch 30 the training accuracy is still 59.95%, i.e. the model is severely under-trained. Two causes, both specific to our setup: (i) with weights normalised to mean 1 and `reduction='mean'` over weighted samples, head-class-dominated batches produce a *smaller* effective gradient, so the weighted loss converges more slowly than plain CE; (ii) the 30-epoch budget is far shorter than the 200+ epochs used in the original paper. Note that CB *does* re-balance: its few-class recall (63.1%) beats CE (39.5%): but it destroys the head (66.8% vs 90.3%) and never recovers overall accuracy. A shorter 18-epoch run (54.04%) shows the same pattern more strongly.
 
 ### Practical recommendation
 
 Ordered by benefit per unit of effort:
 
-1. Logit adjustment: one line at inference time, no retraining, +10.6 pp. Do this first, always.
+1. Logit adjustment: one line at inference time, no retraining, +10.6 pp. In this setting it is the cheapest first step to try.
 2. Decoupling (cRT): one extra short training stage, +8.8 pp, and it is the most *interpretable* fix because it isolates the classifier as the biased component.
 3. Re-sampling: trivial to implement, +9.6 pp, but it overfits the tail and needs strong augmentation to be safe.
 4. Class-balanced loss: theoretically appealing, but in our hands it needs a much longer schedule to pay off; at 30 epochs it is a net loss.
@@ -121,7 +123,7 @@ The ranking is not the same as the ranking in the literature (where CB loss is s
 
 ## 9.5 Honest limitations
 
-- One seed per method, one imbalance ratio (rho=100). The long-tail literature sweeps rho in {10, 50, 100, 200} and averages over 3-5 seeds. Our ordering is robust to what we observe, but the magnitudes are not, and a single seed cannot separate a 1-point difference from noise.
+- One seed per method, one imbalance ratio (rho=100). The long-tail literature sweeps rho in {10, 50, 100, 200} and averages over 3-5 seeds. The ordering and the magnitudes are therefore single-run observations: the 9–10 point gains over CE are large enough to be unlikely to reverse, but a single seed cannot separate the 1–2 point differences among logit adjustment, re-sampling and decoupling from noise, and none of the ranking has been tested at other imbalance ratios.
 - The whole study sits in an under-trained regime. Even the best method reaches 72.99%, whereas the CIFAR-10-LT literature reports ~77% for LDAM-DRW at rho=100 with 200-epoch schedules. Our comparison is internally consistent (four methods share one schedule and the class-balanced loss was given a longer one, as noted above), but the absolute numbers should not be compared with published ones.
 - The backbone is trained from scratch. With an ImageNet-pretrained backbone the imbalance gap shrinks substantially, because the representation is already good: an interesting follow-up we did not have the budget for.
-- Balanced accuracy here is macro-averaged recall on the balanced test set. We do not report the balanced error rate on the *training* prior, which is what logit adjustment is theoretically optimal for.
+- Balanced accuracy here is macro-averaged recall on the balanced test set, i.e. one minus the balanced error rate, which is the quantity logit adjustment is designed to optimise. Because the test set is balanced, it coincides with overall accuracy.

@@ -39,16 +39,29 @@ On a small, well-curated binary problem, the pre-trained representation and the 
 ## 10.6 Reproducing the numbers
 
 ```bash
-# environment: Python 3.13, torch 2.6.0+cu124, torchvision 0.21.0, RTX 3070 Ti Laptop (8 GB)
-python -m ee6483.src.data.check_data --root data/datasets        # -> results/data_report.json
-python -m ee6483.src.data.cache_images --src data/datasets --dst data/cache --short 256
-python -m ee6483.scripts.run_experiments --phases main compare ablation lrsearch cifar imbalance
+# Sections 2-9 (ee6483/): Python 3.13, torch 2.6.0+cu124, torchvision 0.21.0, RTX 3070 Ti Laptop (8 GB)
+python -m ee6483.src.data.check_data --root ../datasets/datasets   # -> results/data_report.json
+python -m ee6483.src.data.cache_images --src ../datasets/datasets --dst data/cache --short 256
+python -m ee6483.scripts.run_experiments --phases main compare ablation augcheck lrsearch extra cifar imbalance
 python -m ee6483.scripts.aggregate                                # -> results/summary.{csv,md}
 python -m ee6483.src.analyze --which all                          # -> figures/
 python -m ee6483.src.analyze_cifar                                # -> CIFAR / imbalance figures
 python -m ee6483.scripts.dump_errors                              # -> all 50 validation errors
-python report/make_tokens.py && python report/build_report.py     # -> report/REPORT.md
+
+# Section 7.8 and the final submission (src/): torch 2.11.0+cu128, one A40 per run
+bash scripts/run_backbones.sh                                     # 7 backbones x seeds 0, 1
+python scripts/ensemble_predict.py --out submissions/submission_backbone_ensemble.csv \
+  --group convnext=<2 ConvNeXt-T checkpoints> --group resnet18=<2 ResNet-18 checkpoints> \
+  --group top3=<6 ConvNeXt-T / ResNet-50 / Swin-T checkpoints> --choose top3 --tta
+cp submissions/submission_backbone_ensemble.csv submissions/submission.csv
+
+python report/build_report.py && python report/md_to_docx.py      # -> report/REPORT.md, .docx
 ```
 
-The aggregate tables can be regenerated from `ee6483/results/summary.csv`, which is
-written by the same pipeline.
+`run_experiments.py` reproduces every `ee6483/` run in Appendix A.1 except the
+learning rate of `H_cb_long`, which was not saved (Appendix A.1, notes). The exact
+checkpoint lists for the ensemble are in
+`submissions/submission_backbone_ensemble_ensemble.json`. AMP makes individual runs
+non-bit-exact, so re-runs should match to within the seed noise reported in the text,
+not to the last digit. The numbers in the section files are maintained by hand
+(Appendix A.5).

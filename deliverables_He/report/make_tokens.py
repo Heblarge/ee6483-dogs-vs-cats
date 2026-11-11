@@ -112,7 +112,7 @@ def build_appendix_tokens(t: dict):
 
     # ---- validator output (actually run it)
     try:
-        r = subprocess.run([sys.executable, "ee6483/scripts/validate_submission.py", "--sub", "submission.csv"],
+        r = subprocess.run([sys.executable, "ee6483/scripts/validate_submission.py", "--sub", "submissions/submission.csv"],
                            capture_output=True, text=True, timeout=120)
         out = (r.stdout or r.stderr).strip()
         # drop the absolute path: the appendix must be portable

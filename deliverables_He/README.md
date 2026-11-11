@@ -66,7 +66,8 @@ python scripts/train.py --config configs/dogs_cats/d3_resnet18_finetune.yaml
 python scripts/evaluate.py --ckpt runs/<run_id>/checkpoints/best.pt
 
 # 4. 生成提交文件
-python scripts/predict.py --ckpt runs/<run_id>/checkpoints/best.pt --out submissions/submission.csv
+# （不要写到 submissions/submission.csv：那是最终提交文件）
+python scripts/predict.py --ckpt runs/<run_id>/checkpoints/best.pt --out submissions/submission_<run_id>.csv
 
 # 5. 骨干对比（7 个模型 × 2 seeds，跑完自动汇总到 results/backbones.md）
 bash scripts/run_backbones.sh

@@ -1,8 +1,10 @@
 # Appendix: Complete Experiment Log
 
 Everything reported in the body of this document is derived from the 42 run
-directories under `ee6483/results/`. This appendix prints the raw log so that
-any number in the main text can be traced to a single command.
+directories under `ee6483/results/` and the backbone runs of A.1b. This appendix
+prints the per-run results so that any number in the main text can be traced to
+a run directory; the commands are in `ee6483/scripts/run_experiments.py` and,
+for the runs launched by hand, in the notes below.
 
 ## A.1 Every run
 
@@ -47,7 +49,7 @@ validation accuracy, `test_acc` the CIFAR-10 test accuracy where applicable, and
 | `E7c_aug_full_lowdata` | 42 | resnet18 | 160 | full | full | 500 | 8 | 96.30 | – | 88 |
 | `E7c_aug_none_lowdata` | 42 | resnet18 | 160 | none | full | 500 | 8 | 95.94 | – | 87 |
 | `G1_cifar_scratch` | 42 | resnet18-cifar | 32 | - | ce | 45,000 | 25 | 93.44 | 93.60 | 1540 |
-| `G2_cifar_pretrained` | 42 | resnet18-cifar | 160 | - | ce | 45,000 | 7 | 95.58 | 95.20 | 579 |
+| `G2_cifar_pretrained` | 42 | resnet18 (ImageNet) | 160 | - | ce | 45,000 | 7 | 95.58 | 95.20 | 579 |
 | `H_cb` | 42 | resnet18-cifar | 32 | - | cb | 11,908 | 18 | 54.02 | 54.04 | 658 |
 | `H_cb_long` | 42 | resnet18-cifar | 32 | - | cb | 11,908 | 30 | 59.22 | 59.50 | 1069 |
 | `H_ce` | 42 | resnet18-cifar | 32 | - | ce | 11,908 | 18 | 62.54 | 62.44 | 809 |
@@ -61,12 +63,24 @@ validation accuracy, `test_acc` the CIFAR-10 test accuracy where applicable, and
 Notes:
 
 - The two `E7b` rows are the 8-epoch augmentation check added specifically to
-  test whether the 3-epoch null result in Section 7.6 was a budget artefact.
-- `H_cb` (18 epochs) and `H_cb_long` (30 epochs, 2× learning rate) are both
-  listed: the second was run to give the class-balanced loss a fair schedule
-  before concluding that it underperforms (Section 9.4).
-- `H_logit_adjust` shows `sec = 0` because it is post-hoc: it reuses the `H_ce`
-  checkpoint and only changes the decision rule.
+  test whether the 3-epoch null result in Section 7.6 was a budget artefact; the
+  two `E7c` rows repeat it at 250 images per class. These four runs were first
+  launched by hand; their full arguments are saved in each `metrics.json` and
+  are reproduced exactly by the `augcheck` phase of `run_experiments.py`.
+- `H_cb` (18 epochs) and `H_cb_long` (30 epochs) are both listed: the second was
+  run to give the class-balanced loss a longer schedule before concluding that
+  it underperforms (Section 9.4). `H_cb_long` was launched by hand and its
+  `metrics.json` does not record the learning rate, so only its epoch count can
+  be verified from the saved files.
+- `H_logit_adjust` shows `sec = 0` because it is post-hoc: its `metrics.json` is
+  written by `ee6483/scripts/eval_logit_adjust.py`, which reuses the `H_ce`
+  checkpoint and only changes the decision rule. The `train.log` in the same
+  folder is left over from an earlier in-training implementation and its test
+  accuracy (51.56%) is superseded; see the `README.md` in that folder.
+- The `H_*` runs save the class counts, epochs and per-epoch history in
+  `metrics.json`, but not the full argument dictionary that the `E*` runs save;
+  their arguments are the defaults of `ee6483/src/train_cifar.py` plus the
+  command line in `run_experiments.py`.
 - `E4_ensemble` is the evaluation of the three `E4_r18_ft` seeds averaged with
   horizontal-flip TTA: the configuration of the first submission
   (kept as `submissions/submission_m3_ensemble.csv`).
@@ -111,11 +125,16 @@ Produced by the config-driven code base (`src/`, `configs/dogs_cats/backbones/`)
 | GPU | NVIDIA GeForce RTX 3070 Ti Laptop GPU (8 GB) |
 | OS | Windows 11 |
 
-Everything is pinned: the same seed set {42, 43, 44}, `cudnn.deterministic=True`,
-`cudnn.benchmark=False`, and an offline-resized image cache (short side 256 px)
-so that every run sees identical pixels. AMP is the one non-deterministic
-component, which is why all headline numbers are means over three seeds rather
-than single runs.
+The table lists the versions used for every run in A.1; the backbone runs of
+A.1b used torch 2.11.0+cu128 on the cluster. `requirements.txt` gives minimum
+versions only, so a fresh install will not reproduce these versions exactly
+unless they are installed explicitly. The pretrained weights are torchvision's
+`DEFAULT` weights for each architecture (IMAGENET1K_V1 for ResNet-18/34,
+IMAGENET1K_V2 for ResNet-50 under the versions above). Within a run, the seed
+set {42, 43, 44}, `cudnn.deterministic=True`, `cudnn.benchmark=False` and an
+offline-resized image cache (short side 256 px) fix the data order and the
+pixels. AMP is the one non-deterministic component, which is why the main
+model's headline numbers are means over three seeds rather than single runs.
 
 ## A.3 The submitted file
 
@@ -161,23 +180,23 @@ training):
 | Unreadable / corrupt | 0 |
 | Test ids | exactly 1…500, all numeric file names |
 | Id ↔ `sampleSubmission.csv` | one-to-one match |
-| pHash near-duplicates (Hamming ≤ 6) | 40 pairs / 35 + 5 groups: 12 cross the train↔val split, 5 cross the class boundary |
+| pHash near-duplicates (Hamming ≤ 6) | 40 pairs / 35 + 5 groups: 12 cross the train↔val split (10 distinct validation images), 5 cross the class boundary |
 | Placeholder graphics | 6 ("PHOTO UNAVAILABLE" / "Adopted"), labelled inconsistently |
 | Mean image size | 400 × 361 px (train), 400 × 361 px (test) |
 | Smallest side | 32 px |
 
 ## A.5 Reproducing this document
 
-The report itself is generated, not hand-assembled:
+The document is assembled from the section files:
 
 ```bash
 python -m ee6483.scripts.aggregate          # results/summary.csv
-python report/make_tokens.py                # results/*/metrics.json -> tokens.json
 python report/build_report.py               # sections/*.md -> REPORT.md
 python report/md_to_docx.py                 # REPORT.md -> EE6483_Group_Report.docx
 ```
 
-`build_report.py` substitutes the double-brace placeholders from `tokens.json`, so
-re-running the pipeline after new experiments updates every table and every
-number quoted in the prose. A stale figure in the text is therefore a bug in the
-pipeline, not a transcription error: which is the property we wanted.
+The numbers in the section files are written in directly and were checked by
+hand against `ee6483/results/summary.csv`, the per-run `metrics.json` files and
+`results/backbones.csv`. They are not substituted automatically, so re-running
+an experiment does not update the text: a changed result has to be copied into
+the relevant section by hand.

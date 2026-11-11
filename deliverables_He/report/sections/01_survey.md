@@ -34,7 +34,7 @@ Supervision level.
 |---|---|---|---|
 | Supervised | all training data labelled | AlexNet, VGG, ResNet, ViT | **this project** |
 | Semi-supervised | small labelled + large unlabelled | pseudo-labelling, MixMatch, FixMatch [Sohn et al., NeurIPS 2020] | would exploit the 500 test images, which is not permitted |
-| Self-supervised pre-training | none (pretext task), then linear probe / fine-tune | MoCo, SimCLR, BYOL, MAE, DINOv2 | source of the pretrained weights we rely on |
+| Self-supervised pre-training | none (pretext task), then linear probe / fine-tune | MoCo, SimCLR, BYOL, MAE, DINOv2 | context only: our weights are torchvision's supervised ImageNet checkpoints |
 | Few-shot / metric learning | a handful per class | Prototypical networks, MAML | not applicable (10k per class) |
 | Zero-shot | none, class described in text | CLIP-style vision-language models | interesting upper bound; not needed |
 
@@ -48,7 +48,7 @@ With vs. without domain shift. A *domain shift* means $P_{test} \neq P_{train}$.
 2. CNNs trained end-to-end (2012–2019). AlexNet [Krizhevsky et al., NeurIPS 2012] established the recipe (ReLU, dropout, GPU, augmentation) that is still in use. Depth then increased through VGG [Simonyan & Zisserman, ICLR 2015], GoogLeNet [Szegedy et al., CVPR 2015], ResNet [He et al., CVPR 2016], DenseNet [Huang et al., CVPR 2017] and ResNeXt [Xie et al., CVPR 2017].
 3. Efficient architecture search and scaling (2019–2021). EfficientNet [Tan & Le, ICML 2019] showed that depth/width/resolution must be scaled jointly under a compound coefficient.
 4. Transformers and large-scale pre-training (2020–). ViT [Dosovitskiy et al., ICLR 2021] replaced convolution with global self-attention and demonstrated that *data scale*, not inductive bias, is the binding constraint; Swin [Liu et al., ICCV 2021] reintroduced locality through windowed attention; ConvNeXt [Liu et al., CVPR 2022] showed a modernised ResNet matches Swin, i.e. the architecture family matters less than the training recipe.
-5. Transfer learning (the practical workhorse). Fine-tune an ImageNet-pretrained backbone; with 20k images this beats training from scratch by 10+ points. The two key papers are Yosinski et al. [NeurIPS 2014] on feature transferability and Kornblith et al. [CVPR 2019] on the correlation between ImageNet accuracy and transfer accuracy.
+5. Transfer learning (the practical workhorse). Fine-tune an ImageNet-pretrained backbone; with 20k images this beats training from scratch by several points, and by more when the training budget is short (2.7–7.5 points in our own experiments, Sections 5 and 7). The two key papers are Yosinski et al. [NeurIPS 2014] on feature transferability and Kornblith et al. [CVPR 2019] on the correlation between ImageNet accuracy and transfer accuracy.
 6. Long-tailed / imbalanced learning. Re-weighting [Cui et al., CVPR 2019; Cao et al., NeurIPS 2019], re-sampling, decoupled training [Kang et al., ICLR 2020], post-hoc logit adjustment [Menon et al., ICLR 2021]. Covered in Section 9.
 
 ## 1.2 Recent progress: papers that shaped the field

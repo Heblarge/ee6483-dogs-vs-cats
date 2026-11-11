@@ -75,13 +75,31 @@ PHASES = {
         (train("E7_ft_lpft", "resnet18", 3, img=160, aug="full", ft="lpft", freeze=1), "ft lp-ft"),
         (train("E7_scratch", "resnet18", 6, img=160, aug="full", ft="scratch", patience=6), "pretrained vs scratch"),
     ],
+    "augcheck": [
+        # Section 7.6: is the 3-epoch augmentation result a budget artefact? 8 epochs, full data and 250/class.
+        # Arguments match the saved metrics.json of the original (hand-launched) runs.
+        (train("E7b_aug_full_8ep", "resnet18", 8, img=160, aug="full", ft="full", patience=9), "aug full 8ep"),
+        (train("E7b_aug_none_8ep", "resnet18", 8, img=160, aug="none", ft="full", patience=9), "aug none 8ep"),
+        (train("E7c_aug_full_lowdata", "resnet18", 8, img=160, aug="full", ft="full", n_per_class=250, patience=9),
+         "aug full lowdata"),
+        (train("E7c_aug_none_lowdata", "resnet18", 8, img=160, aug="none", ft="full", n_per_class=250, patience=9),
+         "aug none lowdata"),
+    ],
     "cifar": [
         ([PY, "-m", "ee6483.src.train_cifar", "--mode", "g1", "--epochs", "25", "--exp-id", "G1_cifar_scratch"], "G1 cifar scratch"),
         ([PY, "-m", "ee6483.src.train_cifar", "--mode", "g2", "--epochs", "7", "--exp-id", "G2_cifar_pretrained"], "G2 cifar pretrained"),
     ],
     "imbalance": [
         ([PY, "-m", "ee6483.src.train_cifar", "--mode", "h", "--method", m, "--epochs", "18",
-          "--exp-id", f"H_{m}"], f"H {m}") for m in ("ce", "resample", "cb", "decouple", "logit_adjust")
+          "--exp-id", f"H_{m}"], f"H {m}") for m in ("ce", "resample", "cb", "decouple")
+    ] + [
+        # longer schedule for the class-balanced loss (the CB row of Section 9.4). The original
+        # run was launched by hand and its learning rate was not saved; the default is used here.
+        ([PY, "-m", "ee6483.src.train_cifar", "--mode", "h", "--method", "cb", "--epochs", "30",
+          "--exp-id", "H_cb_long"], "H cb long"),
+        # logit adjustment is post-hoc on the H_ce checkpoint: tau is swept on the validation
+        # split and the chosen value is applied once to the test set (no retraining)
+        ([PY, "-m", "ee6483.scripts.eval_logit_adjust"], "H logit_adjust (post-hoc on H_ce)"),
     ],
     "extra": [
         (train("E6_r50_ft", "resnet50", 6, img=160, patience=3), "E6 resnet50 lpft"),

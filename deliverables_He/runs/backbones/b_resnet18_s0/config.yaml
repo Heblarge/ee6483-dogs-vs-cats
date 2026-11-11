@@ -1,0 +1,37 @@
+name: b_resnet18
+seed: 0
+output_dir: runs/backbones
+data:
+  root: ../datasets/datasets
+  img_size: 224
+  normalize: imagenet
+  batch_size: 64
+  num_workers: 4
+  augment:
+    random_resized_crop:
+      scale:
+      - 0.6
+      - 1.0
+    hflip: 0.5
+model:
+  name: resnet18
+  pretrained: true
+  freeze: none
+loss:
+  name: cross_entropy
+  label_smoothing: 0.1
+optim:
+  name: adamw
+  lr: 0.001
+  backbone_lr_mult: 0.1
+  weight_decay: 0.05
+scheduler:
+  name: cosine
+  warmup_epochs: 1
+train:
+  epochs: 6
+  amp: true
+  grad_accum_steps: 1
+  grad_clip_norm: 1.0
+  monitor: accuracy
+  early_stop_patience: null

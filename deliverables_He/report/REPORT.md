@@ -19,7 +19,7 @@ A one-factor-at-a-time ablation ranks the design choices by the size of their ef
 
 An analysis of all 50 validation errors shows that two thirds arise when the animal is not presented as in the training set, either because the face is hidden or because the animal is behind a fence or held in a hand. Grad-CAM attributes correct predictions to the animal's head rather than to the scene. Accuracy falls by 12.7 points under heavy blur, but by only 1.1 points under 30° rotation and 0.4 points under 25% occlusion.
 
-The pipeline is then applied to CIFAR-10, where the ImageNet stem must be replaced by a 3×3 stride-1 stem to avoid destroying a 32-pixel image. Training from scratch reaches 93.60% test accuracy and ImageNet pre-training reaches 95.20%. On a long-tailed CIFAR-10 variant with a 90:1 imbalance ratio, five remedies are compared against plain cross-entropy. Post-hoc logit adjustment performs best, raising test accuracy from 62.44% to 72.99% and macro-F1 from 60.27% to 72.96% without retraining.
+The pipeline is then applied to CIFAR-10, where the ImageNet stem must be replaced by a 3×3 stride-1 stem to avoid destroying a 32-pixel image. Training from scratch reaches 93.60% test accuracy and ImageNet pre-training reaches 95.20%. On a long-tailed CIFAR-10 variant with a 90:1 imbalance ratio, four remedies are compared against plain cross-entropy. Post-hoc logit adjustment performs best, raising test accuracy from 62.44% to 72.99% and macro-F1 from 60.27% to 72.96% without retraining.
 
 Keywords: transfer learning, ResNet, fine-tuning, data augmentation, Grad-CAM, long-tailed recognition, CIFAR-10
 
@@ -88,7 +88,7 @@ Supervision level.
 |---|---|---|---|
 | Supervised | all training data labelled | AlexNet, VGG, ResNet, ViT | **this project** |
 | Semi-supervised | small labelled + large unlabelled | pseudo-labelling, MixMatch, FixMatch [Sohn et al., NeurIPS 2020] | would exploit the 500 test images, which is not permitted |
-| Self-supervised pre-training | none (pretext task), then linear probe / fine-tune | MoCo, SimCLR, BYOL, MAE, DINOv2 | source of the pretrained weights we rely on |
+| Self-supervised pre-training | none (pretext task), then linear probe / fine-tune | MoCo, SimCLR, BYOL, MAE, DINOv2 | context only: our weights are torchvision's supervised ImageNet checkpoints |
 | Few-shot / metric learning | a handful per class | Prototypical networks, MAML | not applicable (10k per class) |
 | Zero-shot | none, class described in text | CLIP-style vision-language models | interesting upper bound; not needed |
 
@@ -102,7 +102,7 @@ With vs. without domain shift. A *domain shift* means $P_{test} \neq P_{train}$.
 2. CNNs trained end-to-end (2012–2019). AlexNet [Krizhevsky et al., NeurIPS 2012] established the recipe (ReLU, dropout, GPU, augmentation) that is still in use. Depth then increased through VGG [Simonyan & Zisserman, ICLR 2015], GoogLeNet [Szegedy et al., CVPR 2015], ResNet [He et al., CVPR 2016], DenseNet [Huang et al., CVPR 2017] and ResNeXt [Xie et al., CVPR 2017].
 3. Efficient architecture search and scaling (2019–2021). EfficientNet [Tan & Le, ICML 2019] showed that depth/width/resolution must be scaled jointly under a compound coefficient.
 4. Transformers and large-scale pre-training (2020–). ViT [Dosovitskiy et al., ICLR 2021] replaced convolution with global self-attention and demonstrated that *data scale*, not inductive bias, is the binding constraint; Swin [Liu et al., ICCV 2021] reintroduced locality through windowed attention; ConvNeXt [Liu et al., CVPR 2022] showed a modernised ResNet matches Swin, i.e. the architecture family matters less than the training recipe.
-5. Transfer learning (the practical workhorse). Fine-tune an ImageNet-pretrained backbone; with 20k images this beats training from scratch by 10+ points. The two key papers are Yosinski et al. [NeurIPS 2014] on feature transferability and Kornblith et al. [CVPR 2019] on the correlation between ImageNet accuracy and transfer accuracy.
+5. Transfer learning (the practical workhorse). Fine-tune an ImageNet-pretrained backbone; with 20k images this beats training from scratch by several points, and by more when the training budget is short (2.7–7.5 points in our own experiments, Sections 5 and 7). The two key papers are Yosinski et al. [NeurIPS 2014] on feature transferability and Kornblith et al. [CVPR 2019] on the correlation between ImageNet accuracy and transfer accuracy.
 6. Long-tailed / imbalanced learning. Re-weighting [Cui et al., CVPR 2019; Cao et al., NeurIPS 2019], re-sampling, decoupled training [Kang et al., ICLR 2020], post-hoc logit adjustment [Menon et al., ICLR 2021]. Covered in Section 9.
 
 ## 1.2 Recent progress: papers that shaped the field
@@ -252,15 +252,15 @@ Run before any training (`ee6483/src/data/check_data.py`); the raw output is `ee
 | Test file names | all numeric, ids exactly 1…500, contiguous |
 | `sampleSubmission.csv` | 500 rows, header `id,label`, ids match the test files one-to-one |
 | Near-duplicates (pHash, Hamming ≤ 6) | **40 pairs** in 35 + 5 groups: 28 identical hashes, the rest at distance 2 |
-| … crossing the train↔val split | **12 pairs** (0.24% of the validation set) |
+| … crossing the train↔val split | **12 pairs**, involving 10 distinct validation images (0.20% of the validation set) |
 | … crossing the class boundary | **5 pairs** |
 | Placeholder graphics | **6 images** ("PHOTO UNAVAILABLE" / "Adopted"), 4 of them the same graphic labelled both cat and dog |
 
 Three consequences:
 
 1. Resolution heterogeneity is real. The 32 px minimum is well below the 224 px input, so those images are upsampled by a factor of 7. They are a known source of error in Section 6. Caching at short side 256 px (Section 2.3) normalises the rest.
-2. The dataset contains placeholder graphics, and they are labelled inconsistently. Six images are not photographs at all: four copies of a "PHOTO UNAVAILABLE" black-cat silhouette and two of an "Adopted" text card. The "PHOTO UNAVAILABLE" graphic appears three times in the training set under `dog` and once in the validation set under `cat`; the "Adopted" card appears once under each label, both in training. Only one of the six therefore lies in the validation set, and that image is unlearnable by construction: the network sees the same pixels labelled `dog` three times during training and is then asked for `cat`. One unavoidable error in 5,000 images caps validation accuracy at 1 - 1/5,000 = 99.98%. The two training-set copies of the "Adopted" card cost nothing directly; they simply contribute contradictory gradients. We did not delete them: removing six images would not change any conclusion, and keeping them makes the label-noise discussion in Section 6 concrete.
-3. Twelve near-duplicate pairs cross the train/val split (0.24% of the 5,000 validation images). The largest effect this can have is 0.24 pp of validation accuracy, which is larger than the seed-to-seed spread of the main model (0.05 pp) but an order of magnitude below any effect we report. We did not remove them either: the split was given, and quietly cleaning the validation set would make our numbers incomparable with anyone else's on the same data. The pairs are listed in `ee6483/results/duplicates_all.json` so the reader can re-run the analysis with them excluded.
+2. The dataset contains placeholder graphics, and they are labelled inconsistently. Six images are not photographs at all: four copies of a "PHOTO UNAVAILABLE" black-cat silhouette and two of an "Adopted" text card. The "PHOTO UNAVAILABLE" graphic appears three times in the training set under `dog` and once in the validation set under `cat`; the "Adopted" card appears once under each label, both in training. Only one of the six therefore lies in the validation set, and a model that fits its training data will almost certainly get it wrong: it sees the same graphic labelled `dog` three times during training and is then asked for `cat`. In practice this costs one error in 5,000 images (0.02 pp); it is not a strict mathematical bound, but the image is indeed among the main model's validation errors (Section 6). The two training-set copies of the "Adopted" card cost nothing directly; they simply contribute contradictory gradients. We did not delete them: removing six images would not change any conclusion, and keeping them makes the label-noise discussion in Section 6 concrete.
+3. Twelve near-duplicate pairs cross the train/val split. They involve 10 distinct validation images (one, the placeholder above, matches three training images), seven pairs have identical perceptual hashes, and one pair is byte-identical. The largest effect this can have on any validation accuracy is therefore 0.20 pp (10 images). That is larger than the seed-to-seed spread of the main model (0.05 pp) and of the same order as the differences between some backbones in Section 7.8, so it matters for fine comparisons: it cannot reverse the two-tier split there (the smallest gap between tiers is 0.28 pp), but differences below about 0.2 pp should not be read as rankings. It is small compared with the pre-training, data-quantity and fine-tuning effects of Section 7. We did not remove them either: the split was given, and quietly cleaning the validation set would make our numbers incomparable with anyone else's on the same data. The pairs are listed in `ee6483/results/duplicates_all.json` so the reader can re-run the analysis with them excluded.
 
 ![Figure 1. Near-duplicates and placeholders](../ee6483/figures/fig_duplicates.png)
 
@@ -347,9 +347,9 @@ Tensor shapes through the network (batch size $B$, input 224×224):
 
 ![Figure 4. Architecture of the main model with tensor shapes at every stage](../ee6483/figures/fig_architecture.png)
 
-The classification head is a *fresh* layer: its weights are Kaiming-initialised and its bias is zero, so at the start of training the model outputs a near-uniform distribution and the first epochs are spent learning the head, not damaging the backbone. This is the mechanism behind the LP-FT strategy in Section 3.4.
+The classification head is a *fresh* `Linear(512→2)` layer (behind dropout 0.2) with PyTorch's default initialisation: a Kaiming-uniform variant for the weights and small uniform values in ±1/√512 for the bias. At the start of training the logits are therefore small, the model outputs a near-uniform distribution, and the first epochs are spent learning the head, not damaging the backbone. This is the mechanism behind the LP-FT strategy in Section 3.4.
 
-`torchvision.models.resnet18(weights="IMAGENET1K_V1")` supplies the first 512-dimensional feature extractor; everything from `layer1` to `layer4` is loaded from the ImageNet checkpoint.
+`torchvision.models.resnet18(weights="DEFAULT")`, which for ResNet-18 resolves to `IMAGENET1K_V1` (the only ImageNet checkpoint torchvision provides for it), supplies the first 512-dimensional feature extractor; everything from `layer1` to `layer4` is loaded from the ImageNet checkpoint.
 
 ### M1: SmallCNN (the from-scratch control)
 
@@ -600,7 +600,7 @@ All numbers are accuracy on the 5,000-image validation set. Where a model was tr
 5. Three-seed averaging plus horizontal-flip TTA adds 0.29 points (98.93% → 99.22%) and reduces the error count from 50 to 39. This is the cheapest accuracy in the project, requiring no retraining and no new data, only variance reduction.
 
 M0 (HOG+SVM) is the exception to the 5,000-image validation protocol: it was trained on 8,000 and validated on 2,000 images because feature extraction is CPU-bound; all other rows use the full 5,000-image validation set. The single ResNet-50 run reaches 99.30%, which is 0.08 points above the earlier M3 ensemble (99.22%) but 0.40 points below the final submitted backbone ensemble (99.70%). It is one seed, trained at 160 px for 6 epochs, and the seed-to-seed standard deviation of the ResNet-18 family is 0.05, so a 0.08-point difference between one run of one model and a three-seed ensemble of another cannot be separated from run-to-run variation. Making the comparison meaningful would need three ResNet-50 seeds of its own (about one hour of GPU time) plus a decision about which resolution to use for all three. This comparison was later made properly in Section 7.8, which retrains seven backbones under one budget with two seeds each; the final submission is built from its top tier (Section 5.3).
-6. The seed spread of the main model is tiny (98.90, 98.90, 99.00 → σ = 0.05 pp). At this point the task is close to its label-noise ceiling: Section 6 shows that at least 5 of the 50 single-model errors are unlearnable, so ~99.9% is the practical maximum on this validation set.
+6. The seed spread of the main model is tiny (98.90, 98.90, 99.00 → σ = 0.05 pp). At this point the task is approaching its label-noise ceiling: Section 6 attributes 5 of the 50 single-model errors to label noise, non-photographic content or severely degraded images. At least three of them (Section 6, category 5) are mislabelled or contradictory, so a sound classifier should not be expected to get them right; this suggests a practical ceiling in the region of 99.9% on this validation set, as an estimate rather than a hard bound.
 
 ## 5.2 Detailed metrics for the main-study ensemble (M3 ×3 + TTA)
 
@@ -728,7 +728,7 @@ Four observations:
 - Two thirds of the errors (33/50) are "the animal is not presented the way the training set presents it": no face, or wrapped in a fence/hand. The model is not confused about *what* a cat or dog is; it is missing the specific view it has learned to rely on. This is a coverage problem, and it is the single most useful conclusion of the error analysis.
 - Category 1 is the largest source of error, and it is face-driven. Grad-CAM (Section 6.6) confirms that on correct predictions the evidence is concentrated on the head. That prior is usually right, which is why accuracy is 99%, but it has no fallback when the head is hidden.
 - Category 4 is an annotation problem, not a model problem. With a single-label target, an image containing both animals has no correct answer; whichever label is assigned, the model is "wrong" half the time by construction. This sets a floor on achievable accuracy that no architecture can remove.
-- Category 5 is irreducible, and Section 2 explains why. `cat.3072` is a photograph of five people at a trade-show booth labelled "cat"; `cat.11565` is the "PHOTO UNAVAILABLE" placeholder that also appears three times under `dog` (Section 2.2); `dog.1568` is a tabby cat held by a person, labelled "dog". No model can fit these, since the same pixels carry two different targets, so they cap achievable accuracy on this validation set regardless of architecture. This is the concrete cost of the 6 placeholder images found by the pHash audit.
+- Category 5 is largely irreducible, and Section 2 explains part of why. `cat.11565` is the "PHOTO UNAVAILABLE" placeholder that also appears three times under `dog` (Section 2.2), so the same graphic carries two different targets; `cat.3072` is a photograph of five people at a trade-show booth labelled "cat"; `dog.1568` is a tabby cat held by a person, labelled "dog". The last two are label noise rather than contradictory duplicates: a model could still output the given label, but only by chance or by fitting the noise, not by recognising the animal. These images therefore limit the accuracy a sound classifier can be expected to reach on this validation set, regardless of architecture. This is the concrete cost of the 6 placeholder images found by the pHash audit.
 
 Category 3 is the shortcut learning discussed in Section 1: a black cat walking on grass is predicted "dog" with 0.90 confidence. The model has learned a genuine correlation in the data (dogs photographed outdoors more often), and it exploits that correlation when the animal itself is ambiguous.
 
@@ -964,7 +964,7 @@ Mean ± standard deviation over two seeds; on 5,000 validation images, 0.02 pp i
 
 Four results follow.
 
-- **Two tiers, separated by more than the noise.** ConvNeXt-T, ResNet-50 and Swin-T reach 99.56–99.61%; the other four reach 99.24–99.28%. The gap of about 0.3 pp is roughly 15 validation images, while the seed-to-seed spread is at most 0.06 pp (3 images). Differences *within* a tier are inside the noise and do not rank those models.
+- **Two tiers, separated by more than the noise.** ConvNeXt-T, ResNet-50 and Swin-T reach 99.56–99.61%; the other four reach 99.24–99.28%. The gap of about 0.3 pp is roughly 15 validation images, while the seed-to-seed spread is at most 0.06 pp (3 images). The 10 validation images with near-duplicates in the training set (Section 2.2) could move any model by at most 0.20 pp, which is less than the smallest gap between the tiers (0.28 pp), so the split survives even that worst case. Differences *within* a tier are inside the noise and do not rank those models. With two seeds and a validation set that both selects the epoch and reports the result, the tiers are a well-supported observation rather than a statistically tested ranking.
 - **Accuracy tracks the quality of the pretrained weights, not model size.** ViT-B/16 has three times the parameters of ConvNeXt-T and ties ResNet-34. The top tier consists exactly of the three CNN-or-hierarchical backbones whose checkpoints score ≥ 80.9% on ImageNet. Within the ResNet family, ResNet-18 to ResNet-34 adds depth and gains 0.03 pp (noise), whereas ResNet-34 to ResNet-50 gains 0.29 pp. The ResNet-50 checkpoint is torchvision's V2 weights, trained with a modern recipe, so this step confounds a deeper bottleneck architecture with a better pre-training recipe. This is the transfer pattern reported by Kornblith et al. [CVPR 2019] and is consistent with Section 7.2: the downstream task inherits most of its accuracy from the upstream representation.
 - **ViT-B/16 is under-trained at this budget rather than shown to be worse.** Its curve starts lowest (98.26% after two epochs) and is still rising at epoch 6, while the convolutional and Swin models have flattened by epoch 4–5. A plain ViT lacks the locality bias of convolutions and of Swin's windowed attention, and is known to need longer fine-tuning. At a fixed 6-epoch budget it is the worst trade-off measured: 2.7× the time per epoch of ResNet-18 for the same accuracy.
 - **The conclusions do not depend on which epoch is reported.** Best and last-epoch accuracies differ by at most 0.06 pp, and the two tiers are unchanged if the last epoch is used.
@@ -1038,7 +1038,9 @@ Replacing the stem with a single 3×3 stride-1 convolution and removing the max-
 
 G1: CIFAR-ResNet-18 trained from scratch. 11.2M parameters, 3×3 stride-1 stem, SGD (lr 0.1, momentum 0.9, Nesterov, wd 5e-4), cosine schedule with 5% warm-up, batch 128, 25 epochs, standard CIFAR augmentation. No pre-training of any kind.
 
-G2: ImageNet ResNet-18, upsampled inputs. The 32×32 images are resized to 160×160 with bicubic interpolation before entering the standard ImageNet stem, the head is replaced by `Linear(512→10)`, and the network is fine-tuned for 7 epochs with SGD (lr 0.01, cosine). This isolates the value of pre-training from the value of architecture.
+G2: ImageNet ResNet-18, upsampled inputs. The 32×32 images are resized to 160×160 with bilinear interpolation (torchvision's default for `Resize`) before entering the standard ImageNet stem, the head is replaced by `Linear(512→10)`, and the network is fine-tuned for 7 epochs with SGD (lr 0.01, cosine).
+
+G1 and G2 are two complete recipes, not a controlled pair: besides the initialisation they differ in the stem (3×3 stride 1 vs 7×7 stride 2 plus max-pool), the input resolution (32 vs 160 px), the number of epochs (25 vs 7) and the learning rate. The gap between them therefore measures "ImageNet transfer as it is normally done" against "a standard from-scratch CIFAR recipe", and cannot be attributed to pre-training alone.
 
 ## 8.4 Results
 
@@ -1053,9 +1055,9 @@ G2: ImageNet ResNet-18, upsampled inputs. The 32×32 images are resized to 160×
 
 ### Reading the results
 
-1. From-scratch training is competitive here. G1 reaches 93.60% test accuracy in 25 epochs without any pre-training; the ImageNet-pretrained G2 reaches 95.20% in 7 epochs. The gap is only ~1.6 points: about five times smaller than the 7.5-point pre-training gap measured on cats vs. dogs at a comparable short budget (Section 7.2).
+1. From-scratch training is competitive here. G1 reaches 93.60% test accuracy in 25 epochs without any pre-training; the ImageNet-pretrained G2 reaches 95.20% in 7 epochs. The gap between the two recipes is only ~1.6 points, much smaller than the 7.5-point pre-training gap measured on cats vs. dogs at a short budget (Section 7.2). Because G1 and G2 differ in more than the initialisation (Section 8.3), the two gaps are indicative rather than directly comparable.
 2. That is exactly what the learning curve in Section 7.3 predicts. Pre-training substitutes for data: it is worth most when the dataset is small (a pre-trained model on 500 cat/dog images reaches 93.6%, beating a from-scratch model trained on 20,000 images at 90.7%) and worth least when the dataset is large. CIFAR-10 has 45,000 training images of 32x32: small images are cheap to learn from, and the dataset is 2.25x larger than our cat/dog training set. The pre-training advantage shrinks accordingly. This cross-dataset consistency is stronger evidence than either experiment alone.
-3. ImageNet pre-training is partly off-target here. Only 2 of the 10 CIFAR classes (cat, dog) exist in ImageNet-1k as such; the other 8 are coarse supersets (automobile, truck, ship, airplane) or absent (frog, deer). What transfers is the generic low/mid-level feature hierarchy, not a category prior: which is why the gain is real but modest.
+3. ImageNet pre-training is partly off-target here. ImageNet-1k has no class named after any CIFAR-10 category: it splits them into fine-grained classes (many dog breeds, several cat, frog, ship and truck types, an airliner class), and some, such as deer, have no direct counterpart. What transfers is the generic low/mid-level feature hierarchy, not a category prior: which is why the gain is real but modest.
 4. The confusion structure is semantic, and it is the same structure we saw in Section 6. The single dominant off-diagonal pair is cat-dog (69 errors in each direction), i.e. exactly the confusion that dominated the Dogs vs Cats task: the same two classes are the hardest pair in both problems, which is a satisfying cross-task consistency check. The second tier is animal-shape confusion (cat→deer 22, frog→cat 21, bird→deer 18) plus a blue-background cluster (ship→airplane 20, airplane→ship 18, bird→airplane 18). The last group is informative: at 32x32 the vehicle classes are small objects on a sky/sea background, and the model does use that background as evidence: the shortcut we worried about in Section 1 is measurable here, just not for the animal classes.
 5. Per-class accuracy tracks class difficulty, not class frequency (all classes are equally frequent here): automobile, ship and truck are easiest (96-98%), while cat, dog and bird are hardest (86-91%). That ordering is driven by within-class variability and object size, and it changes completely in Section 9, where frequency is manipulated instead: which is exactly the point of Section 9.
 
@@ -1084,7 +1086,7 @@ Kang et al. [ICLR 2020] show that (2) dominates: if you freeze a representation 
 
 We use CIFAR-10 with an exponential long-tailed training distribution (the "CIFAR-10-LT" protocol):
 
-$$n_i = n_{max}\cdot \rho^{-i/(C-1)},\qquad i=0,\dots,9,\quad \rho=100,\ n_{max}=5{,}000$$
+$$n_i = n_{max}\cdot \rho^{-i/(C-1)},\qquad i=0,\dots,9,\quad \rho=100,\ n_{max}=5000$$
 
 which gives the per-class counts below. Only the *training* set is subsampled; validation and test keep the original balanced distribution, because the goal is to classify well on a balanced test set, not to reproduce the training prior.
 
@@ -1100,7 +1102,7 @@ The validation split (5,000, stratified) and the 10,000-image test set are untou
 
 Five methods are implemented so that the comparison spans the three families in the literature: data-level, loss-level and post-hoc.
 
-The classifier is the CIFAR-ResNet-18 of Section 8 (model G1), retrained from scratch on the long-tailed training set. Only the loss, the sampling procedure or the decision rule changes between methods, so any difference in the results is attributable to the treatment of imbalance rather than to a change of architecture.
+The classifier is the CIFAR-ResNet-18 of Section 8 (model G1), retrained from scratch on the long-tailed training set. The architecture is the same for every method; what changes is the loss, the sampling procedure or the decision rule. One exception should be kept in mind when reading the results: the class-balanced loss row uses a longer, 30-epoch run (Appendix A.1), so it differs from the others in schedule as well as in loss, and is not a strictly one-variable comparison. The 18-epoch CB run is reported alongside it.
 
 ### 9.3.1 Cross-entropy baseline (CE)
 
@@ -1115,7 +1117,7 @@ $$p_j \propto \frac{1}{n_{c(j)}}$$
 so that every batch is approximately class-balanced (`WeightedRandomSampler`, replacement=True). Tail images are therefore repeated many times per epoch.
 
 *Why it should work:* it removes the classifier bias directly: the empirical label distribution seen by the loss becomes uniform.
-*Known risk:* the tail classes are effectively oversampled by a factor of 10, so they overfit; this must be paired with strong augmentation. Our augmentation includes RandomCrop+flip+RandAugment+RandomErasing, which mitigates but does not eliminate it.
+*Known risk:* the sampler draws about 11,908 / 10 ≈ 1,190 images per class per epoch, so each of the 50 truck images is seen about 24 times per epoch (against roughly 0.26 times for an airplane image); the tail classes therefore overfit, and this must be paired with strong augmentation. Our augmentation includes RandomCrop+flip+RandAugment+RandomErasing, which mitigates but does not eliminate it.
 
 ### 9.3.3 Class-balanced loss (loss-level)
 
@@ -1126,11 +1128,11 @@ $$w_c \propto \frac{1}{E_{n_c}},\qquad \mathcal{L} = -\sum_c w_c\, y_c \log p_c$
 The intuition: as $n$ grows, additional samples add progressively less new information, so the "effective" size saturates and the weights should not diverge like $1/n$. With $\beta \to 1$ this recovers inverse-frequency weighting; with $\beta \to 0$ it recovers plain CE. We normalise the weights to mean 1 so the effective learning rate is unchanged.
 
 *Why it should work:* it re-balances the loss without changing the data distribution, so no sample is repeated and there is no extra overfitting risk.
-*Known risk:* with a 10:1 ratio the weights are mild; the gradient is still dominated by head-class batches early in training.
+*Known risk:* at a 90:1 ratio and $\beta=0.9999$ the weights are far from mild: $E_{4500}\approx 3624$ against $E_{50}\approx 49.9$, so a truck sample weighs about 73 times as much as an airplane sample. Head-class samples then contribute little gradient, which can slow the learning of the shared representation.
 
 ### 9.3.4 Decoupling / cRT (two-stage)
 
-Kang et al. [ICLR 2020]: train normally for 80% of the schedule, then freeze the backbone, re-initialise the classifier, and re-train only the classifier with class-balanced sampling for the remaining 20%.
+Kang et al. [ICLR 2020]: train normally for about 80% of the schedule, then freeze the backbone, re-initialise the classifier, and re-train only the classifier with class-balanced sampling for the rest. In our 18-epoch run the first stage is epochs 1–14 (identical to the CE baseline) and the classifier is re-trained in epochs 15–18.
 
 *Why it should work:* it follows the causal analysis of Section 9.1. the representation is nearly unbiased, the classifier is the biased part, so fix only the classifier and do not disturb the features.
 *Implementation note:* the head is re-initialised (Kaiming) rather than merely re-tuned, because the existing head has already absorbed the prior; and the second stage uses a 10× smaller learning rate with a short cosine decay.
@@ -1139,9 +1141,11 @@ Kang et al. [ICLR 2020]: train normally for 80% of the schedule, then freeze the
 
 Menon et al. [ICLR 2021]. Train with plain CE, then at *inference* shift the logits by the log-prior:
 
-$$\hat{y} = \arg\max_c \big[f_c(x) + \tau \log \pi_c\big],\qquad \pi_c = \frac{n_c}{\sum_j n_j},\ \tau = 1$$
+$$\hat{y} = \arg\max_c \big[f_c(x) - \tau \log \pi_c\big],\qquad \pi_c = \frac{n_c}{\sum_j n_j}$$
 
-*Why it should work:* under a multinomial-logit model this is the Bayes-optimal correction for the balanced error rate, and it costs nothing at training time: no retraining, no extra hyper-parameter search.
+Subtracting $\tau \log \pi_c$ raises the scores of rare classes (small $\pi_c$) relative to frequent ones. The strength $\tau$ is chosen on the validation split from $\{0, 0.25, 0.5, 0.75, 1.0, 1.5\}$ and then applied once to the test set (`ee6483/scripts/eval_logit_adjust.py`).
+
+*Why it should work:* under a multinomial-logit model this is the Bayes-optimal correction for the balanced error rate, and it costs nothing at training time: no retraining, only a one-dimensional sweep over $\tau$ on cached validation logits.
 *Known risk:* it assumes the training prior is the only source of bias; if the representation itself is skewed, the correction is incomplete.
 
 ## 9.4 Results
@@ -1172,16 +1176,16 @@ The two rarest classes collapse to 22-24% recall, barely above the 10% chance le
 
 ### What each method does
 
-1. Logit adjustment is the winner, and it requires no retraining. Applying `argmax f_c(x) - tau·log(pi_c)` to the *already trained* CE model raises test accuracy from 62.44% to 72.99% (+10.6 pp) and macro-F1 from 60.27% to 72.96%. The optimal tau selected on the validation split is exactly 1.0, which is what the theory predicts for a multinomial-logit model: a satisfying confirmation that the mechanism is the one the paper describes (a prior shift in the logits) rather than an accidental regularisation effect.
+1. Logit adjustment is the winner, and it requires no retraining. Applying `argmax f_c(x) - tau·log(pi_c)` to the *already trained* CE model raises test accuracy from 62.44% to 72.99% (+10.6 pp) and macro-F1 from 60.27% to 72.96%. The tau selected on the validation split from the six-value grid is 1.0, which coincides with the value the theory gives for a multinomial-logit model. Because the grid is coarse this is a consistency check rather than a confirmation, but it agrees with the mechanism the paper describes (a prior shift in the logits).
 2. Re-sampling works but trades head for tail. +9.6 pp overall; head-class recall drops from 90.3% to 85.8% while the tail rises from 39.5% to 64.5%. This is the expected behaviour: repeating tail samples makes the effective training distribution uniform.
-3. Decoupling works for the reason Kang et al. give. The training log shows it directly: validation accuracy is 52.6% at epoch 10; the backbone is then frozen and the head re-initialised, and four epochs later (epoch 14) validation accuracy is 70.0%. The representation was already fine; the classifier was the biased part, and re-training it on a balanced stream recovered 18 points in 4 epochs. Final test accuracy 71.22%. Table entries are rounded to one decimal, so the many/few averages quoted above can differ from recomputation on the rounded per-class recalls by up to 0.3 points.
+3. Decoupling works for the reason Kang et al. give. The training log shows it directly: epochs 1–14 are identical to the CE baseline and end at 61.0% validation accuracy; the backbone is then frozen and the head re-initialised, and after one epoch of class-balanced head re-training (epoch 15) validation accuracy is 70.0%. With the representation fixed, re-training only the classifier gained 8.9 points in one epoch, which is the pattern expected if the classifier, not the representation, carries most of the bias. Final test accuracy 71.22%. Table entries are rounded to one decimal, so the many/few averages quoted above can differ from recomputation on the rounded per-class recalls by up to 0.3 points.
 4. Class-balanced loss gives no gain at this schedule. It reaches 59.50%, *below* plain CE. The training curves explain why: at epoch 30 the training accuracy is still 59.95%, i.e. the model is severely under-trained. Two causes, both specific to our setup: (i) with weights normalised to mean 1 and `reduction='mean'` over weighted samples, head-class-dominated batches produce a *smaller* effective gradient, so the weighted loss converges more slowly than plain CE; (ii) the 30-epoch budget is far shorter than the 200+ epochs used in the original paper. Note that CB *does* re-balance: its few-class recall (63.1%) beats CE (39.5%): but it destroys the head (66.8% vs 90.3%) and never recovers overall accuracy. A shorter 18-epoch run (54.04%) shows the same pattern more strongly.
 
 ### Practical recommendation
 
 Ordered by benefit per unit of effort:
 
-1. Logit adjustment: one line at inference time, no retraining, +10.6 pp. Do this first, always.
+1. Logit adjustment: one line at inference time, no retraining, +10.6 pp. In this setting it is the cheapest first step to try.
 2. Decoupling (cRT): one extra short training stage, +8.8 pp, and it is the most *interpretable* fix because it isolates the classifier as the biased component.
 3. Re-sampling: trivial to implement, +9.6 pp, but it overfits the tail and needs strong augmentation to be safe.
 4. Class-balanced loss: theoretically appealing, but in our hands it needs a much longer schedule to pay off; at 30 epochs it is a net loss.
@@ -1190,10 +1194,10 @@ The ranking is not the same as the ranking in the literature (where CB loss is s
 
 ## 9.5 Honest limitations
 
-- One seed per method, one imbalance ratio (rho=100). The long-tail literature sweeps rho in {10, 50, 100, 200} and averages over 3-5 seeds. Our ordering is robust to what we observe, but the magnitudes are not, and a single seed cannot separate a 1-point difference from noise.
+- One seed per method, one imbalance ratio (rho=100). The long-tail literature sweeps rho in {10, 50, 100, 200} and averages over 3-5 seeds. The ordering and the magnitudes are therefore single-run observations: the 9–10 point gains over CE are large enough to be unlikely to reverse, but a single seed cannot separate the 1–2 point differences among logit adjustment, re-sampling and decoupling from noise, and none of the ranking has been tested at other imbalance ratios.
 - The whole study sits in an under-trained regime. Even the best method reaches 72.99%, whereas the CIFAR-10-LT literature reports ~77% for LDAM-DRW at rho=100 with 200-epoch schedules. Our comparison is internally consistent (four methods share one schedule and the class-balanced loss was given a longer one, as noted above), but the absolute numbers should not be compared with published ones.
 - The backbone is trained from scratch. With an ImageNet-pretrained backbone the imbalance gap shrinks substantially, because the representation is already good: an interesting follow-up we did not have the budget for.
-- Balanced accuracy here is macro-averaged recall on the balanced test set. We do not report the balanced error rate on the *training* prior, which is what logit adjustment is theoretically optimal for.
+- Balanced accuracy here is macro-averaged recall on the balanced test set, i.e. one minus the balanced error rate, which is the quantity logit adjustment is designed to optimise. Because the test set is balanced, it coincides with overall accuracy.
 
 <div style="page-break-after: always;"></div>
 
@@ -1238,19 +1242,32 @@ On a small, well-curated binary problem, the pre-trained representation and the 
 ## 10.6 Reproducing the numbers
 
 ```bash
-# environment: Python 3.13, torch 2.6.0+cu124, torchvision 0.21.0, RTX 3070 Ti Laptop (8 GB)
-python -m ee6483.src.data.check_data --root data/datasets        # -> results/data_report.json
-python -m ee6483.src.data.cache_images --src data/datasets --dst data/cache --short 256
-python -m ee6483.scripts.run_experiments --phases main compare ablation lrsearch cifar imbalance
+# Sections 2-9 (ee6483/): Python 3.13, torch 2.6.0+cu124, torchvision 0.21.0, RTX 3070 Ti Laptop (8 GB)
+python -m ee6483.src.data.check_data --root ../datasets/datasets   # -> results/data_report.json
+python -m ee6483.src.data.cache_images --src ../datasets/datasets --dst data/cache --short 256
+python -m ee6483.scripts.run_experiments --phases main compare ablation augcheck lrsearch extra cifar imbalance
 python -m ee6483.scripts.aggregate                                # -> results/summary.{csv,md}
 python -m ee6483.src.analyze --which all                          # -> figures/
 python -m ee6483.src.analyze_cifar                                # -> CIFAR / imbalance figures
 python -m ee6483.scripts.dump_errors                              # -> all 50 validation errors
-python report/make_tokens.py && python report/build_report.py     # -> report/REPORT.md
+
+# Section 7.8 and the final submission (src/): torch 2.11.0+cu128, one A40 per run
+bash scripts/run_backbones.sh                                     # 7 backbones x seeds 0, 1
+python scripts/ensemble_predict.py --out submissions/submission_backbone_ensemble.csv \
+  --group convnext=<2 ConvNeXt-T checkpoints> --group resnet18=<2 ResNet-18 checkpoints> \
+  --group top3=<6 ConvNeXt-T / ResNet-50 / Swin-T checkpoints> --choose top3 --tta
+cp submissions/submission_backbone_ensemble.csv submissions/submission.csv
+
+python report/build_report.py && python report/md_to_docx.py      # -> report/REPORT.md, .docx
 ```
 
-The aggregate tables can be regenerated from `ee6483/results/summary.csv`, which is
-written by the same pipeline.
+`run_experiments.py` reproduces every `ee6483/` run in Appendix A.1 except the
+learning rate of `H_cb_long`, which was not saved (Appendix A.1, notes). The exact
+checkpoint lists for the ensemble are in
+`submissions/submission_backbone_ensemble_ensemble.json`. AMP makes individual runs
+non-bit-exact, so re-runs should match to within the seed noise reported in the text,
+not to the last digit. The numbers in the section files are maintained by hand
+(Appendix A.5).
 
 <div style="page-break-after: always;"></div>
 
@@ -1306,8 +1323,10 @@ Every entry above was checked against the published record (venue, year, title).
 # Appendix: Complete Experiment Log
 
 Everything reported in the body of this document is derived from the 42 run
-directories under `ee6483/results/`. This appendix prints the raw log so that
-any number in the main text can be traced to a single command.
+directories under `ee6483/results/` and the backbone runs of A.1b. This appendix
+prints the per-run results so that any number in the main text can be traced to
+a run directory; the commands are in `ee6483/scripts/run_experiments.py` and,
+for the runs launched by hand, in the notes below.
 
 ## A.1 Every run
 
@@ -1352,7 +1371,7 @@ validation accuracy, `test_acc` the CIFAR-10 test accuracy where applicable, and
 | `E7c_aug_full_lowdata` | 42 | resnet18 | 160 | full | full | 500 | 8 | 96.30 | – | 88 |
 | `E7c_aug_none_lowdata` | 42 | resnet18 | 160 | none | full | 500 | 8 | 95.94 | – | 87 |
 | `G1_cifar_scratch` | 42 | resnet18-cifar | 32 | - | ce | 45,000 | 25 | 93.44 | 93.60 | 1540 |
-| `G2_cifar_pretrained` | 42 | resnet18-cifar | 160 | - | ce | 45,000 | 7 | 95.58 | 95.20 | 579 |
+| `G2_cifar_pretrained` | 42 | resnet18 (ImageNet) | 160 | - | ce | 45,000 | 7 | 95.58 | 95.20 | 579 |
 | `H_cb` | 42 | resnet18-cifar | 32 | - | cb | 11,908 | 18 | 54.02 | 54.04 | 658 |
 | `H_cb_long` | 42 | resnet18-cifar | 32 | - | cb | 11,908 | 30 | 59.22 | 59.50 | 1069 |
 | `H_ce` | 42 | resnet18-cifar | 32 | - | ce | 11,908 | 18 | 62.54 | 62.44 | 809 |
@@ -1366,12 +1385,24 @@ validation accuracy, `test_acc` the CIFAR-10 test accuracy where applicable, and
 Notes:
 
 - The two `E7b` rows are the 8-epoch augmentation check added specifically to
-  test whether the 3-epoch null result in Section 7.6 was a budget artefact.
-- `H_cb` (18 epochs) and `H_cb_long` (30 epochs, 2× learning rate) are both
-  listed: the second was run to give the class-balanced loss a fair schedule
-  before concluding that it underperforms (Section 9.4).
-- `H_logit_adjust` shows `sec = 0` because it is post-hoc: it reuses the `H_ce`
-  checkpoint and only changes the decision rule.
+  test whether the 3-epoch null result in Section 7.6 was a budget artefact; the
+  two `E7c` rows repeat it at 250 images per class. These four runs were first
+  launched by hand; their full arguments are saved in each `metrics.json` and
+  are reproduced exactly by the `augcheck` phase of `run_experiments.py`.
+- `H_cb` (18 epochs) and `H_cb_long` (30 epochs) are both listed: the second was
+  run to give the class-balanced loss a longer schedule before concluding that
+  it underperforms (Section 9.4). `H_cb_long` was launched by hand and its
+  `metrics.json` does not record the learning rate, so only its epoch count can
+  be verified from the saved files.
+- `H_logit_adjust` shows `sec = 0` because it is post-hoc: its `metrics.json` is
+  written by `ee6483/scripts/eval_logit_adjust.py`, which reuses the `H_ce`
+  checkpoint and only changes the decision rule. The `train.log` in the same
+  folder is left over from an earlier in-training implementation and its test
+  accuracy (51.56%) is superseded; see the `README.md` in that folder.
+- The `H_*` runs save the class counts, epochs and per-epoch history in
+  `metrics.json`, but not the full argument dictionary that the `E*` runs save;
+  their arguments are the defaults of `ee6483/src/train_cifar.py` plus the
+  command line in `run_experiments.py`.
 - `E4_ensemble` is the evaluation of the three `E4_r18_ft` seeds averaged with
   horizontal-flip TTA: the configuration of the first submission
   (kept as `submissions/submission_m3_ensemble.csv`).
@@ -1416,11 +1447,16 @@ Produced by the config-driven code base (`src/`, `configs/dogs_cats/backbones/`)
 | GPU | NVIDIA GeForce RTX 3070 Ti Laptop GPU (8 GB) |
 | OS | Windows 11 |
 
-Everything is pinned: the same seed set {42, 43, 44}, `cudnn.deterministic=True`,
-`cudnn.benchmark=False`, and an offline-resized image cache (short side 256 px)
-so that every run sees identical pixels. AMP is the one non-deterministic
-component, which is why all headline numbers are means over three seeds rather
-than single runs.
+The table lists the versions used for every run in A.1; the backbone runs of
+A.1b used torch 2.11.0+cu128 on the cluster. `requirements.txt` gives minimum
+versions only, so a fresh install will not reproduce these versions exactly
+unless they are installed explicitly. The pretrained weights are torchvision's
+`DEFAULT` weights for each architecture (IMAGENET1K_V1 for ResNet-18/34,
+IMAGENET1K_V2 for ResNet-50 under the versions above). Within a run, the seed
+set {42, 43, 44}, `cudnn.deterministic=True`, `cudnn.benchmark=False` and an
+offline-resized image cache (short side 256 px) fix the data order and the
+pixels. AMP is the one non-deterministic component, which is why the main
+model's headline numbers are means over three seeds rather than single runs.
 
 ## A.3 The submitted file
 
@@ -1466,23 +1502,23 @@ training):
 | Unreadable / corrupt | 0 |
 | Test ids | exactly 1…500, all numeric file names |
 | Id ↔ `sampleSubmission.csv` | one-to-one match |
-| pHash near-duplicates (Hamming ≤ 6) | 40 pairs / 35 + 5 groups: 12 cross the train↔val split, 5 cross the class boundary |
+| pHash near-duplicates (Hamming ≤ 6) | 40 pairs / 35 + 5 groups: 12 cross the train↔val split (10 distinct validation images), 5 cross the class boundary |
 | Placeholder graphics | 6 ("PHOTO UNAVAILABLE" / "Adopted"), labelled inconsistently |
 | Mean image size | 400 × 361 px (train), 400 × 361 px (test) |
 | Smallest side | 32 px |
 
 ## A.5 Reproducing this document
 
-The report itself is generated, not hand-assembled:
+The document is assembled from the section files:
 
 ```bash
 python -m ee6483.scripts.aggregate          # results/summary.csv
-python report/make_tokens.py                # results/*/metrics.json -> tokens.json
 python report/build_report.py               # sections/*.md -> REPORT.md
 python report/md_to_docx.py                 # REPORT.md -> EE6483_Group_Report.docx
 ```
 
-`build_report.py` substitutes the double-brace placeholders from `tokens.json`, so
-re-running the pipeline after new experiments updates every table and every
-number quoted in the prose. A stale figure in the text is therefore a bug in the
-pipeline, not a transcription error: which is the property we wanted.
+The numbers in the section files are written in directly and were checked by
+hand against `ee6483/results/summary.csv`, the per-run `metrics.json` files and
+`results/backbones.csv`. They are not substituted automatically, so re-running
+an experiment does not update the text: a changed result has to be copied into
+the relevant section by hand.

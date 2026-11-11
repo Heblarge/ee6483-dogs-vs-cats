@@ -96,7 +96,7 @@ two seeds each, horizontal-flip TTA; report Sections 5.3 and 7.8). The submitted
 
 | Path | Purpose |
 |---|---|
-| `<exp>/s<seed>/metrics.json` | Every scalar result for that run (accuracy, F1, confusion matrix, per-class recall, args, timings) |
+| `<exp>/s<seed>/metrics.json` | Every scalar result for that run (accuracy, F1, confusion matrix, per-class recall, timings); the `E*` runs also save the full argument dictionary, the CIFAR `G*`/`H*` runs only the class counts, epochs and history |
 | `<exp>/s<seed>/curves.csv` | Per-epoch loss and accuracy |
 | `<exp>/s<seed>/train.log` | Full training log |
 | `summary.csv` / `summary.md` | All runs in one table |
@@ -166,22 +166,31 @@ CIFAR-10 is downloaded automatically from the HuggingFace parquet mirror on firs
 ```bash
 pip install -r requirements.txt          # see the note about the CUDA build inside
 
-# 1. reproduce the submitted predictions (three seeds, then the ensemble)
+# 1. reproduce the M3 baseline ensemble (three ResNet-18 seeds, the first submission).
+#    It writes submission_m3_ensemble.csv and does NOT touch the final submission.csv.
 python -m ee6483.src.train --config ee6483/configs/main.yaml --data-root ../datasets/datasets --exp-id E4_r18_ft --seed 42
 python -m ee6483.src.train --config ee6483/configs/main.yaml --data-root ../datasets/datasets --exp-id E4_r18_ft --seed 43
 python -m ee6483.src.train --config ee6483/configs/main.yaml --data-root ../datasets/datasets --exp-id E4_r18_ft --seed 44
 python -m ee6483.src.predict --ckpts ee6483/results/E4_r18_ft/s4{2,3,4}/best.pt \
-    --data-root ../datasets/datasets --out submissions/submission.csv --tta 1
+    --data-root ../datasets/datasets --out submissions/submission_m3_ensemble.csv --tta 1
+python ee6483/scripts/validate_submission.py --sub submissions/submission_m3_ensemble.csv
+
+# 2. reproduce the FINAL submission (six top-tier backbones, Section 7.8; needs the
+#    cluster checkpoints, see CLUSTER_GUIDE.md and
+#    submissions/submission_backbone_ensemble_ensemble.json for the exact lists)
+bash scripts/run_backbones.sh
+python scripts/ensemble_predict.py --out submissions/submission_backbone_ensemble.csv \
+    --group convnext=<2 ckpts> --group resnet18=<2 ckpts> --group top3=<6 ckpts> --choose top3 --tta
+cp submissions/submission_backbone_ensemble.csv submissions/submission.csv
 python ee6483/scripts/validate_submission.py --sub submissions/submission.csv
 
-# 2. regenerate every table and figure
-python -m ee6483.scripts.run_experiments --phases main compare ablation lrsearch cifar imbalance
+# 3. regenerate every table and figure
+python -m ee6483.scripts.run_experiments --phases main compare ablation augcheck lrsearch extra cifar imbalance
 python -m ee6483.scripts.aggregate
 python -m ee6483.src.analyze --which all
 python -m ee6483.src.analyze_cifar
 
-# 3. regenerate the report
-python report/make_tokens.py
+# 4. regenerate the report (numbers in report/sections/*.md are maintained by hand)
 python report/build_report.py
 python report/md_to_docx.py
 ```

@@ -37,8 +37,9 @@ pip install -r requirements.txt
 # 数据在仓库根目录 datasets/datasets/{train,val,test}
 python -m ee6483.src.data.cache_images --src ../datasets/datasets --dst data/cache --short 256
 python -m ee6483.src.train --config ee6483/configs/main.yaml --data-root ../datasets/datasets --exp-id E4_r18_ft --seed 42
-python -m ee6483.src.predict --ckpts ee6483/results/E4_r18_ft/s42/best.pt --data-root ../datasets/datasets --out submissions/submission.csv --tta 1
-python ee6483/scripts/validate_submission.py --sub submissions/submission.csv
+python -m ee6483.src.predict --ckpts ee6483/results/E4_r18_ft/s42/best.pt --data-root ../datasets/datasets --out submissions/submission_m3_single.csv --tta 1
+python ee6483/scripts/validate_submission.py --sub submissions/submission_m3_single.csv
+# 注意：最终提交 submissions/submission.csv 来自六模型骨干集成，复现方法见 REPORT_GUIDE.md 第 2 步
 ```
 
 ## 说明
