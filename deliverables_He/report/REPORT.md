@@ -15,7 +15,7 @@ This report studies binary cat/dog classification on 20,000 training images, 5,0
 
 The main model, an ImageNet-pretrained ResNet-18 fine-tuned with the LP-FT schedule, reaches 98.93 ± 0.05% validation accuracy over three seeds. A three-seed ensemble with horizontal-flip test-time augmentation raises this to 99.22%. The submitted predictions come from an ensemble of the three best backbones in a controlled comparison (ConvNeXt-T, ResNet-50 and Swin-T, two seeds each), which reaches 99.70% validation accuracy.
 
-A one-factor-at-a-time ablation ranks the design choices by the size of their effect. Pre-training is the largest factor, worth 7.46 points at a fixed budget. Training-set size is second: accuracy rises from 93.56% with 500 images to 98.12% with 20,000 and saturates beyond 10,000. The depth of fine-tuning (1.88 points) and the input resolution (0.64 points from 160 to 224 pixels) are third-order. Augmentation moves accuracy by less than half a point at all three budgets tested, with the sign depending on the schedule. Backbone choice is a small effect. A controlled comparison of seven ImageNet backbones at a fixed budget, two seeds each, spans 99.24% to 99.61%: ConvNeXt-T, ResNet-50 and Swin-T form a top tier about 0.3 points above ResNet-18/34, EfficientNet-B0 and ViT-B/16, and the ranking follows the ImageNet accuracy of the pretrained weights rather than the number of parameters (ViT-B/16, still improving at the end of the budget, is the exception).
+A one-factor-at-a-time ablation ranks the design choices by the size of their effect. Pre-training is the largest factor, worth up to 7.46 points at a fixed budget (the from-scratch arm received twice the epochs; see Section 7.2). Training-set size is second: accuracy rises from 93.56% with 500 images to 98.12% with 20,000 and saturates beyond 10,000. The depth of fine-tuning (1.96 points from head-only to last stage) and the input resolution (0.64 points from 160 to 224 pixels) are third-order. Augmentation moves accuracy by less than half a point at all three budgets tested, with the sign depending on the schedule. Backbone choice is a small effect. A controlled comparison of seven ImageNet backbones at a fixed budget, two seeds each, spans 99.24% to 99.61%: ConvNeXt-T, ResNet-50 and Swin-T form a top tier about 0.3 points above ResNet-18/34, EfficientNet-B0 and ViT-B/16, and the ranking follows the ImageNet accuracy of the pretrained weights rather than the number of parameters (ViT-B/16, still improving at the end of the budget, is the exception).
 
 An analysis of all 50 validation errors shows that two thirds arise when the animal is not presented as in the training set, either because the face is hidden or because the animal is behind a fence or held in a hand. Grad-CAM attributes correct predictions to the animal's head rather than to the scene. Accuracy falls by 12.7 points under heavy blur, but by only 1.1 points under 30° rotation and 0.4 points under 25% occlusion.
 
@@ -158,7 +158,7 @@ Diagnosis (He et al., CVPR 2016). The paper starts from an empirical puzzle: a 5
 
 Fix. Re-parameterise each block to learn a residual $F(x) = H(x) - x$, so the block output is $F(x) + x$. If the identity is optimal, driving $F$ to zero is easier than learning the identity through non-linearities. The paper also shows that shortcut connections add neither parameters nor computational cost, which is what makes depth "free".
 
-Evidence and impact. the 152-layer ResNet won ILSVRC 2015 with 3.57% top-5 error, and the ablation is unusually clean: plain vs. residual at 18/34 layers, with and without shortcuts, isolates exactly one variable. The follow-up [He et al., ECCV 2016] moved BN and ReLU before the convolution (pre-activation) and improved optimisation further, which is why modern ResNets use `conv-BN-ReLU` ordering and a zero-initialised last BN in each block.
+Evidence and impact. the 152-layer ResNet won ILSVRC 2015 with 3.57% top-5 error, and the ablation is unusually clean: plain vs. residual at 18/34 layers, with and without shortcuts, isolates exactly one variable. The follow-up [He et al., ECCV 2016] moved BN and ReLU before the convolution (pre-activation) and improved optimisation further, which is why modern ResNets use `BN-ReLU-conv` ordering and a zero-initialised last BN in each block.
 
 Why it matters for us. Our backbone is a ResNet, and the LP-FT finding [Kumar et al., ICLR 2022] that fine-tuning *distorts* pretrained features is essentially a statement about how much of the residual network should be allowed to move. A frozen ResNet-18 with a linear head (M2) is a strong feature extractor; unfreezing everything at a large learning rate destroys some of that structure before the head has learned to use it: which is exactly the accuracy dip we observe at the first unfrozen epoch and why we warm up the backbone learning rate.
 
@@ -357,7 +357,7 @@ Four blocks, each `Conv3×3-BN-ReLU → Conv3×3-BN-ReLU → MaxPool2`, with 32/
 
 ### M0: classical baseline
 
-Each image is resized to 96×96, converted to grayscale for HOG (9 orientations, 8×8 cells, 2×2 blocks, L2-Hys) and kept in RGB for a 16-bin per-channel colour histogram. The two descriptors are concatenated (1764 + 48 = 1812 dimensions), standardised, and classified by an RBF SVM (C=10). Trained on 8,000 images (4,000 per class) because the feature extraction is CPU-bound.
+Each image is resized to 96×96, converted to grayscale for HOG (9 orientations, 8×8 cells, 2×2 blocks, L2-Hys) and kept in RGB for a 16-bin per-channel colour histogram. The two descriptors are concatenated (4356 + 48 = 4404 dimensions), standardised, and classified by an RBF SVM (C=10). Trained on 8,000 images (4,000 per class) because the feature extraction is CPU-bound.
 
 ## 3.3 Loss function
 
@@ -427,7 +427,7 @@ Details that matter: no vertical flip (an upside-down animal is out of distribut
 
 ## 3.7 Code and how to run it
 
-The complete implementation is submitted with this report as the `ee6483/` package: 30 Python modules, the configuration files, every run's `metrics.json` and training log, and the 24 figures. `README.md` at the repository root lists every file and what it does, and `ee6483/README.md` gives the step-by-step reproduction commands. Minimum working example:
+The complete implementation is submitted with this report as the `ee6483/` package: 30 Python modules, the configuration files, every run's `metrics.json` and training log, and the 19 figures. `README.md` at the repository root lists every file and what it does, and `ee6483/README.md` gives the step-by-step reproduction commands. Minimum working example:
 
 ```bash
 # main model, one seed
@@ -513,7 +513,7 @@ Decision: 224 px for the main model, 160 px for ablations. 224 is the resolution
 | full fine-tune | 11.18 M | 98.12 |
 | LP-FT (1 epoch probe, then full) | 11.18 M | 98.32 |
 
-The structure of this table is "one big step, then nothing": going from a frozen backbone to unfreezing the last residual stage is worth 1.88 points, and going from the last stage to all 11.2M parameters changes nothing measurable. In other words the useful adaptation happens in the last block; the early layers of an ImageNet network are already the right feature extractor for photographs of animals.
+The structure of this table is "one big step, then nothing": going from a frozen backbone to unfreezing the last residual stage is worth 1.96 points, and going from the last stage to all 11.2M parameters changes nothing measurable. In other words the useful adaptation happens in the last block; the early layers of an ImageNet network are already the right feature extractor for photographs of animals.
 
 The head-only row measures what the pre-trained representation can do on its own. At this budget (160 px, 3 epochs) a 1,026-parameter linear classifier on frozen ImageNet features reaches 96.24%; the same probe trained for 6 epochs at 224 px reaches 97.78% (model M2 in Section 5.1). Either way most of the final accuracy comes from the representation rather than from the training procedure.
 
@@ -599,12 +599,12 @@ All numbers are accuracy on the 5,000-image validation set. Where a model was tr
 4. The backbone-size effect is non-monotone, and small. ResNet-34 reaches 97.54% (-1.39 points vs ResNet-18, early-stopped at epoch 4), while ResNet-50 reaches 99.30% (+0.37 points, at 160 px and 6 epochs, i.e. *less* compute per image than M3). So the three sizes span 1.8 points in a non-monotone way: the 34 is an outlier that stopped early, and the 50 is the best single model we trained. Two conclusions follow. First, architecture is not the binding constraint, since the whole 18/34/50 spread is a quarter of the 7.46-point pre-training effect. Second, at this dataset size the result is sensitive to the training budget each model receives, so a single-run backbone comparison carries little information. Section 7.8 therefore repeats it for seven backbones under one fixed budget with two seeds each: ResNet-18 and ResNet-34 are then indistinguishable (99.25% vs 99.28%), and the best backbone, ConvNeXt-T, reaches 99.61 ± 0.01%.
 5. Three-seed averaging plus horizontal-flip TTA adds 0.29 points (98.93% → 99.22%) and reduces the error count from 50 to 39. This is the cheapest accuracy in the project, requiring no retraining and no new data, only variance reduction.
 
-The single ResNet-50 run reaches 99.30%, which is 0.08 points above the submitted ensemble. It is one seed, trained at 160 px for 6 epochs, and the seed-to-seed standard deviation of the ResNet-18 family is 0.05, so a 0.08-point difference between one run of one model and a three-seed ensemble of another cannot be separated from run-to-run variation. Making the comparison meaningful would need three ResNet-50 seeds of its own (about one hour of GPU time) plus a decision about which resolution to use for all three. This comparison was later made properly in Section 7.8, which retrains seven backbones under one budget with two seeds each; the final submission is built from its top tier (Section 5.3).
+M0 (HOG+SVM) is the exception to the 5,000-image validation protocol: it was trained on 8,000 and validated on 2,000 images because feature extraction is CPU-bound; all other rows use the full 5,000-image validation set. The single ResNet-50 run reaches 99.30%, which is 0.08 points above the earlier M3 ensemble (99.22%) but 0.40 points below the final submitted backbone ensemble (99.70%). It is one seed, trained at 160 px for 6 epochs, and the seed-to-seed standard deviation of the ResNet-18 family is 0.05, so a 0.08-point difference between one run of one model and a three-seed ensemble of another cannot be separated from run-to-run variation. Making the comparison meaningful would need three ResNet-50 seeds of its own (about one hour of GPU time) plus a decision about which resolution to use for all three. This comparison was later made properly in Section 7.8, which retrains seven backbones under one budget with two seeds each; the final submission is built from its top tier (Section 5.3).
 6. The seed spread of the main model is tiny (98.90, 98.90, 99.00 → σ = 0.05 pp). At this point the task is close to its label-noise ceiling: Section 6 shows that at least 5 of the 50 single-model errors are unlearnable, so ~99.9% is the practical maximum on this validation set.
 
 ## 5.2 Detailed metrics for the main-study ensemble (M3 ×3 + TTA)
 
-The metrics below are for the ensemble of the main model, which is also the model analysed in Section 6. The final submitted ensemble reaches 99.70% (15 errors out of 5,000) on the same validation set; see Section 5.3.
+The metrics below are for the ensemble of the main model, which is also the model analysed in Section 6. They are not the submitted model: the final submitted backbone ensemble reaches 99.70% (15 errors out of 5,000) on the same validation set; see Section 5.3.
 
 | Metric | Value |
 |---|---|
@@ -626,7 +626,7 @@ The submitted `submission.csv` is produced by `scripts/ensemble_predict.py` (clu
 2. applying horizontal-flip test-time augmentation inside each model,
 3. averaging the six softmax outputs.
 
-The configuration was fixed before any result was seen; two smaller ensembles were evaluated alongside it for reference only.
+The three backbone families were selected after the controlled comparison in Section 7.8, as the top three by validation accuracy (two seeds each); equal weighting and horizontal-flip TTA were fixed in advance. Two smaller ensembles were evaluated alongside it for reference only.
 
 | Ensemble | Models | val acc (%) | Errors / 5,000 |
 |---|---|---|---|
@@ -663,7 +663,7 @@ No test accuracy is reported, because the test set has no labels. We also did no
 
 ## 5.4 A note on the optimism of validation accuracy
 
-Validation accuracy was used for early stopping and for choosing among M0–M5, so the reported numbers are mildly optimistic relative to a model that had never seen the validation set. The bias is small, with 5,000 validation images and about 10 compared configurations, but it is real. The appropriate statement is that *99.22% is a validation-set number obtained with model selection performed on the same set; the test set is unlabelled, so we cannot quantify the gap.*
+Validation accuracy was used for early stopping and for choosing among M0–M5, so the reported numbers are mildly optimistic relative to a model that had never seen the validation set. The bias is small, with 5,000 validation images and about 10 compared configurations, but it is real. The appropriate statement is that *the main-model ensemble's 99.22% is a validation-set number obtained with model selection performed on the same set; the final submitted ensemble's 99.70% carries an even larger selection bias (the top three backbones were chosen on this validation set); the test set is unlabelled, so we cannot quantify the gap.*
 
 ## 5.5 Runtime
 
@@ -701,7 +701,7 @@ Statements about whether a particular test prediction is correct are manual judg
 | **true cat** | 2,482 (99.28%) | 18 (0.72%) |
 | **true dog** | 32 (1.28%) | 2,468 (98.72%) |
 
-50 errors out of 5,000 (99.00% accuracy) for the single-seed model (seed 42); the three-seed ensemble used for the submission makes 39 errors on the same set, i.e. ensembling removes about a fifth of them. The errors are asymmetric: the model confuses dogs for cats about 1.8× more often than the reverse. Two plausible causes, both consistent with the case studies below:
+50 errors out of 5,000 (99.00% accuracy) for the single-seed model (seed 42); the three-seed main-model ensemble makes 39 errors on the same set, i.e. ensembling removes about a fifth of them. The final submitted backbone ensemble makes 15 errors (Section 5.3); this chapter analyses the main model, not that ensemble. The errors are asymmetric: the model confuses dogs for cats about 1.8× more often than the reverse. Two plausible causes, both consistent with the case studies below:
 
 1. The "dog" class has far more visual diversity (340+ breeds, from 1 kg to 90 kg), so its decision region is broader and its boundary is fuzzier on the cat side.
 2. Several dog breeds are small, long-haired and round-faced (Pomeranian, Shih Tzu, Bichon): i.e. they sit inside the cat region of feature space. The opposite direction has no strong analogue.
@@ -770,7 +770,7 @@ For incorrect predictions the pattern is diagnostic, and it splits by direction:
 - Both cat-to-dog errors are cats photographed on grass (0.92 and 0.90). In each case the activation covers the animal but also the surrounding lawn, so the scene contributes evidence; this is the background cue discussed in Section 1 and quantified as failure category 3 in Section 6.3.
 - Both dog-to-cat errors are dogs whose face is not visible: one is held against a person's body (0.94), the other is photographed from behind (0.93). The activation falls on the back, the fur and the person's hands rather than on a head, which is the coverage failure described in Sections 6.4 and 6.5.
 
-Robustness test. We apply eight deterministic perturbations to the validation images and re-evaluate without retraining:
+Robustness test. We apply seven deterministic perturbations (plus the clean condition) to the validation images and re-evaluate without retraining:
 
 | Perturbation | val acc (%) | Δ vs clean |
 |---|---|---|
@@ -839,7 +839,7 @@ Three caveats apply.
 
 ## 7.2 The largest effect: pre-training
 
-This is the only fully controlled comparison in the study: identical architecture, data, augmentation, resolution and optimiser; only the initialisation differs. The from-scratch model was given twice the epochs to compensate.
+This is the only fully controlled comparison in the study: identical architecture, data, augmentation, resolution and optimiser; only the initialisation differs. The from-scratch model was given twice the epochs to compensate, so the 7.46-point gap is the combined effect of pre-training and the longer schedule; it is an upper bound on the pure initialisation effect.
 
 | Level | Epochs | val acc (%) | Δ |
 |---|---|---|---|
@@ -981,7 +981,7 @@ The controlled comparisons are ranked below. Each holds the budget fixed and cha
 |---|---|---|---|
 | 1 | Pre-training (ImageNet weights vs random) | +7.46 pp | transferred generic features |
 | 2 | Training data, 500 to 20,000 images | +4.56 pp | sample coverage, saturating near 10,000 |
-| 3 | Fine-tune depth (head only to last stage) | +1.88 pp | adaptation of the last block |
+| 3 | Fine-tune depth (head only to last stage) | +1.96 pp | adaptation of the last block |
 | 4 | Input resolution, 96 to 224 px | +0.64 pp on top of +1.04 from 96 to 160 | resolvable detail |
 | 5 | Augmentation, none to full | -0.24 pp | below 0.5 pp at every budget tested; sign depends on schedule |
 | 6 | Backbone, 7 ImageNet models at a fixed budget (Section 7.8) | +0.37 pp spread (99.24 to 99.61) | follows the ImageNet accuracy of the weights, not parameter count |
@@ -1174,7 +1174,7 @@ The two rarest classes collapse to 22-24% recall, barely above the 10% chance le
 
 1. Logit adjustment is the winner, and it requires no retraining. Applying `argmax f_c(x) - tau·log(pi_c)` to the *already trained* CE model raises test accuracy from 62.44% to 72.99% (+10.6 pp) and macro-F1 from 60.27% to 72.96%. The optimal tau selected on the validation split is exactly 1.0, which is what the theory predicts for a multinomial-logit model: a satisfying confirmation that the mechanism is the one the paper describes (a prior shift in the logits) rather than an accidental regularisation effect.
 2. Re-sampling works but trades head for tail. +9.6 pp overall; head-class recall drops from 90.3% to 85.8% while the tail rises from 39.5% to 64.5%. This is the expected behaviour: repeating tail samples makes the effective training distribution uniform.
-3. Decoupling works for the reason Kang et al. give. The training log shows it directly: validation accuracy is 52.6% at epoch 10, then the backbone is frozen and the head re-initialised at epoch 14, and one epoch later validation accuracy is 70.0%. The representation was already fine; the classifier was the biased part, and re-training it on a balanced stream recovered 18 points in 4 epochs. Final test accuracy 71.22%.
+3. Decoupling works for the reason Kang et al. give. The training log shows it directly: validation accuracy is 52.6% at epoch 10; the backbone is then frozen and the head re-initialised, and four epochs later (epoch 14) validation accuracy is 70.0%. The representation was already fine; the classifier was the biased part, and re-training it on a balanced stream recovered 18 points in 4 epochs. Final test accuracy 71.22%. Table entries are rounded to one decimal, so the many/few averages quoted above can differ from recomputation on the rounded per-class recalls by up to 0.3 points.
 4. Class-balanced loss gives no gain at this schedule. It reaches 59.50%, *below* plain CE. The training curves explain why: at epoch 30 the training accuracy is still 59.95%, i.e. the model is severely under-trained. Two causes, both specific to our setup: (i) with weights normalised to mean 1 and `reduction='mean'` over weighted samples, head-class-dominated batches produce a *smaller* effective gradient, so the weighted loss converges more slowly than plain CE; (ii) the 30-epoch budget is far shorter than the 200+ epochs used in the original paper. Note that CB *does* re-balance: its few-class recall (63.1%) beats CE (39.5%): but it destroys the head (66.8% vs 90.3%) and never recovers overall accuracy. A shorter 18-epoch run (54.04%) shows the same pattern more strongly.
 
 ### Practical recommendation
@@ -1227,7 +1227,7 @@ We built and evaluated a complete cat/dog classification pipeline: a dataset aud
 2. Train the CIFAR-10 from-scratch model for 200 epochs with cutout/AutoAugment, which is what the published 94–95% figures use, so that the pre-training gap is measured against a properly converged control.
 3. Fine-tune ViT-B/16 for longer than 6 epochs: Section 7.8 shows it still improving at the end of the fixed budget, so its ceiling on this task is not yet measured. The same sweep confirmed the prediction made for ConvNeXt-T, a gain below 0.5 pp (0.36 pp over ResNet-18).
 4. Calibrate and add an open-set rejection head (temperature scaling plus a max-softmax threshold) so that the "no photo available" and animal-free images are rejected instead of being confidently misclassified.
-5. Exploit the unlabelled test set with a semi-supervised method such as FixMatch [Sohn et al., NeurIPS 2020], which would require relaxing the rule against using test data for training.
+5. Exploit additional unlabelled data (not the test set, which must stay untouched) with a semi-supervised method such as FixMatch [Sohn et al., NeurIPS 2020]. Applying it to the test images would violate the evaluation protocol and should not be done.
 
 ## 10.5 Concluding remarks
 

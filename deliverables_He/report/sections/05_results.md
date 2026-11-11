@@ -27,12 +27,12 @@ All numbers are accuracy on the 5,000-image validation set. Where a model was tr
 4. The backbone-size effect is non-monotone, and small. ResNet-34 reaches 97.54% (-1.39 points vs ResNet-18, early-stopped at epoch 4), while ResNet-50 reaches 99.30% (+0.37 points, at 160 px and 6 epochs, i.e. *less* compute per image than M3). So the three sizes span 1.8 points in a non-monotone way: the 34 is an outlier that stopped early, and the 50 is the best single model we trained. Two conclusions follow. First, architecture is not the binding constraint, since the whole 18/34/50 spread is a quarter of the 7.46-point pre-training effect. Second, at this dataset size the result is sensitive to the training budget each model receives, so a single-run backbone comparison carries little information. Section 7.8 therefore repeats it for seven backbones under one fixed budget with two seeds each: ResNet-18 and ResNet-34 are then indistinguishable (99.25% vs 99.28%), and the best backbone, ConvNeXt-T, reaches 99.61 ± 0.01%.
 5. Three-seed averaging plus horizontal-flip TTA adds 0.29 points (98.93% → 99.22%) and reduces the error count from 50 to 39. This is the cheapest accuracy in the project, requiring no retraining and no new data, only variance reduction.
 
-The single ResNet-50 run reaches 99.30%, which is 0.08 points above the submitted ensemble. It is one seed, trained at 160 px for 6 epochs, and the seed-to-seed standard deviation of the ResNet-18 family is 0.05, so a 0.08-point difference between one run of one model and a three-seed ensemble of another cannot be separated from run-to-run variation. Making the comparison meaningful would need three ResNet-50 seeds of its own (about one hour of GPU time) plus a decision about which resolution to use for all three. This comparison was later made properly in Section 7.8, which retrains seven backbones under one budget with two seeds each; the final submission is built from its top tier (Section 5.3).
+M0 (HOG+SVM) is the exception to the 5,000-image validation protocol: it was trained on 8,000 and validated on 2,000 images because feature extraction is CPU-bound; all other rows use the full 5,000-image validation set. The single ResNet-50 run reaches 99.30%, which is 0.08 points above the earlier M3 ensemble (99.22%) but 0.40 points below the final submitted backbone ensemble (99.70%). It is one seed, trained at 160 px for 6 epochs, and the seed-to-seed standard deviation of the ResNet-18 family is 0.05, so a 0.08-point difference between one run of one model and a three-seed ensemble of another cannot be separated from run-to-run variation. Making the comparison meaningful would need three ResNet-50 seeds of its own (about one hour of GPU time) plus a decision about which resolution to use for all three. This comparison was later made properly in Section 7.8, which retrains seven backbones under one budget with two seeds each; the final submission is built from its top tier (Section 5.3).
 6. The seed spread of the main model is tiny (98.90, 98.90, 99.00 → σ = 0.05 pp). At this point the task is close to its label-noise ceiling: Section 6 shows that at least 5 of the 50 single-model errors are unlearnable, so ~99.9% is the practical maximum on this validation set.
 
 ## 5.2 Detailed metrics for the main-study ensemble (M3 ×3 + TTA)
 
-The metrics below are for the ensemble of the main model, which is also the model analysed in Section 6. The final submitted ensemble reaches 99.70% (15 errors out of 5,000) on the same validation set; see Section 5.3.
+The metrics below are for the ensemble of the main model, which is also the model analysed in Section 6. They are not the submitted model: the final submitted backbone ensemble reaches 99.70% (15 errors out of 5,000) on the same validation set; see Section 5.3.
 
 | Metric | Value |
 |---|---|
@@ -54,7 +54,7 @@ The submitted `submission.csv` is produced by `scripts/ensemble_predict.py` (clu
 2. applying horizontal-flip test-time augmentation inside each model,
 3. averaging the six softmax outputs.
 
-The configuration was fixed before any result was seen; two smaller ensembles were evaluated alongside it for reference only.
+The three backbone families were selected after the controlled comparison in Section 7.8, as the top three by validation accuracy (two seeds each); equal weighting and horizontal-flip TTA were fixed in advance. Two smaller ensembles were evaluated alongside it for reference only.
 
 | Ensemble | Models | val acc (%) | Errors / 5,000 |
 |---|---|---|---|
@@ -91,7 +91,7 @@ No test accuracy is reported, because the test set has no labels. We also did no
 
 ## 5.4 A note on the optimism of validation accuracy
 
-Validation accuracy was used for early stopping and for choosing among M0–M5, so the reported numbers are mildly optimistic relative to a model that had never seen the validation set. The bias is small, with 5,000 validation images and about 10 compared configurations, but it is real. The appropriate statement is that *99.22% is a validation-set number obtained with model selection performed on the same set; the test set is unlabelled, so we cannot quantify the gap.*
+Validation accuracy was used for early stopping and for choosing among M0–M5, so the reported numbers are mildly optimistic relative to a model that had never seen the validation set. The bias is small, with 5,000 validation images and about 10 compared configurations, but it is real. The appropriate statement is that *the main-model ensemble's 99.22% is a validation-set number obtained with model selection performed on the same set; the final submitted ensemble's 99.70% carries an even larger selection bias (the top three backbones were chosen on this validation set); the test set is unlabelled, so we cannot quantify the gap.*
 
 ## 5.5 Runtime
 

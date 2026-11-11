@@ -99,11 +99,14 @@ def merge_args_with_yaml(args, yaml_path: str | None):
     if not yaml_path:
         return args
     cfg = load_yaml(yaml_path)
+    cli_keys = getattr(args, "_cli_keys", set())
     for k, v in cfg.items():
-        if hasattr(args, k):
-            setattr(args, k, v)
-        else:
-            setattr(args, k, v)
+        if not hasattr(args, k):
+            print(f"[config] warning: unknown key '{k}' in {yaml_path}, ignored")
+            continue
+        if k in cli_keys:
+            continue  # explicit CLI value wins over YAML
+        setattr(args, k, v)
     return args
 
 

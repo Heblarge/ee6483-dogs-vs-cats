@@ -167,11 +167,11 @@ CIFAR-10 is downloaded automatically from the HuggingFace parquet mirror on firs
 pip install -r requirements.txt          # see the note about the CUDA build inside
 
 # 1. reproduce the submitted predictions (three seeds, then the ensemble)
-python -m ee6483.src.train --config ee6483/configs/main.yaml --exp-id E4_r18_ft --seed 42
-python -m ee6483.src.train --config ee6483/configs/main.yaml --exp-id E4_r18_ft --seed 43
-python -m ee6483.src.train --config ee6483/configs/main.yaml --exp-id E4_r18_ft --seed 44
+python -m ee6483.src.train --config ee6483/configs/main.yaml --data-root ../datasets/datasets --exp-id E4_r18_ft --seed 42
+python -m ee6483.src.train --config ee6483/configs/main.yaml --data-root ../datasets/datasets --exp-id E4_r18_ft --seed 43
+python -m ee6483.src.train --config ee6483/configs/main.yaml --data-root ../datasets/datasets --exp-id E4_r18_ft --seed 44
 python -m ee6483.src.predict --ckpts ee6483/results/E4_r18_ft/s4{2,3,4}/best.pt \
-    --out submissions/submission.csv --tta 1
+    --data-root ../datasets/datasets --out submissions/submission.csv --tta 1
 python ee6483/scripts/validate_submission.py --sub submissions/submission.csv
 
 # 2. regenerate every table and figure

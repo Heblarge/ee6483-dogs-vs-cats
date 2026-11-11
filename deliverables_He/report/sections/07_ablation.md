@@ -16,7 +16,7 @@ Three caveats apply.
 
 ## 7.2 The largest effect: pre-training
 
-This is the only fully controlled comparison in the study: identical architecture, data, augmentation, resolution and optimiser; only the initialisation differs. The from-scratch model was given twice the epochs to compensate.
+This is the only fully controlled comparison in the study: identical architecture, data, augmentation, resolution and optimiser; only the initialisation differs. The from-scratch model was given twice the epochs to compensate, so the 7.46-point gap is the combined effect of pre-training and the longer schedule; it is an upper bound on the pure initialisation effect.
 
 | Level | Epochs | val acc (%) | Δ |
 |---|---|---|---|
@@ -158,7 +158,7 @@ The controlled comparisons are ranked below. Each holds the budget fixed and cha
 |---|---|---|---|
 | 1 | Pre-training (ImageNet weights vs random) | +7.46 pp | transferred generic features |
 | 2 | Training data, 500 to 20,000 images | +4.56 pp | sample coverage, saturating near 10,000 |
-| 3 | Fine-tune depth (head only to last stage) | +1.88 pp | adaptation of the last block |
+| 3 | Fine-tune depth (head only to last stage) | +1.96 pp | adaptation of the last block |
 | 4 | Input resolution, 96 to 224 px | +0.64 pp on top of +1.04 from 96 to 160 | resolvable detail |
 | 5 | Augmentation, none to full | -0.24 pp | below 0.5 pp at every budget tested; sign depends on schedule |
 | 6 | Backbone, 7 ImageNet models at a fixed budget (Section 7.8) | +0.37 pp spread (99.24 to 99.61) | follows the ImageNet accuracy of the weights, not parameter count |

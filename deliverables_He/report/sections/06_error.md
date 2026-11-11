@@ -18,7 +18,7 @@ Statements about whether a particular test prediction is correct are manual judg
 | **true cat** | 2,482 (99.28%) | 18 (0.72%) |
 | **true dog** | 32 (1.28%) | 2,468 (98.72%) |
 
-50 errors out of 5,000 (99.00% accuracy) for the single-seed model (seed 42); the three-seed ensemble used for the submission makes 39 errors on the same set, i.e. ensembling removes about a fifth of them. The errors are asymmetric: the model confuses dogs for cats about 1.8× more often than the reverse. Two plausible causes, both consistent with the case studies below:
+50 errors out of 5,000 (99.00% accuracy) for the single-seed model (seed 42); the three-seed main-model ensemble makes 39 errors on the same set, i.e. ensembling removes about a fifth of them. The final submitted backbone ensemble makes 15 errors (Section 5.3); this chapter analyses the main model, not that ensemble. The errors are asymmetric: the model confuses dogs for cats about 1.8× more often than the reverse. Two plausible causes, both consistent with the case studies below:
 
 1. The "dog" class has far more visual diversity (340+ breeds, from 1 kg to 90 kg), so its decision region is broader and its boundary is fuzzier on the cat side.
 2. Several dog breeds are small, long-haired and round-faced (Pomeranian, Shih Tzu, Bichon): i.e. they sit inside the cat region of feature space. The opposite direction has no strong analogue.
@@ -87,7 +87,7 @@ For incorrect predictions the pattern is diagnostic, and it splits by direction:
 - Both cat-to-dog errors are cats photographed on grass (0.92 and 0.90). In each case the activation covers the animal but also the surrounding lawn, so the scene contributes evidence; this is the background cue discussed in Section 1 and quantified as failure category 3 in Section 6.3.
 - Both dog-to-cat errors are dogs whose face is not visible: one is held against a person's body (0.94), the other is photographed from behind (0.93). The activation falls on the back, the fur and the person's hands rather than on a head, which is the coverage failure described in Sections 6.4 and 6.5.
 
-Robustness test. We apply eight deterministic perturbations to the validation images and re-evaluate without retraining:
+Robustness test. We apply seven deterministic perturbations (plus the clean condition) to the validation images and re-evaluate without retraining:
 
 | Perturbation | val acc (%) | Δ vs clean |
 |---|---|---|

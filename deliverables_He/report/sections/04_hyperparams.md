@@ -49,7 +49,7 @@ Decision: 224 px for the main model, 160 px for ablations. 224 is the resolution
 | full fine-tune | 11.18 M | 98.12 |
 | LP-FT (1 epoch probe, then full) | 11.18 M | 98.32 |
 
-The structure of this table is "one big step, then nothing": going from a frozen backbone to unfreezing the last residual stage is worth 1.88 points, and going from the last stage to all 11.2M parameters changes nothing measurable. In other words the useful adaptation happens in the last block; the early layers of an ImageNet network are already the right feature extractor for photographs of animals.
+The structure of this table is "one big step, then nothing": going from a frozen backbone to unfreezing the last residual stage is worth 1.96 points, and going from the last stage to all 11.2M parameters changes nothing measurable. In other words the useful adaptation happens in the last block; the early layers of an ImageNet network are already the right feature extractor for photographs of animals.
 
 The head-only row measures what the pre-trained representation can do on its own. At this budget (160 px, 3 epochs) a 1,026-parameter linear classifier on frozen ImageNet features reaches 96.24%; the same probe trained for 6 epochs at 224 px reaches 97.78% (model M2 in Section 5.1). Either way most of the final accuracy comes from the representation rather than from the training procedure.
 

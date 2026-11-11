@@ -28,7 +28,7 @@ We built and evaluated a complete cat/dog classification pipeline: a dataset aud
 2. Train the CIFAR-10 from-scratch model for 200 epochs with cutout/AutoAugment, which is what the published 94–95% figures use, so that the pre-training gap is measured against a properly converged control.
 3. Fine-tune ViT-B/16 for longer than 6 epochs: Section 7.8 shows it still improving at the end of the fixed budget, so its ceiling on this task is not yet measured. The same sweep confirmed the prediction made for ConvNeXt-T, a gain below 0.5 pp (0.36 pp over ResNet-18).
 4. Calibrate and add an open-set rejection head (temperature scaling plus a max-softmax threshold) so that the "no photo available" and animal-free images are rejected instead of being confidently misclassified.
-5. Exploit the unlabelled test set with a semi-supervised method such as FixMatch [Sohn et al., NeurIPS 2020], which would require relaxing the rule against using test data for training.
+5. Exploit additional unlabelled data (not the test set, which must stay untouched) with a semi-supervised method such as FixMatch [Sohn et al., NeurIPS 2020]. Applying it to the test images would violate the evaluation protocol and should not be done.
 
 ## 10.5 Concluding remarks
 

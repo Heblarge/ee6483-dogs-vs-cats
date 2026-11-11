@@ -8,6 +8,7 @@ python -m ee6483.src.train --model resnet18 --epochs 8 --lr 3e-4 --batch 64 \
 from __future__ import annotations
 
 import argparse
+import sys
 import csv
 import math
 import time
@@ -67,7 +68,11 @@ def parse_args(argv=None):
     p.add_argument("--patience", type=int, default=4, help="early stop on val acc")
     p.add_argument("--limit-batches", type=int, default=0, help="smoke-test only")
     p.add_argument("--amp", type=int, default=1)
-    return p.parse_args(argv)
+    args = p.parse_args(argv)
+    # Keys explicitly present on the command line must win over the YAML config.
+    src = argv if argv is not None else sys.argv[1:]
+    args._cli_keys = {tok[2:].split("=")[0].replace("-", "_") for tok in src if tok.startswith("--")}
+    return args
 
 
 def build_model(args, num_classes: int = 2):
