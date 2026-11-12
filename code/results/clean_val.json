@@ -1,0 +1,33 @@
+{
+  "checkpoints": [
+    "runs/backbones/b_convnext_tiny_s0/checkpoints/best.pt",
+    "runs/backbones/b_convnext_tiny_s1/checkpoints/best.pt",
+    "runs/backbones/b_resnet50_s0/checkpoints/best.pt",
+    "runs/backbones/b_resnet50_s1/checkpoints/best.pt",
+    "runs/backbones/b_swin_t_s0/checkpoints/best.pt",
+    "runs/backbones/b_swin_t_s1/checkpoints/best.pt"
+  ],
+  "tta": true,
+  "n_val": 5000,
+  "val_acc": 99.7,
+  "val_errors": 15,
+  "n_excluded": 10,
+  "excluded": [
+    "val/cat/cat.11565.jpg",
+    "val/cat/cat.12408.jpg",
+    "val/cat/cat.1639.jpg",
+    "val/cat/cat.3565.jpg",
+    "val/cat/cat.4575.jpg",
+    "val/cat/cat.4726.jpg",
+    "val/cat/cat.7545.jpg",
+    "val/cat/cat.7912.jpg",
+    "val/cat/cat.9240.jpg",
+    "val/dog/dog.8591.jpg"
+  ],
+  "excluded_errors": [
+    "val/cat/cat.11565.jpg"
+  ],
+  "n_clean": 4990,
+  "clean_val_acc": 99.72,
+  "clean_val_errors": 14
+}

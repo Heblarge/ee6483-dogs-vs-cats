@@ -1,0 +1,12 @@
+[08:01:56] exp=E7_ft_lpft model=resnet18 seed=44 device=cuda
+[08:01:56] args={'config': None, 'data_root': 'data/cache', 'out_root': 'ee6483/results', 'exp_id': 'E7_ft_lpft', 'model': 'resnet18', 'pretrained': 1, 'epochs': 3, 'lr': 0.0003, 'head_lr': 0.001, 'wd': 0.0001, 'batch': 64, 'img_size': 160, 'aug': 'full', 'ft_strategy': 'lpft', 'freeze_epochs': 1, 'label_smoothing': 0.1, 'optimizer': 'adamw', 'sched': 'cosine', 'warmup_epochs': 1.0, 'seed': 44, 'n_per_class': 0, 'workers': 4, 'grad_clip': 1.0, 'patience': 3, 'limit_batches': 0, 'amp': 1}
+[08:01:56] train imgs=20000  val imgs=5000 steps/epoch=312
+[08:01:56] params=11.18M pretrained=True strategy=lpft
+[08:02:27]   epoch   1 | train loss 0.4820 acc 79.81% | lr 3.00e-04 | 30s
+[08:02:31]           val loss 0.3068 acc 94.50% macroF1 94.49%
+[08:02:31]   >> stage 2: backbone unfrozen at epoch 2
+[08:03:03]   epoch   2 | train loss 0.3208 acc 92.92% | lr 1.91e-04 | 32s
+[08:03:07]           val loss 0.2466 acc 97.28% macroF1 97.28%
+[08:03:37]   epoch   3 | train loss 0.2660 acc 96.11% | lr 0.00e+00 | 30s
+[08:03:41]           val loss 0.2313 acc 98.24% macroF1 98.24%
+[08:03:41] done in 1m45s | best val acc 98.24% @ epoch 3

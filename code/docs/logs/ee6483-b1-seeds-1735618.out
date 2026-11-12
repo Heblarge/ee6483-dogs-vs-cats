@@ -1,0 +1,58 @@
+NVIDIA A40
+  long-tailed counts: {0: 4500, 1: 2997, 2: 1797, 3: 1077, 4: 646, 5: 387, 6: 232, 7: 139, 8: 83, 9: 50}  total=11908
+[07:49:23] exp=H_ce method=ce mode=h img=32 train=11908 val=5000
+[07:49:29]   ep   1 | loss 1.567 tracc 43.62% | val 24.14% mF1 15.61% | 6s
+[07:49:42]   ep   5 | loss 0.954 tracc 67.68% | val 32.16% mF1 22.63% | 19s
+[07:49:58]   ep  10 | loss 0.648 tracc 78.20% | val 49.94% mF1 43.35% | 34s
+[07:50:15]   ep  15 | loss 0.470 tracc 83.95% | val 58.86% mF1 54.19% | 52s
+[07:50:25]   ep  18 | loss 0.423 tracc 85.75% | val 61.68% mF1 58.37% | 62s
+[07:50:27] TEST acc 61.47% macroF1 58.07% balanced_acc 61.47%
+[07:50:27] done in 1m03s
+  long-tailed counts: {0: 4500, 1: 2997, 2: 1797, 3: 1077, 4: 646, 5: 387, 6: 232, 7: 139, 8: 83, 9: 50}  total=11908
+[07:50:36] resample sampler built (class counts [4500, 2997, 1797, 1077, 646, 387, 232, 139, 83, 50])
+[07:50:36] exp=H_resample method=resample mode=h img=32 train=11908 val=5000
+[07:50:41]   ep   1 | loss 2.091 tracc 21.00% | val 30.06% mF1 25.34% | 5s
+[07:50:58]   ep   5 | loss 1.133 tracc 59.69% | val 54.80% mF1 53.21% | 21s
+[07:51:17]   ep  10 | loss 0.687 tracc 75.79% | val 63.44% mF1 62.93% | 41s
+[07:51:35]   ep  15 | loss 0.455 tracc 83.72% | val 69.56% mF1 69.51% | 59s
+[07:51:47]   ep  18 | loss 0.409 tracc 85.24% | val 72.10% mF1 72.04% | 70s
+[07:51:48] TEST acc 71.99% macroF1 72.01% balanced_acc 71.99%
+[07:51:48] done in 1m11s
+   tau   val acc
+   0.0    62.46%
+  0.25    66.22%
+   0.5    68.98%
+  0.75    71.60%
+   1.0    73.12%
+   1.5    71.58%
+
+selected tau=1.0 (val 73.12%): test acc 73.08%  macroF1 73.08% -> ee6483/results/H_logit_adjust/s43/metrics.json
+  long-tailed counts: {0: 4500, 1: 2997, 2: 1797, 3: 1077, 4: 646, 5: 387, 6: 232, 7: 139, 8: 83, 9: 50}  total=11908
+[07:52:05] exp=H_ce method=ce mode=h img=32 train=11908 val=5000
+[07:52:09]   ep   1 | loss 1.524 tracc 44.93% | val 28.26% mF1 18.85% | 4s
+[07:52:22]   ep   5 | loss 0.970 tracc 66.66% | val 33.78% mF1 23.03% | 18s
+[07:52:39]   ep  10 | loss 0.667 tracc 77.48% | val 47.50% mF1 41.89% | 34s
+[07:52:56]   ep  15 | loss 0.493 tracc 83.06% | val 60.86% mF1 57.96% | 51s
+[07:53:06]   ep  18 | loss 0.438 tracc 84.90% | val 62.76% mF1 60.92% | 61s
+[07:53:07] TEST acc 62.63% macroF1 60.83% balanced_acc 62.63%
+[07:53:07] done in 1m01s
+  long-tailed counts: {0: 4500, 1: 2997, 2: 1797, 3: 1077, 4: 646, 5: 387, 6: 232, 7: 139, 8: 83, 9: 50}  total=11908
+[07:53:14] resample sampler built (class counts [4500, 2997, 1797, 1077, 646, 387, 232, 139, 83, 50])
+[07:53:14] exp=H_resample method=resample mode=h img=32 train=11908 val=5000
+[07:53:20]   ep   1 | loss 2.073 tracc 22.10% | val 29.78% mF1 25.03% | 5s
+[07:53:33]   ep   5 | loss 1.153 tracc 59.22% | val 52.48% mF1 51.68% | 19s
+[07:53:49]   ep  10 | loss 0.712 tracc 74.83% | val 68.74% mF1 68.73% | 35s
+[07:54:05]   ep  15 | loss 0.454 tracc 84.12% | val 71.34% mF1 71.45% | 51s
+[07:54:15]   ep  18 | loss 0.403 tracc 85.95% | val 71.94% mF1 71.89% | 60s
+[07:54:16] TEST acc 72.08% macroF1 71.95% balanced_acc 72.08%
+[07:54:16] done in 1m01s
+   tau   val acc
+   0.0    63.00%
+  0.25    66.62%
+   0.5    70.18%
+  0.75    72.18%
+   1.0    73.18%
+   1.5    69.94%
+
+selected tau=1.0 (val 73.18%): test acc 72.73%  macroF1 72.75% -> ee6483/results/H_logit_adjust/s44/metrics.json
+B1 DONE

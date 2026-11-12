@@ -1,19 +1,19 @@
 # 数据与大文件：不进 Git，按 README 获取
 datasets/
 data/
-!deliverables_He/src/data/
-!deliverables_He/ee6483/src/data/
-deliverables_He/cluster/logs/
+!code/src/data/
+!code/ee6483/src/data/
+code/cluster/logs/
 checkpoints/
 **/runs/*
 # 骨干对比的小型证据文件（每个 run 的 history.csv 与 config.yaml，共约 100 KB）需要入库；
 # checkpoints 与 *.log 仍然排除
-!deliverables_He/runs/backbones/
-deliverables_He/runs/backbones/*
-!deliverables_He/runs/backbones/b_*/
-deliverables_He/runs/backbones/b_*/*
-!deliverables_He/runs/backbones/b_*/history.csv
-!deliverables_He/runs/backbones/b_*/config.yaml
+!code/runs/backbones/
+code/runs/backbones/*
+!code/runs/backbones/b_*/
+code/runs/backbones/b_*/*
+!code/runs/backbones/b_*/history.csv
+!code/runs/backbones/b_*/config.yaml
 *.pt
 *.pth
 
