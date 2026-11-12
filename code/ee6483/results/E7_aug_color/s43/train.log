@@ -1,0 +1,11 @@
+[08:21:05] exp=E7_aug_color model=resnet18 seed=43 device=cuda
+[08:21:05] args={'config': None, 'data_root': 'data/cache', 'out_root': 'ee6483/results', 'exp_id': 'E7_aug_color', 'model': 'resnet18', 'pretrained': 1, 'epochs': 3, 'lr': 0.0003, 'head_lr': 0.001, 'wd': 0.0001, 'batch': 64, 'img_size': 160, 'aug': 'color', 'ft_strategy': 'full', 'freeze_epochs': 2, 'label_smoothing': 0.1, 'optimizer': 'adamw', 'sched': 'cosine', 'warmup_epochs': 1.0, 'seed': 43, 'n_per_class': 0, 'workers': 4, 'grad_clip': 1.0, 'patience': 3, 'limit_batches': 0, 'amp': 1}
+[08:21:05] train imgs=20000  val imgs=5000 steps/epoch=312
+[08:21:05] params=11.18M pretrained=True strategy=full
+[08:21:34]   epoch   1 | train loss 0.3345 acc 91.43% | lr 3.00e-04 | 29s
+[08:21:38]           val loss 0.2564 acc 96.98% macroF1 96.98%
+[08:22:05]   epoch   2 | train loss 0.2693 acc 96.19% | lr 1.50e-04 | 27s
+[08:22:10]           val loss 0.2332 acc 98.06% macroF1 98.06%
+[08:22:36]   epoch   3 | train loss 0.2377 acc 97.88% | lr 0.00e+00 | 27s
+[08:22:40]           val loss 0.2256 acc 98.56% macroF1 98.56%
+[08:22:40] done in 1m35s | best val acc 98.56% @ epoch 3

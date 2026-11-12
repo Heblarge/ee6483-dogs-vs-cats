@@ -1,0 +1,220 @@
+NVIDIA A40
+
+=== [ablation seed43] aug none ===
+[08:17:58]           val loss 0.2547 acc 97.08% macroF1 97.08%
+[08:18:14]   epoch   2 | train loss 0.2404 acc 98.07% | lr 1.50e-04 | 16s
+[08:18:18]           val loss 0.2385 acc 97.60% macroF1 97.60%
+[08:18:37]   epoch   3 | train loss 0.2095 acc 99.68% | lr 0.00e+00 | 19s
+[08:18:41]           val loss 0.2249 acc 98.60% macroF1 98.60%
+[08:18:41] done in 1m14s | best val acc 98.60% @ epoch 3
+[[ablation seed43] aug none] rc=0 92s
+
+=== [ablation seed43] aug flip ===
+[08:19:08]           val loss 0.2765 acc 95.50% macroF1 95.49%
+[08:19:23]   epoch   2 | train loss 0.2538 acc 97.22% | lr 1.50e-04 | 16s
+[08:19:28]           val loss 0.2331 acc 98.12% macroF1 98.12%
+[08:19:43]   epoch   3 | train loss 0.2258 acc 98.56% | lr 0.00e+00 | 15s
+[08:19:48]           val loss 0.2261 acc 98.56% macroF1 98.56%
+[08:19:48] done in 1m00s | best val acc 98.56% @ epoch 3
+[[ablation seed43] aug flip] rc=0 67s
+
+=== [ablation seed43] aug geo ===
+[08:20:17]           val loss 0.2532 acc 96.90% macroF1 96.90%
+[08:20:34]   epoch   2 | train loss 0.2634 acc 96.50% | lr 1.50e-04 | 17s
+[08:20:38]           val loss 0.2365 acc 97.86% macroF1 97.86%
+[08:20:54]   epoch   3 | train loss 0.2355 acc 97.98% | lr 0.00e+00 | 16s
+[08:20:58]           val loss 0.2238 acc 98.52% macroF1 98.52%
+[08:20:58] done in 1m02s | best val acc 98.52% @ epoch 3
+[[ablation seed43] aug geo] rc=0 70s
+
+=== [ablation seed43] aug color ===
+[08:21:38]           val loss 0.2564 acc 96.98% macroF1 96.98%
+[08:22:05]   epoch   2 | train loss 0.2693 acc 96.19% | lr 1.50e-04 | 27s
+[08:22:10]           val loss 0.2332 acc 98.06% macroF1 98.06%
+[08:22:36]   epoch   3 | train loss 0.2377 acc 97.88% | lr 0.00e+00 | 27s
+[08:22:40]           val loss 0.2256 acc 98.56% macroF1 98.56%
+[08:22:40] done in 1m35s | best val acc 98.56% @ epoch 3
+[[ablation seed43] aug color] rc=0 102s
+
+=== [ablation seed43] res 96 ===
+[08:23:11]           val loss 0.2977 acc 94.28% macroF1 94.28%
+[08:23:31]   epoch   2 | train loss 0.3449 acc 91.16% | lr 1.50e-04 | 20s
+[08:23:34]           val loss 0.2654 acc 95.82% macroF1 95.82%
+[08:23:53]   epoch   3 | train loss 0.2988 acc 93.86% | lr 0.00e+00 | 20s
+[08:23:56]           val loss 0.2508 acc 96.78% macroF1 96.78%
+[08:23:57] done in 1m09s | best val acc 96.78% @ epoch 3
+[[ablation seed43] res 96] rc=0 76s
+
+=== [ablation seed43] res 128 ===
+[08:24:31]           val loss 0.2726 acc 95.72% macroF1 95.72%
+[08:24:55]   epoch   2 | train loss 0.3120 acc 93.13% | lr 1.50e-04 | 23s
+[08:24:58]           val loss 0.2457 acc 97.38% macroF1 97.38%
+[08:25:22]   epoch   3 | train loss 0.2691 acc 95.84% | lr 0.00e+00 | 23s
+[08:25:25]           val loss 0.2334 acc 97.92% macroF1 97.92%
+[08:25:25] done in 1m21s | best val acc 97.92% @ epoch 3
+[[ablation seed43] res 128] rc=0 88s
+
+=== [ablation seed43] res 224 ===
+[08:26:22]           val loss 0.2456 acc 97.56% macroF1 97.56%
+[08:27:07]   epoch   2 | train loss 0.2753 acc 95.99% | lr 1.50e-04 | 44s
+[08:27:12]           val loss 0.2300 acc 98.48% macroF1 98.48%
+[08:27:58]   epoch   3 | train loss 0.2419 acc 97.68% | lr 0.00e+00 | 46s
+[08:28:04]           val loss 0.2234 acc 98.72% macroF1 98.72%
+[08:28:04] done in 2m32s | best val acc 98.72% @ epoch 3
+[[ablation seed43] res 224] rc=0 160s
+
+=== [ablation seed43] data 250/class ===
+[08:28:20]           val loss 0.4108 acc 94.88% macroF1 94.87%
+[08:28:21]   epoch   2 | train loss 0.4105 acc 90.18% | lr 1.50e-04 | 1s
+[08:28:25]           val loss 0.3675 acc 95.74% macroF1 95.74%
+[08:28:26]   epoch   3 | train loss 0.3320 acc 93.75% | lr 0.00e+00 | 1s
+[08:28:30]           val loss 0.3211 acc 96.04% macroF1 96.04%
+[08:28:30] done in 0m18s | best val acc 96.04% @ epoch 3
+[[ablation seed43] data 250/class] rc=0 25s
+
+=== [ablation seed43] data 1000/class ===
+[08:28:44]           val loss 0.3331 acc 93.94% macroF1 93.94%
+[08:28:48]   epoch   2 | train loss 0.3656 acc 90.98% | lr 1.50e-04 | 3s
+[08:28:52]           val loss 0.3311 acc 93.76% macroF1 93.74%
+[08:28:55]   epoch   3 | train loss 0.2954 acc 95.01% | lr 0.00e+00 | 3s
+[08:29:00]           val loss 0.2627 acc 97.00% macroF1 97.00%
+[08:29:00] done in 0m23s | best val acc 97.00% @ epoch 3
+[[ablation seed43] data 1000/class] rc=0 30s
+
+=== [ablation seed43] data 2500/class ===
+[08:29:19]           val loss 0.3119 acc 94.14% macroF1 94.13%
+[08:29:27]   epoch   2 | train loss 0.3133 acc 93.59% | lr 1.50e-04 | 7s
+[08:29:31]           val loss 0.2631 acc 96.46% macroF1 96.46%
+[08:29:39]   epoch   3 | train loss 0.2874 acc 95.05% | lr 0.00e+00 | 8s
+[08:29:43]           val loss 0.2403 acc 98.04% macroF1 98.04%
+[08:29:43] done in 0m36s | best val acc 98.04% @ epoch 3
+[[ablation seed43] data 2500/class] rc=0 43s
+
+=== [ablation seed43] data 5000/class ===
+[08:30:11]           val loss 0.2790 acc 97.06% macroF1 97.06%
+[08:30:25]   epoch   2 | train loss 0.3107 acc 93.70% | lr 1.50e-04 | 15s
+[08:30:29]           val loss 0.2569 acc 97.16% macroF1 97.16%
+[08:30:44]   epoch   3 | train loss 0.2647 acc 96.29% | lr 0.00e+00 | 14s
+[08:30:47]           val loss 0.2321 acc 98.20% macroF1 98.20%
+[08:30:47] done in 0m57s | best val acc 98.20% @ epoch 3
+[[ablation seed43] data 5000/class] rc=0 64s
+
+=== [ablation seed43] pretrained vs scratch ===
+[08:33:14]           val loss 0.3983 acc 86.78% macroF1 86.77%
+[08:33:45]   epoch   5 | train loss 0.4274 acc 85.03% | lr 2.86e-05 | 31s
+[08:33:49]           val loss 0.3581 acc 90.14% macroF1 90.14%
+[08:34:19]   epoch   6 | train loss 0.4101 acc 86.24% | lr 0.00e+00 | 30s
+[08:34:23]           val loss 0.3457 acc 90.66% macroF1 90.66%
+[08:34:23] done in 3m28s | best val acc 90.66% @ epoch 6
+[[ablation seed43] pretrained vs scratch] rc=0 215s
+
+=== [ablation seed44] aug none ===
+[08:34:52]           val loss 0.2579 acc 96.78% macroF1 96.78%
+[08:35:08]   epoch   2 | train loss 0.2399 acc 98.05% | lr 1.50e-04 | 16s
+[08:35:12]           val loss 0.2351 acc 98.20% macroF1 98.20%
+[08:35:28]   epoch   3 | train loss 0.2103 acc 99.65% | lr 0.00e+00 | 16s
+[08:35:32]           val loss 0.2242 acc 98.58% macroF1 98.58%
+[08:35:32] done in 1m02s | best val acc 98.58% @ epoch 3
+[[ablation seed44] aug none] rc=0 69s
+
+=== [ablation seed44] aug flip ===
+[08:35:59]           val loss 0.2806 acc 95.60% macroF1 95.59%
+[08:36:15]   epoch   2 | train loss 0.2535 acc 97.11% | lr 1.50e-04 | 15s
+[08:36:18]           val loss 0.2351 acc 98.22% macroF1 98.22%
+[08:36:34]   epoch   3 | train loss 0.2277 acc 98.57% | lr 0.00e+00 | 15s
+[08:36:37]           val loss 0.2240 acc 98.58% macroF1 98.58%
+[08:36:38] done in 0m58s | best val acc 98.58% @ epoch 3
+[[ablation seed44] aug flip] rc=0 66s
+
+=== [ablation seed44] aug geo ===
+[08:37:07]           val loss 0.2682 acc 96.02% macroF1 96.02%
+[08:37:23]   epoch   2 | train loss 0.2661 acc 96.35% | lr 1.50e-04 | 16s
+[08:37:28]           val loss 0.2329 acc 98.30% macroF1 98.30%
+[08:37:44]   epoch   3 | train loss 0.2345 acc 98.15% | lr 0.00e+00 | 16s
+[08:37:48]           val loss 0.2251 acc 98.50% macroF1 98.50%
+[08:37:48] done in 1m03s | best val acc 98.50% @ epoch 3
+[[ablation seed44] aug geo] rc=0 70s
+
+=== [ablation seed44] aug color ===
+[08:38:26]           val loss 0.2581 acc 97.14% macroF1 97.14%
+[08:38:54]   epoch   2 | train loss 0.2669 acc 96.21% | lr 1.50e-04 | 27s
+[08:38:57]           val loss 0.2401 acc 97.86% macroF1 97.86%
+[08:39:24]   epoch   3 | train loss 0.2387 acc 97.86% | lr 0.00e+00 | 27s
+[08:39:28]           val loss 0.2256 acc 98.52% macroF1 98.52%
+[08:39:28] done in 1m34s | best val acc 98.52% @ epoch 3
+[[ablation seed44] aug color] rc=0 101s
+
+=== [ablation seed44] res 96 ===
+[08:39:58]           val loss 0.3052 acc 93.56% macroF1 93.55%
+[08:40:17]   epoch   2 | train loss 0.3413 acc 91.08% | lr 1.50e-04 | 19s
+[08:40:20]           val loss 0.2643 acc 96.00% macroF1 96.00%
+[08:40:40]   epoch   3 | train loss 0.2970 acc 93.88% | lr 0.00e+00 | 20s
+[08:40:43]           val loss 0.2477 acc 97.14% macroF1 97.14%
+[08:40:43] done in 1m07s | best val acc 97.14% @ epoch 3
+[[ablation seed44] res 96] rc=0 75s
+
+=== [ablation seed44] res 128 ===
+[08:41:19]           val loss 0.2621 acc 96.46% macroF1 96.46%
+[08:41:43]   epoch   2 | train loss 0.3071 acc 93.68% | lr 1.50e-04 | 24s
+[08:41:47]           val loss 0.2463 acc 97.22% macroF1 97.22%
+[08:42:10]   epoch   3 | train loss 0.2709 acc 95.90% | lr 0.00e+00 | 23s
+[08:42:14]           val loss 0.2307 acc 98.16% macroF1 98.16%
+[08:42:14] done in 1m22s | best val acc 98.16% @ epoch 3
+[[ablation seed44] res 128] rc=0 90s
+
+=== [ablation seed44] res 224 ===
+[08:43:12]           val loss 0.2629 acc 97.08% macroF1 97.08%
+[08:43:54]   epoch   2 | train loss 0.2764 acc 95.57% | lr 1.50e-04 | 42s
+[08:43:59]           val loss 0.2375 acc 97.98% macroF1 97.98%
+[08:44:44]   epoch   3 | train loss 0.2447 acc 97.61% | lr 0.00e+00 | 44s
+[08:44:49]           val loss 0.2244 acc 98.76% macroF1 98.76%
+[08:44:49] done in 2m28s | best val acc 98.76% @ epoch 3
+[[ablation seed44] res 224] rc=0 155s
+
+=== [ablation seed44] data 250/class ===
+[08:45:03]           val loss 0.4284 acc 93.22% macroF1 93.19%
+[08:45:03]   epoch   2 | train loss 0.3969 acc 91.96% | lr 1.50e-04 | 1s
+[08:45:08]           val loss 0.3510 acc 94.96% macroF1 94.96%
+[08:45:08]   epoch   3 | train loss 0.3154 acc 95.76% | lr 0.00e+00 | 1s
+[08:45:12]           val loss 0.3124 acc 95.62% macroF1 95.62%
+[08:45:13] done in 0m16s | best val acc 95.62% @ epoch 3
+[[ablation seed44] data 250/class] rc=0 24s
+
+=== [ablation seed44] data 1000/class ===
+[08:45:28]           val loss 0.3067 acc 95.18% macroF1 95.18%
+[08:45:32]   epoch   2 | train loss 0.3635 acc 91.13% | lr 1.50e-04 | 3s
+[08:45:35]           val loss 0.2871 acc 95.44% macroF1 95.44%
+[08:45:39]   epoch   3 | train loss 0.2878 acc 95.26% | lr 0.00e+00 | 3s
+[08:45:43]           val loss 0.2589 acc 96.88% macroF1 96.88%
+[08:45:43] done in 0m23s | best val acc 96.88% @ epoch 3
+[[ablation seed44] data 1000/class] rc=0 30s
+
+=== [ablation seed44] data 2500/class ===
+[08:46:04]           val loss 0.2861 acc 96.04% macroF1 96.04%
+[08:46:12]   epoch   2 | train loss 0.3286 acc 92.65% | lr 1.50e-04 | 8s
+[08:46:16]           val loss 0.2554 acc 96.84% macroF1 96.84%
+[08:46:24]   epoch   3 | train loss 0.2814 acc 95.49% | lr 0.00e+00 | 8s
+[08:46:28]           val loss 0.2383 acc 97.86% macroF1 97.86%
+[08:46:28] done in 0m37s | best val acc 97.86% @ epoch 3
+[[ablation seed44] data 2500/class] rc=0 45s
+
+=== [ablation seed44] data 5000/class ===
+[08:46:56]           val loss 0.2768 acc 96.42% macroF1 96.42%
+[08:47:10]   epoch   2 | train loss 0.3019 acc 93.91% | lr 1.50e-04 | 14s
+[08:47:14]           val loss 0.2517 acc 97.22% macroF1 97.22%
+[08:47:29]   epoch   3 | train loss 0.2629 acc 96.30% | lr 0.00e+00 | 15s
+[08:47:33]           val loss 0.2322 acc 98.06% macroF1 98.06%
+[08:47:33] done in 0m58s | best val acc 98.06% @ epoch 3
+[[ablation seed44] data 5000/class] rc=0 65s
+
+=== [ablation seed44] pretrained vs scratch ===
+[08:49:42]           val loss 0.4100 acc 86.24% macroF1 86.19%
+[08:50:08]   epoch   5 | train loss 0.4332 acc 84.49% | lr 2.86e-05 | 26s
+[08:50:11]           val loss 0.3631 acc 89.98% macroF1 89.98%
+[08:50:39]   epoch   6 | train loss 0.4102 acc 86.35% | lr 0.00e+00 | 27s
+[08:50:42]           val loss 0.3524 acc 90.58% macroF1 90.58%
+[08:50:42] done in 3m02s | best val acc 90.58% @ epoch 6
+[[ablation seed44] pretrained vs scratch] rc=0 189s
+
+ALL DONE 0
+ABL DONE

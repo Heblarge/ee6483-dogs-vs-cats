@@ -1,0 +1,10 @@
+[08:24:30] exp=H_cb_long method=cb mode=h img=32 train=11908 val=5000
+[08:24:35]   ep   1 | loss 2.277 tracc 20.56% | val 21.46% mF1 14.54% | 5s
+[08:24:49]   ep   5 | loss 2.015 tracc 36.12% | val 32.40% mF1 27.37% | 19s
+[08:25:07]   ep  10 | loss 1.853 tracc 42.02% | val 39.22% mF1 35.98% | 36s
+[08:25:24]   ep  15 | loss 1.542 tracc 48.35% | val 48.14% mF1 45.36% | 54s
+[08:25:41]   ep  20 | loss 1.278 tracc 57.17% | val 55.44% mF1 55.21% | 70s
+[08:25:58]   ep  25 | loss 1.051 tracc 63.35% | val 61.94% mF1 61.95% | 87s
+[08:26:15]   ep  30 | loss 0.967 tracc 66.99% | val 62.70% mF1 62.53% | 105s
+[08:26:16] TEST acc 62.22% macroF1 62.05% balanced_acc 62.22%
+[08:26:17] done in 1m46s

@@ -8,16 +8,32 @@
 | E5_r34_ft | 42 | resnet34 | 224 | full | lpft | 20000 | 4 | 97.54 |  |  | 287 | E5_r34_ft/s42 |
 | E6_r50_ft | 42 | resnet50 | 160 | full | lpft | 20000 | 6 | 99.3 |  |  | 318 | E6_r50_ft/s42 |
 | E7_aug_color | 42 | resnet18 | 160 | color | full | 20000 | 3 | 98.48 |  |  | 149 | E7_aug_color/s42 |
+| E7_aug_color | 43 | resnet18 | 160 | color | full | 20000 | 3 | 98.56 |  |  | 95 | E7_aug_color/s43 |
+| E7_aug_color | 44 | resnet18 | 160 | color | full | 20000 | 3 | 98.52 |  |  | 94 | E7_aug_color/s44 |
 | E7_aug_flip | 42 | resnet18 | 160 | flip | full | 20000 | 3 | 98.62 |  |  | 134 | E7_aug_flip/s42 |
+| E7_aug_flip | 43 | resnet18 | 160 | flip | full | 20000 | 3 | 98.56 |  |  | 60 | E7_aug_flip/s43 |
+| E7_aug_flip | 44 | resnet18 | 160 | flip | full | 20000 | 3 | 98.58 |  |  | 59 | E7_aug_flip/s44 |
 | E7_aug_full | 42 | resnet18 | 160 | full | full | 20000 | 3 | 98.12 |  |  | 177 | E7_aug_full/s42 |
 | E7_aug_full | 43 | resnet18 | 160 | full | full | 20000 | 3 | 98.48 |  |  | 93 | E7_aug_full/s43 |
 | E7_aug_full | 44 | resnet18 | 160 | full | full | 20000 | 3 | 98.32 |  |  | 106 | E7_aug_full/s44 |
 | E7_aug_geo | 42 | resnet18 | 160 | geo | full | 20000 | 3 | 98.56 |  |  | 120 | E7_aug_geo/s42 |
+| E7_aug_geo | 43 | resnet18 | 160 | geo | full | 20000 | 3 | 98.52 |  |  | 63 | E7_aug_geo/s43 |
+| E7_aug_geo | 44 | resnet18 | 160 | geo | full | 20000 | 3 | 98.5 |  |  | 63 | E7_aug_geo/s44 |
 | E7_aug_none | 42 | resnet18 | 160 | none | full | 20000 | 3 | 98.36 |  |  | 132 | E7_aug_none/s42 |
+| E7_aug_none | 43 | resnet18 | 160 | none | full | 20000 | 3 | 98.6 |  |  | 75 | E7_aug_none/s43 |
+| E7_aug_none | 44 | resnet18 | 160 | none | full | 20000 | 3 | 98.58 |  |  | 62 | E7_aug_none/s44 |
 | E7_data_1000 | 42 | resnet18 | 160 | full | full | 2000 | 3 | 96.76 |  |  | 96 | E7_data_1000/s42 |
+| E7_data_1000 | 43 | resnet18 | 160 | full | full | 2000 | 3 | 97.0 |  |  | 24 | E7_data_1000/s43 |
+| E7_data_1000 | 44 | resnet18 | 160 | full | full | 2000 | 3 | 96.88 |  |  | 23 | E7_data_1000/s44 |
 | E7_data_250 | 42 | resnet18 | 160 | full | full | 500 | 3 | 93.56 |  |  | 89 | E7_data_250/s42 |
+| E7_data_250 | 43 | resnet18 | 160 | full | full | 500 | 3 | 96.04 |  |  | 18 | E7_data_250/s43 |
+| E7_data_250 | 44 | resnet18 | 160 | full | full | 500 | 3 | 95.62 |  |  | 17 | E7_data_250/s44 |
 | E7_data_2500 | 42 | resnet18 | 160 | full | full | 5000 | 3 | 97.9 |  |  | 105 | E7_data_2500/s42 |
+| E7_data_2500 | 43 | resnet18 | 160 | full | full | 5000 | 3 | 98.04 |  |  | 36 | E7_data_2500/s43 |
+| E7_data_2500 | 44 | resnet18 | 160 | full | full | 5000 | 3 | 97.86 |  |  | 38 | E7_data_2500/s44 |
 | E7_data_5000 | 42 | resnet18 | 160 | full | full | 10000 | 3 | 98.2 |  |  | 117 | E7_data_5000/s42 |
+| E7_data_5000 | 43 | resnet18 | 160 | full | full | 10000 | 3 | 98.2 |  |  | 57 | E7_data_5000/s43 |
+| E7_data_5000 | 44 | resnet18 | 160 | full | full | 10000 | 3 | 98.06 |  |  | 58 | E7_data_5000/s44 |
 | E7_ft_head | 42 | resnet18 | 160 | full | head | 20000 | 3 | 96.24 |  |  | 154 | E7_ft_head/s42 |
 | E7_ft_head | 43 | resnet18 | 160 | full | head | 20000 | 3 | 96.08 |  |  | 114 | E7_ft_head/s43 |
 | E7_ft_head | 44 | resnet18 | 160 | full | head | 20000 | 3 | 96.42 |  |  | 99 | E7_ft_head/s44 |
@@ -28,26 +44,58 @@
 | E7_ft_lpft | 43 | resnet18 | 160 | full | lpft | 20000 | 3 | 98.28 |  |  | 94 | E7_ft_lpft/s43 |
 | E7_ft_lpft | 44 | resnet18 | 160 | full | lpft | 20000 | 3 | 98.24 |  |  | 105 | E7_ft_lpft/s44 |
 | E7_lr_1e-3 | 42 | resnet18 | 160 | full | full | 20000 | 3 | 97.7 |  |  | 207 | E7_lr_1e-3/s42 |
+| E7_lr_1e-3 | 43 | resnet18 | 160 | full | full | 20000 | 3 | 97.58 |  |  | 103 | E7_lr_1e-3/s43 |
+| E7_lr_1e-3 | 44 | resnet18 | 160 | full | full | 20000 | 3 | 97.58 |  |  | 91 | E7_lr_1e-3/s44 |
 | E7_lr_1e-4 | 42 | resnet18 | 160 | full | full | 20000 | 3 | 98.62 |  |  | 210 | E7_lr_1e-4/s42 |
+| E7_lr_1e-4 | 43 | resnet18 | 160 | full | full | 20000 | 3 | 98.48 |  |  | 103 | E7_lr_1e-4/s43 |
+| E7_lr_1e-4 | 44 | resnet18 | 160 | full | full | 20000 | 3 | 98.38 |  |  | 100 | E7_lr_1e-4/s44 |
 | E7_lr_1e-5 | 42 | resnet18 | 160 | full | full | 20000 | 3 | 97.68 |  |  | 215 | E7_lr_1e-5/s42 |
+| E7_lr_1e-5 | 43 | resnet18 | 160 | full | full | 20000 | 3 | 97.8 |  |  | 106 | E7_lr_1e-5/s43 |
+| E7_lr_1e-5 | 44 | resnet18 | 160 | full | full | 20000 | 3 | 97.62 |  |  | 103 | E7_lr_1e-5/s44 |
 | E7_lr_3e-3 | 42 | resnet18 | 160 | full | full | 20000 | 3 | 96.06 |  |  | 207 | E7_lr_3e-3/s42 |
+| E7_lr_3e-3 | 43 | resnet18 | 160 | full | full | 20000 | 3 | 96.04 |  |  | 103 | E7_lr_3e-3/s43 |
+| E7_lr_3e-3 | 44 | resnet18 | 160 | full | full | 20000 | 3 | 95.84 |  |  | 90 | E7_lr_3e-3/s44 |
 | E7_lr_3e-4 | 42 | resnet18 | 160 | full | full | 20000 | 3 | 98.24 |  |  | 212 | E7_lr_3e-4/s42 |
+| E7_lr_3e-4 | 43 | resnet18 | 160 | full | full | 20000 | 3 | 98.42 |  |  | 105 | E7_lr_3e-4/s43 |
+| E7_lr_3e-4 | 44 | resnet18 | 160 | full | full | 20000 | 3 | 98.44 |  |  | 90 | E7_lr_3e-4/s44 |
 | E7_res_128 | 42 | resnet18 | 128 | full | full | 20000 | 3 | 97.94 |  |  | 167 | E7_res_128/s42 |
+| E7_res_128 | 43 | resnet18 | 128 | full | full | 20000 | 3 | 97.92 |  |  | 81 | E7_res_128/s43 |
+| E7_res_128 | 44 | resnet18 | 128 | full | full | 20000 | 3 | 98.16 |  |  | 83 | E7_res_128/s44 |
 | E7_res_224 | 42 | resnet18 | 224 | full | full | 20000 | 3 | 98.76 |  |  | 235 | E7_res_224/s42 |
+| E7_res_224 | 43 | resnet18 | 224 | full | full | 20000 | 3 | 98.72 |  |  | 152 | E7_res_224/s43 |
+| E7_res_224 | 44 | resnet18 | 224 | full | full | 20000 | 3 | 98.76 |  |  | 148 | E7_res_224/s44 |
 | E7_res_96 | 42 | resnet18 | 96 | full | full | 20000 | 3 | 97.08 |  |  | 148 | E7_res_96/s42 |
+| E7_res_96 | 43 | resnet18 | 96 | full | full | 20000 | 3 | 96.78 |  |  | 69 | E7_res_96/s43 |
+| E7_res_96 | 44 | resnet18 | 96 | full | full | 20000 | 3 | 97.14 |  |  | 67 | E7_res_96/s44 |
 | E7_scratch | 42 | resnet18 | 160 | full | scratch | 20000 | 6 | 90.66 |  |  | 341 | E7_scratch/s42 |
+| E7_scratch | 43 | resnet18 | 160 | full | scratch | 20000 | 6 | 90.66 |  |  | 209 | E7_scratch/s43 |
+| E7_scratch | 44 | resnet18 | 160 | full | scratch | 20000 | 6 | 90.58 |  |  | 182 | E7_scratch/s44 |
 | E7b_aug_full_8ep | 42 | resnet18 | 160 | full | full | 20000 | 8 | 98.66 |  |  | 323 | E7b_aug_full_8ep/s42 |
+| E7b_aug_full_8ep | 43 | resnet18 | 160 | full | full | 20000 | 8 | 98.78 |  |  | 267 | E7b_aug_full_8ep/s43 |
+| E7b_aug_full_8ep | 44 | resnet18 | 160 | full | full | 20000 | 8 | 98.52 |  |  | 244 | E7b_aug_full_8ep/s44 |
 | E7b_aug_none_8ep | 42 | resnet18 | 160 | none | full | 20000 | 8 | 98.42 |  |  | 241 | E7b_aug_none_8ep/s42 |
+| E7b_aug_none_8ep | 43 | resnet18 | 160 | none | full | 20000 | 8 | 98.58 |  |  | 162 | E7b_aug_none_8ep/s43 |
+| E7b_aug_none_8ep | 44 | resnet18 | 160 | none | full | 20000 | 8 | 98.42 |  |  | 145 | E7b_aug_none_8ep/s44 |
 | E7c_aug_full_lowdata | 42 | resnet18 | 160 | full | full | 500 | 8 | 96.3 |  |  | 88 | E7c_aug_full_lowdata/s42 |
+| E7c_aug_full_lowdata | 43 | resnet18 | 160 | full | full | 500 | 8 | 95.6 |  |  | 39 | E7c_aug_full_lowdata/s43 |
+| E7c_aug_full_lowdata | 44 | resnet18 | 160 | full | full | 500 | 8 | 95.8 |  |  | 35 | E7c_aug_full_lowdata/s44 |
 | E7c_aug_none_lowdata | 42 | resnet18 | 160 | none | full | 500 | 8 | 95.94 |  |  | 87 | E7c_aug_none_lowdata/s42 |
+| E7c_aug_none_lowdata | 43 | resnet18 | 160 | none | full | 500 | 8 | 96.86 |  |  | 38 | E7c_aug_none_lowdata/s43 |
+| E7c_aug_none_lowdata | 44 | resnet18 | 160 | none | full | 500 | 8 | 95.76 |  |  | 33 | E7c_aug_none_lowdata/s44 |
 | G1_cifar_scratch | 42 | resnet18-cifar | 32 | - | ce | 45000 | 25 | 93.44 | 93.6 | 93.6 | 1540 | G1_cifar_scratch/s42 |
 | G2_cifar_pretrained | 42 | resnet18-cifar | 160 | - | ce | 45000 | 7 | 95.58 | 95.19 | 95.2 | 579 | G2_cifar_pretrained/s42 |
 | H_cb | 42 | resnet18-cifar | 32 | - | cb | 11908 | 18 | 54.02 | 53.91 | 54.04 | 658 | H_cb/s42 |
+| H_cb | 43 | resnet18-cifar | 32 | - | cb | 11908 | 18 | 54.5 | 54.04 | 54.23 | 68 | H_cb/s43 |
+| H_cb | 44 | resnet18-cifar | 32 | - | cb | 11908 | 18 | 52.32 | 51.15 | 51.61 | 67 | H_cb/s44 |
 | H_cb_long | 42 | resnet18-cifar | 32 | - | cb | 11908 | 30 | 59.22 | 59.48 | 59.5 | 1069 | H_cb_long/s42 |
+| H_cb_long | 43 | resnet18-cifar | 32 | - | cb | 11908 | 30 | 64.16 | 63.67 | 63.52 | 112 | H_cb_long/s43 |
+| H_cb_long | 44 | resnet18-cifar | 32 | - | cb | 11908 | 30 | 62.7 | 62.05 | 62.22 | 106 | H_cb_long/s44 |
 | H_ce | 42 | resnet18-cifar | 32 | - | ce | 11908 | 18 | 62.54 | 60.27 | 62.44 | 809 | H_ce/s42 |
 | H_ce | 43 | resnet18-cifar | 32 | - | ce | 11908 | 18 | 62.44 | 58.07 | 61.47 | 63 | H_ce/s43 |
 | H_ce | 44 | resnet18-cifar | 32 | - | ce | 11908 | 18 | 63.0 | 60.83 | 62.63 | 62 | H_ce/s44 |
 | H_decouple | 42 | resnet18-cifar | 32 | - | decouple | 11908 | 18 | 71.06 | 71.14 | 71.22 | 679 | H_decouple/s42 |
+| H_decouple | 43 | resnet18-cifar | 32 | - | decouple | 11908 | 18 | 71.32 | 70.7 | 70.88 | 69 | H_decouple/s43 |
+| H_decouple | 44 | resnet18-cifar | 32 | - | decouple | 11908 | 18 | 71.26 | 70.82 | 70.86 | 70 | H_decouple/s44 |
 | H_logit_adjust | 42 | resnet18-cifar | 32 | - | logit_adjust | 11908 | 18 | 73.72 | 72.96 | 72.99 | 0 | H_logit_adjust/s42 |
 | H_logit_adjust | 43 | resnet18-cifar | 32 | - | logit_adjust | 11908 | 18 | 73.12 | 73.08 | 73.08 | 0 | H_logit_adjust/s43 |
 | H_logit_adjust | 44 | resnet18-cifar | 32 | - | logit_adjust | 11908 | 18 | 73.18 | 72.75 | 72.73 | 0 | H_logit_adjust/s44 |

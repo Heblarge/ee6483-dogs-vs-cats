@@ -1,0 +1,222 @@
+NVIDIA A40
+
+=== [imbalance seed43] H cb ===
+[08:17:46]   ep   5 | loss 2.044 tracc 35.11% | val 28.74% mF1 22.72% | 20s
+[08:18:04]   ep  10 | loss 1.677 tracc 44.28% | val 43.06% mF1 39.85% | 37s
+[08:18:21]   ep  15 | loss 1.374 tracc 54.84% | val 53.32% mF1 52.90% | 55s
+[08:18:33]   ep  18 | loss 1.248 tracc 57.84% | val 54.50% mF1 54.39% | 67s
+[08:18:34] TEST acc 54.23% macroF1 54.04% balanced_acc 54.23%
+[08:18:34] done in 1m07s
+[[imbalance seed43] H cb] rc=0 86s
+
+=== [imbalance seed43] H decouple ===
+[08:19:20]   ep  10 | loss 0.648 tracc 78.20% | val 49.94% mF1 43.35% | 38s
+[08:19:35]   >> decoupling: freeze backbone, re-init head, class-balanced head retrain
+[08:19:39]   ep  15 | loss 1.235 tracc 58.90% | val 70.30% mF1 70.13% | 57s
+[08:19:50]   ep  18 | loss 0.836 tracc 70.07% | val 71.28% mF1 71.14% | 68s
+[08:19:51] TEST acc 70.88% macroF1 70.70% balanced_acc 70.88%
+[08:19:51] done in 1m08s
+[[imbalance seed43] H decouple] rc=0 76s
+
+=== [imbalance seed43] H cb long ===
+[08:20:55]   ep  15 | loss 1.497 tracc 51.06% | val 50.42% mF1 49.71% | 57s
+[08:21:14]   ep  20 | loss 1.212 tracc 59.24% | val 58.30% mF1 57.99% | 76s
+[08:21:32]   ep  25 | loss 1.038 tracc 65.63% | val 62.40% mF1 62.38% | 94s
+[08:21:49]   ep  30 | loss 0.929 tracc 67.52% | val 64.04% mF1 64.26% | 111s
+[08:21:50] TEST acc 63.52% macroF1 63.67% balanced_acc 63.52%
+[08:21:50] done in 1m52s
+[[imbalance seed43] H cb long] rc=0 119s
+
+=== [imbalance seed44] H cb ===
+[08:22:19]   ep   5 | loss 1.975 tracc 37.24% | val 32.26% mF1 26.83% | 21s
+[08:22:36]   ep  10 | loss 1.744 tracc 44.00% | val 39.40% mF1 36.21% | 38s
+[08:22:54]   ep  15 | loss 1.443 tracc 50.22% | val 50.88% mF1 50.54% | 56s
+[08:23:04]   ep  18 | loss 1.350 tracc 53.64% | val 51.78% mF1 51.22% | 66s
+[08:23:05] TEST acc 51.61% macroF1 51.15% balanced_acc 51.61%
+[08:23:05] done in 1m07s
+[[imbalance seed44] H cb] rc=0 75s
+
+=== [imbalance seed44] H decouple ===
+[08:23:51]   ep  10 | loss 0.667 tracc 77.48% | val 47.50% mF1 41.89% | 39s
+[08:24:06]   >> decoupling: freeze backbone, re-init head, class-balanced head retrain
+[08:24:10]   ep  15 | loss 1.247 tracc 58.85% | val 70.80% mF1 70.72% | 58s
+[08:24:21]   ep  18 | loss 0.837 tracc 70.55% | val 71.22% mF1 71.15% | 69s
+[08:24:22] TEST acc 70.86% macroF1 70.82% balanced_acc 70.86%
+[08:24:22] done in 1m09s
+[[imbalance seed44] H decouple] rc=0 77s
+
+=== [imbalance seed44] H cb long ===
+[08:25:24]   ep  15 | loss 1.542 tracc 48.35% | val 48.14% mF1 45.36% | 54s
+[08:25:41]   ep  20 | loss 1.278 tracc 57.17% | val 55.44% mF1 55.21% | 70s
+[08:25:58]   ep  25 | loss 1.051 tracc 63.35% | val 61.94% mF1 61.95% | 87s
+[08:26:15]   ep  30 | loss 0.967 tracc 66.99% | val 62.70% mF1 62.53% | 105s
+[08:26:16] TEST acc 62.22% macroF1 62.05% balanced_acc 62.22%
+[08:26:17] done in 1m46s
+[[imbalance seed44] H cb long] rc=0 114s
+
+ALL DONE 0
+
+=== [lrsearch seed43] lr 1e-05 ===
+[08:27:00]           val loss 0.2714 acc 96.56% macroF1 96.56%
+[08:27:30]   epoch   2 | train loss 0.3184 acc 93.31% | lr 5.00e-06 | 30s
+[08:27:34]           val loss 0.2539 acc 97.58% macroF1 97.58%
+[08:28:06]   epoch   3 | train loss 0.3025 acc 94.46% | lr 0.00e+00 | 31s
+[08:28:10]           val loss 0.2509 acc 97.80% macroF1 97.80%
+[08:28:10] done in 1m46s | best val acc 97.80% @ epoch 3
+[[lrsearch seed43] lr 1e-05] rc=0 113s
+
+=== [lrsearch seed43] lr 0.0001 ===
+[08:28:51]           val loss 0.2525 acc 97.68% macroF1 97.68%
+[08:29:22]   epoch   2 | train loss 0.2826 acc 95.39% | lr 5.00e-05 | 30s
+[08:29:26]           val loss 0.2320 acc 98.44% macroF1 98.44%
+[08:29:56]   epoch   3 | train loss 0.2559 acc 97.05% | lr 0.00e+00 | 30s
+[08:30:00]           val loss 0.2277 acc 98.48% macroF1 98.48%
+[08:30:00] done in 1m42s | best val acc 98.48% @ epoch 3
+[[lrsearch seed43] lr 0.0001] rc=0 110s
+
+=== [lrsearch seed43] lr 0.0003 ===
+[08:30:42]           val loss 0.3004 acc 94.16% macroF1 94.14%
+[08:31:12]   epoch   2 | train loss 0.2923 acc 94.74% | lr 1.50e-04 | 30s
+[08:31:16]           val loss 0.2330 acc 98.06% macroF1 98.06%
+[08:31:48]   epoch   3 | train loss 0.2551 acc 96.76% | lr 0.00e+00 | 31s
+[08:31:52]           val loss 0.2268 acc 98.42% macroF1 98.42%
+[08:31:52] done in 1m45s | best val acc 98.42% @ epoch 3
+[[lrsearch seed43] lr 0.0003] rc=0 112s
+
+=== [lrsearch seed43] lr 0.001 ===
+[08:32:35]           val loss 0.3197 acc 92.82% macroF1 92.80%
+[08:33:05]   epoch   2 | train loss 0.3385 acc 91.53% | lr 5.00e-04 | 30s
+[08:33:09]           val loss 0.2632 acc 96.00% macroF1 96.00%
+[08:33:39]   epoch   3 | train loss 0.2817 acc 95.11% | lr 0.00e+00 | 30s
+[08:33:43]           val loss 0.2398 acc 97.58% macroF1 97.58%
+[08:33:43] done in 1m43s | best val acc 97.58% @ epoch 3
+[[lrsearch seed43] lr 0.001] rc=0 111s
+
+=== [lrsearch seed43] lr 0.003 ===
+[08:34:25]           val loss 0.6610 acc 71.54% macroF1 69.47%
+[08:34:55]   epoch   2 | train loss 0.4063 acc 87.15% | lr 1.50e-03 | 30s
+[08:34:59]           val loss 0.3515 acc 90.76% macroF1 90.72%
+[08:35:29]   epoch   3 | train loss 0.3214 acc 92.35% | lr 0.00e+00 | 30s
+[08:35:33]           val loss 0.2647 acc 96.04% macroF1 96.04%
+[08:35:33] done in 1m43s | best val acc 96.04% @ epoch 3
+[[lrsearch seed43] lr 0.003] rc=0 110s
+
+=== [augcheck seed43] aug full 8ep ===
+[08:39:02]           val loss 0.2243 acc 98.62% macroF1 98.62%
+[08:39:32]   epoch   7 | train loss 0.2305 acc 98.18% | lr 1.49e-05 | 30s
+[08:39:36]           val loss 0.2232 acc 98.78% macroF1 98.78%
+[08:40:04]   epoch   8 | train loss 0.2300 acc 98.26% | lr 0.00e+00 | 28s
+[08:40:08]           val loss 0.2219 acc 98.66% macroF1 98.66%
+[08:40:08] done in 4m27s | best val acc 98.78% @ epoch 7
+[[augcheck seed43] aug full 8ep] rc=0 274s
+
+=== [augcheck seed43] aug none 8ep ===
+[08:42:16]           val loss 0.2258 acc 98.46% macroF1 98.46%
+[08:42:33]   epoch   7 | train loss 0.2005 acc 99.98% | lr 1.49e-05 | 17s
+[08:42:37]           val loss 0.2251 acc 98.54% macroF1 98.54%
+[08:42:53]   epoch   8 | train loss 0.2003 acc 99.99% | lr 0.00e+00 | 16s
+[08:42:57]           val loss 0.2246 acc 98.58% macroF1 98.58%
+[08:42:58] done in 2m42s | best val acc 98.58% @ epoch 8
+[[augcheck seed43] aug none 8ep] rc=0 170s
+
+=== [augcheck seed43] aug full lowdata ===
+[08:43:34]           val loss 0.2955 acc 95.22% macroF1 95.22%
+[08:43:35]   epoch   7 | train loss 0.2797 acc 95.98% | lr 1.49e-05 | 1s
+[08:43:39]           val loss 0.2919 acc 95.30% macroF1 95.30%
+[08:43:40]   epoch   8 | train loss 0.2691 acc 97.54% | lr 0.00e+00 | 1s
+[08:43:44]           val loss 0.2905 acc 95.32% macroF1 95.32%
+[08:43:44] done in 0m39s | best val acc 95.60% @ epoch 2
+[[augcheck seed43] aug full lowdata] rc=0 47s
+
+=== [augcheck seed43] aug none lowdata ===
+[08:44:20]           val loss 0.2733 acc 95.84% macroF1 95.84%
+[08:44:20]   epoch   7 | train loss 0.2156 acc 100.00% | lr 1.49e-05 | 0s
+[08:44:24]           val loss 0.2746 acc 95.72% macroF1 95.72%
+[08:44:25]   epoch   8 | train loss 0.2162 acc 100.00% | lr 0.00e+00 | 0s
+[08:44:29]           val loss 0.2741 acc 95.74% macroF1 95.74%
+[08:44:29] done in 0m37s | best val acc 96.86% @ epoch 1
+[[augcheck seed43] aug none lowdata] rc=0 45s
+
+=== [lrsearch seed44] lr 1e-05 ===
+[08:45:12]           val loss 0.2679 acc 96.58% macroF1 96.58%
+[08:45:41]   epoch   2 | train loss 0.3170 acc 93.27% | lr 5.00e-06 | 29s
+[08:45:45]           val loss 0.2526 acc 97.42% macroF1 97.42%
+[08:46:15]   epoch   3 | train loss 0.2986 acc 94.59% | lr 0.00e+00 | 30s
+[08:46:19]           val loss 0.2497 acc 97.62% macroF1 97.62%
+[08:46:19] done in 1m43s | best val acc 97.62% @ epoch 3
+[[lrsearch seed44] lr 1e-05] rc=0 110s
+
+=== [lrsearch seed44] lr 0.0001 ===
+[08:47:01]           val loss 0.2504 acc 97.36% macroF1 97.36%
+[08:47:29]   epoch   2 | train loss 0.2823 acc 95.48% | lr 5.00e-05 | 28s
+[08:47:33]           val loss 0.2313 acc 98.18% macroF1 98.18%
+[08:48:02]   epoch   3 | train loss 0.2593 acc 96.81% | lr 0.00e+00 | 29s
+[08:48:06]           val loss 0.2290 acc 98.38% macroF1 98.38%
+[08:48:06] done in 1m39s | best val acc 98.38% @ epoch 3
+[[lrsearch seed44] lr 0.0001] rc=0 106s
+
+=== [lrsearch seed44] lr 0.0003 ===
+[08:48:44]           val loss 0.2590 acc 96.96% macroF1 96.96%
+[08:49:10]   epoch   2 | train loss 0.2921 acc 94.51% | lr 1.50e-04 | 25s
+[08:49:13]           val loss 0.2332 acc 98.16% macroF1 98.16%
+[08:49:39]   epoch   3 | train loss 0.2572 acc 96.80% | lr 0.00e+00 | 26s
+[08:49:43]           val loss 0.2281 acc 98.44% macroF1 98.44%
+[08:49:43] done in 1m30s | best val acc 98.44% @ epoch 3
+[[lrsearch seed44] lr 0.0003] rc=0 97s
+
+=== [lrsearch seed44] lr 0.001 ===
+[08:50:20]           val loss 0.4078 acc 89.44% macroF1 89.34%
+[08:50:47]   epoch   2 | train loss 0.3379 acc 91.64% | lr 5.00e-04 | 27s
+[08:50:50]           val loss 0.2750 acc 95.46% macroF1 95.46%
+[08:51:16]   epoch   3 | train loss 0.2778 acc 95.41% | lr 0.00e+00 | 26s
+[08:51:20]           val loss 0.2390 acc 97.58% macroF1 97.58%
+[08:51:20] done in 1m30s | best val acc 97.58% @ epoch 3
+[[lrsearch seed44] lr 0.001] rc=0 97s
+
+=== [lrsearch seed44] lr 0.003 ===
+[08:51:57]           val loss 0.4613 acc 84.50% macroF1 84.33%
+[08:52:23]   epoch   2 | train loss 0.4048 acc 86.82% | lr 1.50e-03 | 26s
+[08:52:26]           val loss 0.3300 acc 91.58% macroF1 91.56%
+[08:52:52]   epoch   3 | train loss 0.3175 acc 92.77% | lr 0.00e+00 | 26s
+[08:52:56]           val loss 0.2640 acc 95.84% macroF1 95.84%
+[08:52:56] done in 1m30s | best val acc 95.84% @ epoch 3
+[[lrsearch seed44] lr 0.003] rc=0 96s
+
+=== [augcheck seed44] aug full 8ep ===
+[08:56:01]           val loss 0.2253 acc 98.44% macroF1 98.44%
+[08:56:29]   epoch   7 | train loss 0.2342 acc 98.12% | lr 1.49e-05 | 27s
+[08:56:32]           val loss 0.2240 acc 98.52% macroF1 98.52%
+[08:57:02]   epoch   8 | train loss 0.2293 acc 98.24% | lr 0.00e+00 | 29s
+[08:57:06]           val loss 0.2233 acc 98.48% macroF1 98.48%
+[08:57:06] done in 4m04s | best val acc 98.52% @ epoch 7
+[[augcheck seed44] aug full 8ep] rc=0 250s
+
+=== [augcheck seed44] aug none 8ep ===
+[08:59:05]           val loss 0.2256 acc 98.38% macroF1 98.38%
+[08:59:18]   epoch   7 | train loss 0.2005 acc 99.99% | lr 1.49e-05 | 13s
+[08:59:21]           val loss 0.2249 acc 98.32% macroF1 98.32%
+[08:59:34]   epoch   8 | train loss 0.2003 acc 99.99% | lr 0.00e+00 | 13s
+[08:59:37]           val loss 0.2249 acc 98.34% macroF1 98.34%
+[08:59:37] done in 2m25s | best val acc 98.42% @ epoch 5
+[[augcheck seed44] aug none 8ep] rc=0 151s
+
+=== [augcheck seed44] aug full lowdata ===
+[09:00:10]           val loss 0.2889 acc 95.60% macroF1 95.60%
+[09:00:11]   epoch   7 | train loss 0.2714 acc 96.88% | lr 1.49e-05 | 1s
+[09:00:14]           val loss 0.2828 acc 95.80% macroF1 95.80%
+[09:00:15]   epoch   8 | train loss 0.2562 acc 97.99% | lr 0.00e+00 | 1s
+[09:00:18]           val loss 0.2822 acc 95.80% macroF1 95.80%
+[09:00:18] done in 0m34s | best val acc 95.80% @ epoch 7
+[[augcheck seed44] aug full lowdata] rc=0 40s
+
+=== [augcheck seed44] aug none lowdata ===
+[09:00:48]           val loss 0.2758 acc 95.60% macroF1 95.60%
+[09:00:48]   epoch   7 | train loss 0.2128 acc 100.00% | lr 1.49e-05 | 0s
+[09:00:52]           val loss 0.2778 acc 95.44% macroF1 95.44%
+[09:00:52]   epoch   8 | train loss 0.2116 acc 100.00% | lr 0.00e+00 | 0s
+[09:00:56]           val loss 0.2765 acc 95.56% macroF1 95.56%
+[09:00:56] done in 0m32s | best val acc 95.76% @ epoch 5
+[[augcheck seed44] aug none lowdata] rc=0 38s
+
+ALL DONE 0
+LRIMB DONE

@@ -1,0 +1,9 @@
+[08:23:12] exp=H_decouple method=decouple mode=h img=32 train=11908 val=5000
+[08:23:18]   ep   1 | loss 1.524 tracc 44.93% | val 28.26% mF1 18.85% | 6s
+[08:23:33]   ep   5 | loss 0.970 tracc 66.66% | val 33.78% mF1 23.03% | 21s
+[08:23:51]   ep  10 | loss 0.667 tracc 77.48% | val 47.50% mF1 41.89% | 39s
+[08:24:06]   >> decoupling: freeze backbone, re-init head, class-balanced head retrain
+[08:24:10]   ep  15 | loss 1.247 tracc 58.85% | val 70.80% mF1 70.72% | 58s
+[08:24:21]   ep  18 | loss 0.837 tracc 70.55% | val 71.22% mF1 71.15% | 69s
+[08:24:22] TEST acc 70.86% macroF1 70.82% balanced_acc 70.86%
+[08:24:22] done in 1m09s
